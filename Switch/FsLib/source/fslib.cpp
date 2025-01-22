@@ -32,6 +32,7 @@ bool fslib::initialize(void)
     {
         return false;
     }
+
     // Memcpy the handle to be 100% sure we have it 1:1.
     std::memcpy(&s_deviceMap[SD_CARD_DEVICE], &sdmc, sizeof(FsFileSystem));
 

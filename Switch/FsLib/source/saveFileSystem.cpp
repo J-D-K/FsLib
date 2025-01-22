@@ -198,3 +198,41 @@ bool fslib::openSystemBCATSaveFileSystem(std::string_view deviceName, uint64_t s
 
     return true;
 }
+
+bool fslib::openSaveFileSystemWithSaveDataInfo(std::string_view deviceName, const FsSaveDataInfo &saveInfo)
+{
+    // This is actually nicer.
+    FsSaveDataAttribute saveDataAttributes = {.application_id = saveInfo.application_id,
+                                              .uid = saveInfo.uid,
+                                              .system_save_data_id = saveInfo.system_save_data_id,
+                                              .save_data_type = saveInfo.save_data_type,
+                                              .save_data_rank = saveInfo.save_data_rank,
+                                              .save_data_index = saveInfo.save_data_index};
+
+    Result fsError = 0;
+    FsFileSystem fileSystem;
+    if (saveInfo.save_data_type == FsSaveDataType_System || saveInfo.save_data_type == FsSaveDataType_SystemBcat)
+    {
+        fsError = fsOpenSaveDataFileSystemBySystemSaveDataId(&fileSystem,
+                                                             static_cast<FsSaveDataSpaceId>(saveInfo.save_data_space_id),
+                                                             &saveDataAttributes);
+    }
+    else
+    {
+        fsError = fsOpenSaveDataFileSystem(&fileSystem, static_cast<FsSaveDataSpaceId>(saveInfo.save_data_space_id), &saveDataAttributes);
+    }
+
+    if (R_FAILED(fsError))
+    {
+        g_fslibErrorString = string::getFormattedString("Error opening save data with FsSaveDataInfo: 0x%X.", fsError);
+        return false;
+    }
+
+    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    {
+        fsFsClose(&fileSystem);
+        return false;
+    }
+
+    return true;
+}

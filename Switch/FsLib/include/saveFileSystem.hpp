@@ -68,4 +68,10 @@ namespace fslib
     /// @return True on success. False on failure.
     /// @note I've never seen this used before. Literally <b>ever</b>.
     bool openSystemBCATSaveFileSystem(std::string_view deviceName, uint64_t systemSaveID);
+
+    /// @brief Attempts to open save data with FsSaveDataInfo passed.
+    /// @param deviceName Name of device to map to.
+    /// @param saveInfo FsSaveDataInfo to mount from.
+    /// @return True on success. False on failure.
+    bool openSaveFileSystemWithSaveDataInfo(std::string_view deviceName, const FsSaveDataInfo &saveInfo);
 } // namespace fslib
