@@ -1,4 +1,4 @@
-#include "path.hpp"
+#include "Path.hpp"
 #include <cstring>
 #include <string>
 #include <switch.h>

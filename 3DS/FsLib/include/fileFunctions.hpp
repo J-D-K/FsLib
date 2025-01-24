@@ -1,5 +1,5 @@
 #pragma once
-#include "path.hpp"
+#include "Path.hpp"
 
 namespace fslib
 {

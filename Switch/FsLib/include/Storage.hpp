@@ -1,5 +1,5 @@
 #pragma once
-#include "stream.hpp"
+#include "Stream.hpp"
 #include <switch.h>
 
 namespace fslib

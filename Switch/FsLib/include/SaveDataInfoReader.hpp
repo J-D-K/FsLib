@@ -41,7 +41,7 @@ namespace fslib
             FsSaveDataInfoReader m_infoReader;
             /// @brief Saves whether opening the reader was successful.
             bool m_isOpen = false;
-            /// @brief Save datq info struct.
+            /// @brief Save data info struct.
             FsSaveDataInfo m_saveInfo = {0};
     };
 }; // namespace fslib

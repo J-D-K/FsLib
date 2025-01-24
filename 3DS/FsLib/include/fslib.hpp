@@ -1,11 +1,11 @@
 #pragma once
+#include "Directory.hpp"
+#include "File.hpp"
+#include "Path.hpp"
 #include "dev.hpp"
-#include "directory.hpp"
 #include "directoryFunctions.hpp"
 #include "extData.hpp"
-#include "file.hpp"
 #include "fileFunctions.hpp"
-#include "path.hpp"
 #include "saveDataArchive.hpp"
 #include "secureValue.hpp"
 #include <3ds.h>

@@ -1,4 +1,4 @@
-#include "stream.hpp"
+#include "Stream.hpp"
 
 bool fslib::Stream::isOpen(void) const
 {

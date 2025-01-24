@@ -1,4 +1,4 @@
-#include "directory.hpp"
+#include "Directory.hpp"
 #include "errorCommon.h"
 #include "fslib.hpp"
 #include "string.hpp"
