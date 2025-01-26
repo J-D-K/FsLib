@@ -284,6 +284,9 @@ fslib::Path &fslib::Path::operator+=(const char *pathData)
     }
     // Memcpy to the end.
     std::memcpy(&m_path[m_pathLength], pathData, pathLength);
+
+    m_pathLength += pathLength;
+
     // Should be good. segfault
     return *this;
 }

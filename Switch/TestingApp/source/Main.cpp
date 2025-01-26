@@ -162,14 +162,14 @@ int main(void)
             constexpr std::string_view SAVE_MOUNT = "save";
             constexpr std::string_view SAVE_ROOT = "save:/";
 
-            FsSaveDataInfo &saveInfo = saveInfoReader.getSaveDataInfo();
+            FsSaveDataInfo &saveInfo = saveInfoReader.get();
 
             logFile.writef("Account ID: %016llX%016llX\n", saveInfo.uid.uid[0], saveInfo.uid.uid[1]);
 
             if (!fslib::openSaveFileSystemWithSaveDataInfo(SAVE_MOUNT, saveInfo))
             {
                 // Print error and continue.
-                logFile.writef("%s: %016llX\n", fslib::getErrorString(), saveInfoReader.getSaveDataInfo().application_id);
+                logFile.writef("%s: %016llX\n", fslib::getErrorString(), saveInfoReader.get().application_id);
                 continue;
             }
             // // Print to see
