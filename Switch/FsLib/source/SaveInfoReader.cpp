@@ -56,7 +56,7 @@ bool fslib::SaveInfoReader::read(void)
     return true;
 }
 
-FsSaveDataInfo &fslib::SaveInfoReader::getSaveDataInfo(void)
+FsSaveDataInfo &fslib::SaveInfoReader::get(void)
 {
     return m_saveInfo;
 }

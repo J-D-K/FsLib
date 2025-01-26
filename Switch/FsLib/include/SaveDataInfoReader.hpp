@@ -34,7 +34,7 @@ namespace fslib
 
             /// @brief Returns a reference to the currently held FsSaveDataInfo struct.
             /// @return Reference to save data info.
-            FsSaveDataInfo &getSaveDataInfo(void);
+            FsSaveDataInfo &get(void);
 
         private:
             /// @brief Underlying FsSaveDataInfoReader.
