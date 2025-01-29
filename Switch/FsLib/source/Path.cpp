@@ -162,8 +162,12 @@ const char *fslib::Path::getPath(void) const
 
 const char *fslib::Path::getExtension(void) const
 {
-    size_t extensionBegin = Path::findLastOf('.') + 1;
-    return &m_path[extensionBegin];
+    size_t extensionBegin = Path::findLastOf('.');
+    if (extensionBegin == Path::notFound)
+    {
+        return nullptr;
+    }
+    return &m_path[extensionBegin + 1];
 }
 
 size_t fslib::Path::getLength(void) const
