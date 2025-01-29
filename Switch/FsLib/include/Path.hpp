@@ -85,6 +85,10 @@ namespace fslib
             /// @return Filesystem path.
             const char *getPath(void) const;
 
+            /// @brief Returns the extension. After the '.'
+            /// @return Path's extension.
+            const char *getExtension(void) const;
+
             /// @brief Returns full path length of the path buffer.
             /// @return Path length.
             size_t getLength(void) const;

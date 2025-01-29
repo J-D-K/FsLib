@@ -160,6 +160,12 @@ const char *fslib::Path::getPath(void) const
     return m_deviceEnd + 1;
 }
 
+const char *fslib::Path::getExtension(void) const
+{
+    size_t extensionBegin = Path::findLastOf('.') + 1;
+    return &m_path[extensionBegin];
+}
+
 size_t fslib::Path::getLength(void) const
 {
     return m_pathLength;
