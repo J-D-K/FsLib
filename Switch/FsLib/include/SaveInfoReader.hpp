@@ -14,12 +14,28 @@ namespace fslib
             /// @param saveDataSpaceID Save data space to open.
             SaveInfoReader(FsSaveDataSpaceId saveDataSpaceID);
 
+            /// @brief Opens a SaveInfoReader filtered the passed account ID.
+            /// @param accountID Account ID to use to filter.
+            SaveInfoReader(FsSaveDataSpaceId saveSpaceID, AccountUid accountID);
+
+            /// @brief Opens and SaveInfoReader filtered with the save data type passed.
+            /// @param saveType Save data type to use to filter.
+            SaveInfoReader(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType);
+
             /// @brief Closes the info reader.
             ~SaveInfoReader();
 
             /// @brief Opens a save data info reader with saveDataSpaceID. isOpen() can be checked is this was successful.
             /// @param saveDataSpaceID Save data space to open.
             void open(FsSaveDataSpaceId saveDataSpaceID);
+
+            /// @brief Opens a SaveInfoReader filtered with the passed account ID.
+            /// @param accountID Account ID to use to filter.
+            void open(FsSaveDataSpaceId saveSpaceID, AccountUid accountID);
+
+            /// @brief Opens a SaveInfoReader filtered with the save data type passed.
+            /// @param saveType Save data type to use to filter.
+            void open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType);
 
             /// @brief Closes the save data info reader. This is called in the destructor too.
             void close(void);

@@ -100,6 +100,10 @@ int main(void)
         return -3;
     }
 
+    AccountUid userID;
+    accountInitialize(AccountServiceType_Application);
+    accountGetPreselectedUser(&userID);
+
     // Default libnx console.
     consoleInit(NULL);
 
@@ -108,33 +112,17 @@ int main(void)
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&gamePad);
 
-    fslib::File testBoolOp("sdmc:/hbmenu.nro", FsOpenMode_Read);
-    if (testBoolOp)
+    fslib::SaveInfoReader testFilterReader(FsSaveDataSpaceId_System, FsSaveDataType_System);
+    if (!testFilterReader)
     {
-        print("File opened!\n");
-    }
-    else
-    {
-        print("File not opened.\n");
+        print("%s\n", fslib::getErrorString());
+        return -4;
     }
 
-    fslib::File testBoolOpB("sdmc:/bullshit_file_name.txt", FsOpenMode_Read);
-    if (testBoolOpB)
+    while (testFilterReader.read())
     {
-        print("File opened?\n");
+        print("Save found for %016llX.\n", testFilterReader.get().application_id);
     }
-    else
-    {
-        print("File not opened.\n");
-    }
-
-    // unzFile testOpen = unzOpen64(TEST_ZIP_PATH);
-    // if (!testOpen)
-    // {
-    //     print("What the fuck?\n");
-    // }
-
-    // unzClose(testOpen);
 
     print("Press + to exit.");
 
