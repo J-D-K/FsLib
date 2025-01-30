@@ -60,3 +60,8 @@ FsSaveDataInfo &fslib::SaveInfoReader::get(void)
 {
     return m_saveInfo;
 }
+
+fslib::SaveInfoReader::operator bool(void) const
+{
+    return m_isOpen;
+}

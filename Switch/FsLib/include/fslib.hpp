@@ -2,7 +2,7 @@
 #include "Directory.hpp"
 #include "File.hpp"
 #include "Path.hpp"
-#include "SaveDataInfoReader.hpp"
+#include "SaveInfoReader.hpp"
 #include "Storage.hpp"
 #include "bisFileSystem.hpp"
 #include "dev.hpp"

@@ -36,6 +36,9 @@ namespace fslib
             /// @return Reference to save data info.
             FsSaveDataInfo &get(void);
 
+            /// @brief Operator that can be used in place of isOpen.
+            operator bool(void) const;
+
         private:
             /// @brief Underlying FsSaveDataInfoReader.
             FsSaveDataInfoReader m_infoReader;
