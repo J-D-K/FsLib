@@ -130,6 +130,11 @@ bool fslib::Directory::isDirectory(int index) const
     return m_directoryList[index].type == FsDirEntryType_Dir;
 }
 
+fslib::Directory::operator bool(void) const
+{
+    return m_wasRead;
+}
+
 const char *fslib::Directory::operator[](int index) const
 {
     if (index < 0 || index >= m_entryCount)

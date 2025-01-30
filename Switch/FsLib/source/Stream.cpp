@@ -46,6 +46,11 @@ void fslib::Stream::seek(int64_t offset, uint8_t origin)
     Stream::ensureOffsetIsValid();
 }
 
+fslib::Stream::operator bool(void) const
+{
+    return m_isOpen;
+}
+
 void fslib::Stream::ensureOffsetIsValid(void)
 {
     if (m_offset < 0)

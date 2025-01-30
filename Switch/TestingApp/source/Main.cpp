@@ -108,20 +108,25 @@ int main(void)
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&gamePad);
 
-
-    std::FILE *testOpen = std::fopen(TEST_ZIP_PATH, "r");
-
-    std::fseek(testOpen, 0, SEEK_END);
-    size_t fileSize = std::ftell(testOpen);
-    std::fseek(testOpen, 0, SEEK_SET);
-
-    for (size_t i = 0; i < fileSize; i++)
+    fslib::File testBoolOp("sdmc:/hbmenu.nro", FsOpenMode_Read);
+    if (testBoolOp)
     {
-        print("%02X", fgetc(testOpen));
+        print("File opened!\n");
     }
-    print("\n");
+    else
+    {
+        print("File not opened.\n");
+    }
 
-    std::fclose(testOpen);
+    fslib::File testBoolOpB("sdmc:/bullshit_file_name.txt", FsOpenMode_Read);
+    if (testBoolOpB)
+    {
+        print("File opened?\n");
+    }
+    else
+    {
+        print("File not opened.\n");
+    }
 
     // unzFile testOpen = unzOpen64(TEST_ZIP_PATH);
     // if (!testOpen)

@@ -45,6 +45,9 @@ namespace fslib
             /// @return True if the item is a directory. False if it is not or out of bounds.
             bool isDirectory(int index) const;
 
+            /// @brief This can be used like isOpen.
+            operator bool(void) const;
+
             /// @brief Returns entry name at Index.
             /// @param Index Index of entry.
             /// @return Entry's name. If out of bounds, nullptr.

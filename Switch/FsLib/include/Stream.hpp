@@ -39,6 +39,9 @@ namespace fslib
              */
             void seek(int64_t offset, uint8_t origin);
 
+            /// @brief Operator that can be used like isOpen().
+            operator bool(void) const;
+
             /// @brief Used to seek from the beginning of the stream.
             static constexpr uint8_t beginning = 0;
             /// @brief Used to seek from the current offset of the stream.
