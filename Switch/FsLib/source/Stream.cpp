@@ -38,7 +38,7 @@ void fslib::Stream::seek(int64_t offset, uint8_t origin)
 
         case Stream::end:
         {
-            m_offset = end + offset;
+            m_offset = m_streamSize + offset;
         }
         break;
     }

@@ -4,6 +4,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <minizip/unzip.h>
 #include <switch.h>
 #include <thread>
 
@@ -22,6 +23,8 @@ namespace
     constexpr uint64_t MINECRAFT_APPLICATION_ID = 0x0100D71004694000;
     // Save ID of test system save mount.
     constexpr uint64_t TARGET_SYSTEM_SAVE = 0x8000000000000011;
+    // Using this path to try to debug something.
+    const char *TEST_ZIP_PATH = "sdmc:/switch/JKSV/MONSTER HUNTER RISE/JK - 2025-01-28_15-16-03.zip";
     // Array of save data space ids. For some reason All doesn't seem to catch SD card saves?
     constexpr std::array<FsSaveDataSpaceId, 7> SAVE_DATA_SPACE_IDS = {FsSaveDataSpaceId_System,
                                                                       FsSaveDataSpaceId_User,
@@ -97,11 +100,6 @@ int main(void)
         return -3;
     }
 
-    if (!fslib::device::initialize())
-    {
-        return -4;
-    }
-
     // Default libnx console.
     consoleInit(NULL);
 
@@ -110,9 +108,28 @@ int main(void)
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&gamePad);
 
-    fslib::Path testPath = "sdmc:/switch/JKSV/test.zip";
 
-    print("Extension: %s\n", testPath.getExtension());
+    std::FILE *testOpen = std::fopen(TEST_ZIP_PATH, "r");
+
+    std::fseek(testOpen, 0, SEEK_END);
+    size_t fileSize = std::ftell(testOpen);
+    std::fseek(testOpen, 0, SEEK_SET);
+
+    for (size_t i = 0; i < fileSize; i++)
+    {
+        print("%02X", fgetc(testOpen));
+    }
+    print("\n");
+
+    std::fclose(testOpen);
+
+    // unzFile testOpen = unzOpen64(TEST_ZIP_PATH);
+    // if (!testOpen)
+    // {
+    //     print("What the fuck?\n");
+    // }
+
+    // unzClose(testOpen);
 
     print("Press + to exit.");
 

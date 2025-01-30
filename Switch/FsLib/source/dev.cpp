@@ -134,7 +134,6 @@ extern "C"
             s_fileMap.erase(newFileID);
             return -1;
         }
-
         return 0;
     }
 
