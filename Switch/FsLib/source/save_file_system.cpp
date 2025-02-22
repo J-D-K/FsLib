@@ -1,15 +1,15 @@
-#include "saveFileSystem.hpp"
+#include "save_file_system.hpp"
 #include "fslib.hpp"
 #include "string.hpp"
 #include <switch.h>
 
 extern std::string g_fslibErrorString;
 
-bool fslib::openSystemSaveFileSystem(std::string_view deviceName,
-                                     uint64_t systemSaveID,
-                                     FsSaveDataSpaceId saveDataSpaceID,
-                                     FsSaveDataRank saveDataRank,
-                                     AccountUid accountID)
+bool fslib::open_system_save_file_system(std::string_view deviceName,
+                                         uint64_t systemSaveID,
+                                         FsSaveDataSpaceId saveDataSpaceID,
+                                         FsSaveDataRank saveDataRank,
+                                         AccountUid accountID)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = 0,
                                               .uid = accountID,
@@ -22,11 +22,11 @@ bool fslib::openSystemSaveFileSystem(std::string_view deviceName,
     Result fsError = fsOpenSaveDataFileSystemBySystemSaveDataId(&fileSystem, saveDataSpaceID, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening system save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening system save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -35,11 +35,11 @@ bool fslib::openSystemSaveFileSystem(std::string_view deviceName,
     return true;
 }
 
-bool fslib::openAccountSaveFileSystem(std::string_view deviceName,
-                                      uint64_t applicationID,
-                                      AccountUid userID,
-                                      FsSaveDataSpaceId saveDataSpaceID,
-                                      FsSaveDataRank saveDataRank)
+bool fslib::open_account_save_file_system(std::string_view deviceName,
+                                          uint64_t applicationID,
+                                          AccountUid userID,
+                                          FsSaveDataSpaceId saveDataSpaceID,
+                                          FsSaveDataRank saveDataRank)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = applicationID,
                                               .uid = userID,
@@ -52,11 +52,11 @@ bool fslib::openAccountSaveFileSystem(std::string_view deviceName,
     Result fsError = fsOpenSaveDataFileSystem(&fileSystem, saveDataSpaceID, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening account save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening account save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -65,7 +65,7 @@ bool fslib::openAccountSaveFileSystem(std::string_view deviceName,
     return true;
 }
 
-bool fslib::openBCATSaveFileSystem(std::string_view deviceName, uint64_t applicationID)
+bool fslib::open_bcat_save_file_system(std::string_view deviceName, uint64_t applicationID)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = applicationID,
                                               .uid = {0},
@@ -78,11 +78,11 @@ bool fslib::openBCATSaveFileSystem(std::string_view deviceName, uint64_t applica
     Result fsError = fsOpenSaveDataFileSystem(&fileSystem, FsSaveDataSpaceId_User, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening BCAT save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening BCAT save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -91,7 +91,7 @@ bool fslib::openBCATSaveFileSystem(std::string_view deviceName, uint64_t applica
     return true;
 }
 
-bool fslib::openDeviceSaveFileSystem(std::string_view deviceName, uint64_t applicationID)
+bool fslib::open_device_save_file_system(std::string_view deviceName, uint64_t applicationID)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = applicationID,
                                               .uid = {0},
@@ -104,11 +104,11 @@ bool fslib::openDeviceSaveFileSystem(std::string_view deviceName, uint64_t appli
     Result fsError = fsOpenSaveDataFileSystem(&fileSystem, FsSaveDataSpaceId_User, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening device save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening device save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -117,7 +117,7 @@ bool fslib::openDeviceSaveFileSystem(std::string_view deviceName, uint64_t appli
     return true;
 }
 
-bool fslib::openTemporarySaveFileSystem(std::string_view deviceName)
+bool fslib::open_temporary_save_file_system(std::string_view deviceName)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = 0,
                                               .uid = {0},
@@ -130,11 +130,11 @@ bool fslib::openTemporarySaveFileSystem(std::string_view deviceName)
     Result fsError = fsOpenSaveDataFileSystem(&fileSystem, FsSaveDataSpaceId_User, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening temporary save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening temporary save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -143,11 +143,11 @@ bool fslib::openTemporarySaveFileSystem(std::string_view deviceName)
     return true;
 }
 
-bool fslib::openCacheSaveFileSystem(std::string_view deviceName,
-                                    uint64_t applicationID,
-                                    uint16_t saveDataIndex,
-                                    FsSaveDataSpaceId saveDataSpaceID,
-                                    FsSaveDataRank saveDataRank)
+bool fslib::open_cache_save_file_system(std::string_view deviceName,
+                                        uint64_t applicationID,
+                                        uint16_t saveDataIndex,
+                                        FsSaveDataSpaceId saveDataSpaceID,
+                                        FsSaveDataRank saveDataRank)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = applicationID,
                                               .uid = {0},
@@ -160,11 +160,11 @@ bool fslib::openCacheSaveFileSystem(std::string_view deviceName,
     Result fsError = fsOpenSaveDataFileSystem(&fileSystem, saveDataSpaceID, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening cache save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening cache save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -173,7 +173,7 @@ bool fslib::openCacheSaveFileSystem(std::string_view deviceName,
     return true;
 }
 
-bool fslib::openSystemBCATSaveFileSystem(std::string_view deviceName, uint64_t systemSaveID)
+bool fslib::open_system_bcat_save_file_system(std::string_view deviceName, uint64_t systemSaveID)
 {
     FsSaveDataAttribute saveDataAttributes = {.application_id = 0,
                                               .uid = {0},
@@ -183,14 +183,15 @@ bool fslib::openSystemBCATSaveFileSystem(std::string_view deviceName, uint64_t s
                                               .save_data_index = 0};
 
     FsFileSystem fileSystem;
-    Result fsError = fsOpenSaveDataFileSystemBySystemSaveDataId(&fileSystem, FsSaveDataSpaceId_User, &saveDataAttributes);
+    Result fsError =
+        fsOpenSaveDataFileSystemBySystemSaveDataId(&fileSystem, FsSaveDataSpaceId_User, &saveDataAttributes);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening system bcat save data: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening system bcat save data: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;
@@ -199,7 +200,7 @@ bool fslib::openSystemBCATSaveFileSystem(std::string_view deviceName, uint64_t s
     return true;
 }
 
-bool fslib::openSaveFileSystemWithSaveDataInfo(std::string_view deviceName, const FsSaveDataInfo &saveInfo)
+bool fslib::open_save_data_with_save_info(std::string_view deviceName, const FsSaveDataInfo &saveInfo)
 {
     // This is actually nicer.
     FsSaveDataAttribute saveDataAttributes = {.application_id = saveInfo.application_id,
@@ -213,22 +214,26 @@ bool fslib::openSaveFileSystemWithSaveDataInfo(std::string_view deviceName, cons
     FsFileSystem fileSystem;
     if (saveInfo.save_data_type == FsSaveDataType_System || saveInfo.save_data_type == FsSaveDataType_SystemBcat)
     {
-        fsError = fsOpenSaveDataFileSystemBySystemSaveDataId(&fileSystem,
-                                                             static_cast<FsSaveDataSpaceId>(saveInfo.save_data_space_id),
-                                                             &saveDataAttributes);
+        fsError =
+            fsOpenSaveDataFileSystemBySystemSaveDataId(&fileSystem,
+                                                       static_cast<FsSaveDataSpaceId>(saveInfo.save_data_space_id),
+                                                       &saveDataAttributes);
     }
     else
     {
-        fsError = fsOpenSaveDataFileSystem(&fileSystem, static_cast<FsSaveDataSpaceId>(saveInfo.save_data_space_id), &saveDataAttributes);
+        fsError = fsOpenSaveDataFileSystem(&fileSystem,
+                                           static_cast<FsSaveDataSpaceId>(saveInfo.save_data_space_id),
+                                           &saveDataAttributes);
     }
 
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening save data with FsSaveDataInfo: 0x%X.", fsError);
+        g_fslibErrorString =
+            string::get_formatted_string("Error opening save data with FsSaveDataInfo: 0x%X.", fsError);
         return false;
     }
 
-    if (!fslib::mapFileSystem(deviceName, &fileSystem))
+    if (!fslib::map_file_system(deviceName, &fileSystem))
     {
         fsFsClose(&fileSystem);
         return false;

@@ -26,14 +26,14 @@ void fslib::Storage::open(FsBisPartitionId partitionID)
     Result fsError = fsOpenBisStorage(&m_storageHandle, partitionID);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening partition ID %X: 0x%X.", partitionID, fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening partition ID %X: 0x%X.", partitionID, fsError);
         return;
     }
 
     fsError = fsStorageGetSize(&m_storageHandle, &m_streamSize);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error getting storage size: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error getting storage size: 0x%X.", fsError);
         return;
     }
     // Offset is always 0 since storage is read only.
@@ -56,7 +56,7 @@ ssize_t fslib::Storage::read(void *buffer, size_t bufferSize)
     Result fsError = fsStorageRead(&m_storageHandle, m_offset, buffer, static_cast<uint64_t>(bufferSize));
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error reading from storage: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error reading from storage: 0x%X.", fsError);
         return 0;
     }
     // There isn't really a way to make sure this worked 100%...
@@ -64,7 +64,7 @@ ssize_t fslib::Storage::read(void *buffer, size_t bufferSize)
     return bufferSize;
 }
 
-signed char fslib::Storage::readByte(void)
+signed char fslib::Storage::read_byte(void)
 {
     if (m_offset >= m_streamSize)
     {
@@ -75,7 +75,7 @@ signed char fslib::Storage::readByte(void)
     Result fsError = fsStorageRead(&m_storageHandle, m_offset++, &byte, 1);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error reading byte from storage: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error reading byte from storage: 0x%X.", fsError);
         return -1;
     }
     return byte;

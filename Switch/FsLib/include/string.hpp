@@ -8,5 +8,5 @@ namespace string
     /// @param format Format of string.
     /// @param arguments
     /// @return Formatted string?
-    std::string getFormattedString(const char *Format, ...);
+    std::string get_formatted_string(const char *Format, ...);
 } // namespace string

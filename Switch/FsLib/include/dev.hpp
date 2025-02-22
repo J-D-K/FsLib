@@ -14,6 +14,6 @@ namespace fslib
          * end result is cleaner for the end user. Having to implement a complete version of LibNX's initialization code just to bypass one
          * function was a nightmare. Don't ask me how I know...
          */
-        bool initializeSDMC(void);
+        bool initialize_sdmc(void);
     } // namespace dev
 } // namespace fslib

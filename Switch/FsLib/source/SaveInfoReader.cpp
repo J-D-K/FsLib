@@ -37,7 +37,7 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID)
     Result fsError = fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening save data info reader: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening save data info reader: 0x%X.", fsError);
         return;
     }
     // Should be good.
@@ -67,7 +67,7 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accou
     Result fsError = fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString(ERROR_OPENING_WITH_FILTER, fsError);
+        g_fslibErrorString = string::get_formatted_string(ERROR_OPENING_WITH_FILTER, fsError);
         return;
     }
     m_isOpen = true;
@@ -77,20 +77,23 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType s
 {
     SaveInfoReader::close();
 
-    FsSaveDataFilter saveFilter = {
-        .filter_by_application_id = false,
-        .filter_by_save_data_type = true,
-        .filter_by_user_id = false,
-        .filter_by_system_save_data_id = false,
-        .filter_by_index = false,
-        .save_data_rank = FsSaveDataRank_Primary,
-        .padding = {0},
-        .attr = {.application_id = 0, .uid = {0}, .save_data_type = saveType, .save_data_rank = FsSaveDataRank_Primary, .save_data_index = 0}};
+    FsSaveDataFilter saveFilter = {.filter_by_application_id = false,
+                                   .filter_by_save_data_type = true,
+                                   .filter_by_user_id = false,
+                                   .filter_by_system_save_data_id = false,
+                                   .filter_by_index = false,
+                                   .save_data_rank = FsSaveDataRank_Primary,
+                                   .padding = {0},
+                                   .attr = {.application_id = 0,
+                                            .uid = {0},
+                                            .save_data_type = saveType,
+                                            .save_data_rank = FsSaveDataRank_Primary,
+                                            .save_data_index = 0}};
 
     Result fsError = fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString(ERROR_OPENING_WITH_FILTER, fsError);
+        g_fslibErrorString = string::get_formatted_string(ERROR_OPENING_WITH_FILTER, fsError);
         return;
     }
     m_isOpen = true;
@@ -105,7 +108,7 @@ void fslib::SaveInfoReader::close(void)
     }
 }
 
-bool fslib::SaveInfoReader::isOpen(void) const
+bool fslib::SaveInfoReader::is_open(void) const
 {
     return m_isOpen;
 }
@@ -117,7 +120,7 @@ bool fslib::SaveInfoReader::read(void)
     Result fsError = fsSaveDataInfoReaderRead(&m_infoReader, &m_saveInfo, 1, &totalEntries);
     if (R_FAILED(fsError) || totalEntries == 0)
     {
-        g_fslibErrorString = string::getFormattedString("Error reading save data info: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error reading save data info: 0x%X.", fsError);
         return false;
     }
     return true;

@@ -9,7 +9,7 @@ namespace
 } // namespace
 
 // This will get the trimmed down version of the path with no beginning or trailing slashes. Passing NULL or nullptr to pathBegin will skip trimming the beginning.
-static void getTrimmedPath(const char *path, const char **pathBegin, size_t &pathLengthOut)
+static void get_trimmed_path(const char *path, const char **pathBegin, size_t &pathLengthOut)
 {
     // Get where the beginning of the path begins after slashes.
     if (pathBegin)
@@ -58,16 +58,16 @@ fslib::Path::Path(const std::filesystem::path &pathData)
 
 fslib::Path::~Path()
 {
-    Path::freePath();
+    Path::free_path();
 }
 
-bool fslib::Path::isValid(void) const
+bool fslib::Path::is_valid(void) const
 {
     return m_path && m_deviceEnd && std::char_traits<char>::length(m_deviceEnd + 1) > 0 &&
            std::strpbrk(m_deviceEnd + 1, FORBIDDEN_PATH_CHARACTERS) == NULL;
 }
 
-fslib::Path fslib::Path::subPath(size_t pathLength) const
+fslib::Path fslib::Path::sub_path(size_t pathLength) const
 {
     if (pathLength > m_pathLength)
     {
@@ -75,7 +75,7 @@ fslib::Path fslib::Path::subPath(size_t pathLength) const
     }
 
     fslib::Path newPath;
-    if (newPath.allocatePath(m_pathSize))
+    if (newPath.allocate_path(m_pathSize))
     {
         // Copy the sub path to newPath's buffer.
         std::memcpy(newPath.m_path, m_path, pathLength);
@@ -87,7 +87,7 @@ fslib::Path fslib::Path::subPath(size_t pathLength) const
     return newPath;
 }
 
-size_t fslib::Path::findFirstOf(char character) const
+size_t fslib::Path::find_first_of(char character) const
 {
     for (size_t i = 0; i < m_pathLength; i++)
     {
@@ -96,14 +96,14 @@ size_t fslib::Path::findFirstOf(char character) const
             return i;
         }
     }
-    return Path::notFound;
+    return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::findFirstOf(char character, size_t begin) const
+size_t fslib::Path::find_first_of(char character, size_t begin) const
 {
     if (begin >= m_pathLength)
     {
-        return Path::notFound;
+        return Path::NOT_FOUND;
     }
 
     for (size_t i = begin; i < m_pathLength; i++)
@@ -113,10 +113,10 @@ size_t fslib::Path::findFirstOf(char character, size_t begin) const
             return i;
         }
     }
-    return Path::notFound;
+    return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::findLastOf(char character) const
+size_t fslib::Path::find_last_of(char character) const
 {
     for (size_t i = m_pathLength; i > 0; i--)
     {
@@ -125,10 +125,10 @@ size_t fslib::Path::findLastOf(char character) const
             return i;
         }
     }
-    return Path::notFound;
+    return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::findLastOf(char character, size_t begin) const
+size_t fslib::Path::find_last_of(char character, size_t begin) const
 {
     if (begin > m_pathLength)
     {
@@ -142,42 +142,42 @@ size_t fslib::Path::findLastOf(char character, size_t begin) const
             return i;
         }
     }
-    return Path::notFound;
+    return Path::NOT_FOUND;
 }
 
-const char *fslib::Path::cString(void) const
+const char *fslib::Path::c_string(void) const
 {
     return m_path;
 }
 
-std::string_view fslib::Path::getDeviceName(void) const
+std::string_view fslib::Path::get_device_name(void) const
 {
     return std::string_view(m_path, m_deviceEnd - m_path);
 }
 
-const char *fslib::Path::getPath(void) const
+const char *fslib::Path::get_path(void) const
 {
     return m_deviceEnd + 1;
 }
 
-const char *fslib::Path::getExtension(void) const
+const char *fslib::Path::get_extension(void) const
 {
-    size_t extensionBegin = Path::findLastOf('.');
-    if (extensionBegin == Path::notFound)
+    size_t extensionBegin = Path::find_last_of('.');
+    if (extensionBegin == Path::NOT_FOUND)
     {
         return nullptr;
     }
     return &m_path[extensionBegin + 1];
 }
 
-size_t fslib::Path::getLength(void) const
+size_t fslib::Path::get_length(void) const
 {
     return m_pathLength;
 }
 
 fslib::Path &fslib::Path::operator=(const fslib::Path &path)
 {
-    if (!Path::allocatePath(path.m_pathSize))
+    if (!Path::allocate_path(path.m_pathSize))
     {
         // Not sure this is the best idea. To do: Throw allocation error or something?
         return *this;
@@ -204,7 +204,7 @@ fslib::Path &fslib::Path::operator=(const char *pathData)
 
     // To do: Double check if the + 1 is really needed.
     m_pathSize = FS_MAX_PATH + ((m_deviceEnd - pathData) + 1);
-    if (!Path::allocatePath(m_pathSize))
+    if (!Path::allocate_path(m_pathSize))
     {
         // To do: Throw some kind of allocation error?
         return *this;
@@ -213,7 +213,7 @@ fslib::Path &fslib::Path::operator=(const char *pathData)
     // Going to use this and ignore where it says the path begins.
     size_t pathLength = 0;
     const char *pathBegin = NULL;
-    getTrimmedPath(m_deviceEnd + 1, &pathBegin, pathLength);
+    get_trimmed_path(m_deviceEnd + 1, &pathBegin, pathLength);
 
     // Copy the device string first.
     std::memcpy(m_path, pathData, (m_deviceEnd - pathData) + 2);
@@ -247,7 +247,7 @@ fslib::Path &fslib::Path::operator/=(const char *pathData)
     // Get trimmed path without beginning and trailing slashes.
     size_t pathLength = 0;
     const char *pathBegin = nullptr;
-    getTrimmedPath(pathData, &pathBegin, pathLength);
+    get_trimmed_path(pathData, &pathBegin, pathLength);
 
     if ((m_pathLength + pathLength) + 1 >= m_pathSize)
     {
@@ -316,10 +316,10 @@ fslib::Path &fslib::Path::operator+=(const std::filesystem::path &pathData)
     return *this += pathData.string().c_str();
 }
 
-bool fslib::Path::allocatePath(uint16_t pathSize)
+bool fslib::Path::allocate_path(uint16_t pathSize)
 {
     // Call this first just incase so we don't be leakin all over.
-    Path::freePath();
+    Path::free_path();
 
     m_path = new (std::nothrow) char[pathSize];
     if (!m_path)
@@ -331,7 +331,7 @@ bool fslib::Path::allocatePath(uint16_t pathSize)
     return true;
 }
 
-void fslib::Path::freePath(void)
+void fslib::Path::free_path(void)
 {
     if (m_path)
     {

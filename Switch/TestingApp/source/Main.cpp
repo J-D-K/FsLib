@@ -51,18 +51,18 @@ void print(const char *format, ...)
 }
 
 // This is a recursive directory printing function.
-void printDirectory(const fslib::Path &directoryPath)
+void print_directory(const fslib::Path &directoryPath)
 {
     fslib::Directory dir(directoryPath);
-    if (!dir.isOpen())
+    if (!dir.is_open())
     {
-        print("%s\n", fslib::getErrorString());
+        print("%s\n", fslib::get_error_string());
         return;
     }
 
-    for (int64_t i = 0; i < dir.getCount(); i++)
+    for (int64_t i = 0; i < dir.get_count(); i++)
     {
-        if (dir.isDirectory(i))
+        if (dir.is_directory(i))
         {
             // New path
             fslib::Path newPath = directoryPath / dir[i];
@@ -70,7 +70,7 @@ void printDirectory(const fslib::Path &directoryPath)
             // Print
             print("\tDIR %s\n", dir[i]);
             // Feed this function the path.
-            printDirectory(newPath);
+            print_directory(newPath);
         }
         else
         {
@@ -95,7 +95,7 @@ int main(void)
 
 
     // This shuts down fs_dev and puts it's own sdmc devop in its place. This only works for files on the SDMC. Everything else should use fslib.
-    if (!fslib::dev::initializeSDMC())
+    if (!fslib::dev::initialize_sdmc())
     {
         return -3;
     }
@@ -112,10 +112,10 @@ int main(void)
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&gamePad);
 
-    fslib::SaveInfoReader testFilterReader(FsSaveDataSpaceId_System, FsSaveDataType_System);
+    fslib::SaveInfoReader testFilterReader(FsSaveDataSpaceId_User, FsSaveDataType_Account);
     if (!testFilterReader)
     {
-        print("%s\n", fslib::getErrorString());
+        print("%s\n", fslib::get_error_string());
         return -4;
     }
 

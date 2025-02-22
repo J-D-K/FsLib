@@ -10,7 +10,7 @@
 extern std::string g_fslibErrorString;
 
 // Sorts by entry type, then alphabetically.
-static bool compareEntries(const FsDirectoryEntry &entryA, const FsDirectoryEntry &entryB)
+static bool compare_entries(const FsDirectoryEntry &entryA, const FsDirectoryEntry &entryB)
 {
     if (entryA.type != entryB.type)
     {
@@ -42,31 +42,33 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     // This so directories can be reused.
     m_wasRead = false;
 
-    if (!directoryPath.isValid())
+    if (!directoryPath.is_valid())
     {
         g_fslibErrorString = ERROR_INVALID_PATH;
         return;
     }
 
     FsFileSystem *fileSystem;
-    if (!fslib::getFileSystemByDeviceName(directoryPath.getDeviceName(), &fileSystem))
+    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &fileSystem))
     {
         g_fslibErrorString = ERROR_DEVICE_NOT_FOUND;
         return;
     }
 
-    Result fsError =
-        fsFsOpenDirectory(fileSystem, directoryPath.getPath(), FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, &m_directoryHandle);
+    Result fsError = fsFsOpenDirectory(fileSystem,
+                                       directoryPath.get_path(),
+                                       FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles,
+                                       &m_directoryHandle);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening directory: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening directory: 0x%X.", fsError);
         return;
     }
 
     fsError = fsDirGetEntryCount(&m_directoryHandle, &m_entryCount);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening reading entry count: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening reading entry count: 0x%X.", fsError);
         return;
     }
 
@@ -79,31 +81,31 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     if (R_FAILED(fsError) || totalEntriesRead != m_entryCount)
     {
         Directory::close();
-        g_fslibErrorString = string::getFormattedString("Error reading entries: 0x%X. %02d/%02d entries were read.");
+        g_fslibErrorString = string::get_formatted_string("Error reading entries: 0x%X. %02d/%02d entries were read.");
         return;
     }
 
     // Sort if requested.
     if (sortedListing)
     {
-        std::sort(m_directoryList.get(), m_directoryList.get() + m_entryCount, compareEntries);
+        std::sort(m_directoryList.get(), m_directoryList.get() + m_entryCount, compare_entries);
     }
     // Close and success?
     Directory::close();
     m_wasRead = true;
 }
 
-bool fslib::Directory::isOpen(void) const
+bool fslib::Directory::is_open(void) const
 {
     return m_wasRead;
 }
 
-int64_t fslib::Directory::getCount(void) const
+int64_t fslib::Directory::get_count(void) const
 {
     return m_entryCount;
 }
 
-int64_t fslib::Directory::getEntrySize(int index) const
+int64_t fslib::Directory::get_entry_size(int index) const
 {
     if (index < 0 || index >= m_entryCount)
     {
@@ -112,7 +114,7 @@ int64_t fslib::Directory::getEntrySize(int index) const
     return m_directoryList[index].file_size;
 }
 
-const char *fslib::Directory::getEntry(int index) const
+const char *fslib::Directory::get_entry(int index) const
 {
     if (index < 0 || index >= m_entryCount)
     {
@@ -121,7 +123,7 @@ const char *fslib::Directory::getEntry(int index) const
     return m_directoryList[index].name;
 }
 
-bool fslib::Directory::isDirectory(int index) const
+bool fslib::Directory::is_directory(int index) const
 {
     if (index < 0 || index >= m_entryCount)
     {

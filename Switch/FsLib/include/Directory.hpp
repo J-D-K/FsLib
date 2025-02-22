@@ -24,26 +24,26 @@ namespace fslib
 
             /// @brief Returns if directory was successfully opened.
             /// @return True if it was. False if it wasn't.
-            bool isOpen(void) const;
+            bool is_open(void) const;
 
             /// @brief Returns total number of entries read from directory.
             /// @return Total numbers of entries read from directory.
-            int64_t getCount(void) const;
+            int64_t get_count(void) const;
 
             /// @brief Returns the size of the entry at Index.
             /// @param Index Index of entry.
             /// @return Size of entry. 0 if Index is out of bounds.
-            int64_t getEntrySize(int index) const;
+            int64_t get_entry_size(int index) const;
 
             /// @brief Returns the name of the entry at Index.
             /// @param Index Index of entry.
             /// @return Name of the entry. nullptr if Index is out of bounds.
-            const char *getEntry(int index) const;
+            const char *get_entry(int index) const;
 
             /// @brief Returns whether or not the entry at Index is a directory.
             /// @param Index Index of entry.
             /// @return True if the item is a directory. False if it is not or out of bounds.
-            bool isDirectory(int index) const;
+            bool is_directory(int index) const;
 
             /// @brief This can be used like isOpen.
             operator bool(void) const;

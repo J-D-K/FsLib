@@ -49,14 +49,14 @@ typedef enum
     Type3
 } EnumName;
 ```
-4. Member functions and methods: Lower camel case. Ex:
+4. Member functions and methods: Lower snake case. Ex:
 ```cpp
 class ClassName
 {
     public:
         ClassName(void) = default;
 
-        void memberFunctionName(void);
+        void member_function_name(void);
 };
 ```
 
@@ -65,20 +65,20 @@ class ClassName
 class BaseClass
 {
     public:
-        void memberMethod(void);
+        void member_method(void);
 }
 
 class DerivedClass : public BaseClass
 {
     public:
-        void memberMethodB(void)
+        void member_method_b(void)
         {
-            BaseClass::memberMethod();
+            BaseClass::member_method();
         }
 }
 ```
 
-6. Class member variables: Prefixed by either `m_` for members, or `s_` for static members followed by lower camel case for the variable name. Ex
+6. Class member variables: Prefixed by either `m_` for members, or `sm_` for static members followed by lower camel case for the variable name. Ex
 ```cpp
 class ClassName
 {
@@ -87,13 +87,13 @@ class ClassName
 
     private:
         int m_classNameVariable = 0;
-        static inline int s_staticSharedVariable = 0;
+        static inline int sm_staticSharedVariable = 0;
 };
 ```
 
-7. Functions: Lower camel case, prefixed with the namespace they belong to. No `namespace x{` in source files. Ex:
+7. Functions: Lower snake case, prefixed with the namespace they belong to. No `namespace x{` in source files. Ex:
 ```cpp
-void fslib::functionName(void)
+void fslib::function_name(void)
 {
     // Do stuff here.
 }
@@ -101,7 +101,7 @@ void fslib::functionName(void)
 
 8. Function arguments: Lower camel case. Ex:
 ```cpp
-void fslib::functionName(int argName)
+void fslib::function_name(int argName)
 ```
 
 9. Local variables: Lower camel case. Ex:

@@ -44,7 +44,7 @@ namespace fslib
 
             /// @brief Reads a single byte from storage.
             /// @return Byte read on success. -1 on failure.
-            signed char readByte(void);
+            signed char read_byte(void);
 
         private:
             /// @brief Handle to storage opened.

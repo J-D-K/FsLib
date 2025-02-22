@@ -8,5 +8,5 @@ namespace fslib
     /// @param deviceName Name to map to partition.
     /// @param partitionID ID of BIS partition.
     /// @return True on success. False on failure.
-    bool openBisFileSystem(std::string_view deviceName, FsBisPartitionId partitionID);
+    bool open_bis_filesystem(std::string_view deviceName, FsBisPartitionId partitionID);
 } // namespace fslib

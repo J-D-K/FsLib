@@ -38,7 +38,7 @@ namespace fslib
 
             /// @brief Returns if file was successfully opened.
             /// @return
-            bool isOpen(void) const;
+            bool is_open(void) const;
 
             /// @brief Attempts to read ReadSize bytes into Buffer from file.
             /// @param buffer Buffer to write into.
@@ -50,11 +50,11 @@ namespace fslib
             /// @param lineOut Buffer to read line into.
             /// @param lineLength Size of line buffer.
             /// @return True on success. False on failure or line exceeding LineLength.
-            bool readLine(char *lineOut, size_t lineLength);
+            bool read_line(char *lineOut, size_t lineLength);
 
             /// @brief Attempts to read a single character or byte from file.
             /// @return Byte read.
-            signed char getByte(void);
+            signed char get_byte(void);
 
             /// @brief Attempts to write Buffer of BufferSize bytes to file.
             /// @param buffer Buffer containing data.
@@ -71,7 +71,7 @@ namespace fslib
             /// @brief Writes a single byte to file.
             /// @param byte Byte to write.
             /// @return True on success. False on failure.
-            bool putByte(char byte);
+            bool put_byte(char byte);
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
@@ -97,18 +97,18 @@ namespace fslib
             /// @brief Private: Resizes file if Buffer is too large to fit in remaining space.
             /// @param bufferSize Size of buffer.
             /// @return True on success. False on failure.
-            bool resizeIfNeeded(size_t bufferSize);
+            bool resize_if_needed(size_t bufferSize);
 
             /// @brief Private: Returns if file has flag set to read.
             /// @return True if flags are correct. False if not.
-            inline bool isOpenForReading(void) const
+            inline bool is_open_for_reading(void) const
             {
                 return (m_openFlags & FsOpenMode_Read);
             }
 
             /// @brief Private: Returns if file has flag set to write.
             /// @return True if flags are correct. False if not.
-            inline bool isOpenForWriting(void) const
+            inline bool is_open_for_writing(void) const
             {
                 return (m_openFlags & FsOpenMode_Write) || (m_openFlags & FsOpenMode_Append);
             }

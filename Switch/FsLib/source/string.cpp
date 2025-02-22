@@ -7,7 +7,7 @@ namespace
     constexpr int VA_BUFFER_SIZE = 0x1000;
 } // namespace
 
-std::string string::getFormattedString(const char *format, ...)
+std::string string::get_formatted_string(const char *format, ...)
 {
     char vaBuffer[VA_BUFFER_SIZE] = {0};
 

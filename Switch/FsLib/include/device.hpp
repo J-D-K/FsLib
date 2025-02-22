@@ -13,10 +13,10 @@ namespace fslib
 
         /// @brief Returns whether or not an sd card is inserted.
         /// @return True if one is. False if one isn't or failure.
-        bool sdIsInserted(void);
+        bool sd_is_inserted(void);
 
         /// @brief Returns whether a game card is inserted or not.
         /// @return True if one is. False if not or error.
-        bool gameCardIsInserted(void);
+        bool gamecard_is_inserted(void);
     } // namespace device
 } // namespace fslib

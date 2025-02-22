@@ -1,6 +1,6 @@
 #include "File.hpp"
 #include "errorCommon.h"
-#include "fileFunctions.hpp"
+#include "file_functions.hpp"
 #include "fslib.hpp"
 #include "string.hpp"
 #include <cstdarg>
@@ -32,7 +32,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     // So this class can be reused.
     File::close();
 
-    if (!filePath.isValid())
+    if (!filePath.is_valid())
     {
         g_fslibErrorString = ERROR_INVALID_PATH;
         return;
@@ -45,19 +45,19 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     }
 
     FsFileSystem *fileSystem;
-    if (!fslib::getFileSystemByDeviceName(filePath.getDeviceName(), &fileSystem))
+    if (!fslib::get_file_system_by_device_name(filePath.get_device_name(), &fileSystem))
     {
         g_fslibErrorString = ERROR_DEVICE_NOT_FOUND;
         return;
     }
 
-    if ((openFlags & FsOpenMode_Create) && fslib::fileExists(filePath) && !fslib::deleteFile(filePath))
+    if ((openFlags & FsOpenMode_Create) && fslib::file_exists(filePath) && !fslib::delete_file(filePath))
     {
         // Previous calls should set error. Let's not worry about it.
         return;
     }
 
-    if ((openFlags & FsOpenMode_Create) && !fslib::createFile(filePath, fileSize))
+    if ((openFlags & FsOpenMode_Create) && !fslib::create_file(filePath, fileSize))
     {
         return;
     }
@@ -68,17 +68,17 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
         openFlags &= ~FsOpenMode_Create;
     }
 
-    Result fsError = fsFsOpenFile(fileSystem, filePath.getPath(), openFlags, &m_fileHandle);
+    Result fsError = fsFsOpenFile(fileSystem, filePath.get_path(), openFlags, &m_fileHandle);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error opening file: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error opening file: 0x%X.", fsError);
         return;
     }
 
     fsError = fsFileGetSize(&m_fileHandle, &m_streamSize);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error getting file's size: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error getting file's size: 0x%X.", fsError);
         return;
     }
     // Save flags and set offset.
@@ -97,14 +97,14 @@ void fslib::File::close(void)
     }
 }
 
-bool fslib::File::isOpen(void) const
+bool fslib::File::is_open(void) const
 {
     return m_isOpen;
 }
 
 ssize_t fslib::File::read(void *buffer, size_t bufferSize)
 {
-    if (!m_isOpen || !File::isOpenForReading())
+    if (!m_isOpen || !File::is_open_for_reading())
     {
         g_fslibErrorString = ERROR_NOT_OPEN_FOR_READING;
         return -1;
@@ -114,7 +114,7 @@ ssize_t fslib::File::read(void *buffer, size_t bufferSize)
     Result fsError = fsFileRead(&m_fileHandle, m_offset, buffer, bufferSize, FsReadOption_None, &bytesRead);
     if (R_FAILED(fsError) || bytesRead > bufferSize) // Carrying over that last one from 3DS...
     {
-        g_fslibErrorString = string::getFormattedString("Error reading from file: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error reading from file: 0x%X.", fsError);
         // I don't think this is a problem on Switch like on 3DS, but just in case.
         bytesRead = m_offset + static_cast<int64_t>(bufferSize) > m_streamSize ? m_streamSize - m_offset : bufferSize;
     }
@@ -122,9 +122,9 @@ ssize_t fslib::File::read(void *buffer, size_t bufferSize)
     return bytesRead;
 }
 
-bool fslib::File::readLine(char *lineOut, size_t lineLength)
+bool fslib::File::read_line(char *lineOut, size_t lineLength)
 {
-    if (!m_isOpen || !File::isOpenForReading())
+    if (!m_isOpen || !File::is_open_for_reading())
     {
         g_fslibErrorString = ERROR_NOT_OPEN_FOR_READING;
         return false;
@@ -134,7 +134,7 @@ bool fslib::File::readLine(char *lineOut, size_t lineLength)
     // Loop within length. I might want to revise this later.
     for (size_t i = 0; i < lineLength; i++)
     {
-        if (Stream::endOfStream() || (nextCharacter = File::getByte()) == -1)
+        if (Stream::end_of_stream() || (nextCharacter = File::get_byte()) == -1)
         {
             // End of file before new line or character read was bad.
             return false;
@@ -154,9 +154,9 @@ bool fslib::File::readLine(char *lineOut, size_t lineLength)
     return false;
 }
 
-signed char fslib::File::getByte(void)
+signed char fslib::File::get_byte(void)
 {
-    if (!m_isOpen || !File::isOpenForReading())
+    if (!m_isOpen || !File::is_open_for_reading())
     {
         g_fslibErrorString = ERROR_NOT_OPEN_FOR_READING;
         return -1;
@@ -168,7 +168,7 @@ signed char fslib::File::getByte(void)
     Result fsError = fsFileRead(&m_fileHandle, m_offset++, &character, 1, FsReadOption_None, &bytesRead);
     if (R_FAILED(fsError) || bytesRead == 0)
     {
-        g_fslibErrorString = string::getFormattedString("Error reading byte from file: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error reading byte from file: 0x%X.", fsError);
         return -1;
     }
 
@@ -177,7 +177,7 @@ signed char fslib::File::getByte(void)
 
 ssize_t fslib::File::write(const void *buffer, size_t bufferSize)
 {
-    if (!m_isOpen || !File::isOpenForWriting() || !File::resizeIfNeeded(bufferSize))
+    if (!m_isOpen || !File::is_open_for_writing() || !File::resize_if_needed(bufferSize))
     {
         g_fslibErrorString = ERROR_NOT_OPEN_FOR_WRITING;
         return -1;
@@ -186,7 +186,7 @@ ssize_t fslib::File::write(const void *buffer, size_t bufferSize)
     Result fsError = fsFileWrite(&m_fileHandle, m_offset, buffer, bufferSize, FsWriteOption_None);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error writing to file: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error writing to file: 0x%X.", fsError);
         return -1;
     }
     // There's no real way to verify this was successful on Switch
@@ -206,10 +206,10 @@ bool fslib::File::writef(const char *format, ...)
     return File::write(vaBuffer, std::char_traits<char>::length(vaBuffer));
 }
 
-bool fslib::File::putByte(char byte)
+bool fslib::File::put_byte(char byte)
 {
     // L o L
-    if (!m_isOpen || !File::isOpenForWriting() || !File::resizeIfNeeded(1))
+    if (!m_isOpen || !File::is_open_for_writing() || !File::resize_if_needed(1))
     {
         g_fslibErrorString = ERROR_NOT_OPEN_FOR_WRITING;
         return false;
@@ -219,7 +219,8 @@ bool fslib::File::putByte(char byte)
     Result fsError = fsFileWrite(&m_fileHandle, m_offset++, &byte, 1, FsWriteOption_None);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error writing a single, tiny, miniscule byte to file: 0x%X.", fsError);
+        g_fslibErrorString =
+            string::get_formatted_string("Error writing a single, tiny, miniscule byte to file: 0x%X.", fsError);
         return false;
     }
     return true;
@@ -239,7 +240,7 @@ fslib::File &fslib::File::operator<<(const std::string &string)
 
 bool fslib::File::flush(void)
 {
-    if (!m_isOpen || !File::isOpenForWriting())
+    if (!m_isOpen || !File::is_open_for_writing())
     {
         g_fslibErrorString = ERROR_NOT_OPEN_FOR_WRITING;
         return false;
@@ -248,13 +249,13 @@ bool fslib::File::flush(void)
     Result fsError = fsFileFlush(&m_fileHandle);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error flushing file: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error flushing file: 0x%X.", fsError);
         return false;
     }
     return true;
 }
 
-bool fslib::File::resizeIfNeeded(size_t bufferSize)
+bool fslib::File::resize_if_needed(size_t bufferSize)
 {
     // Size remaining in file.
     size_t spaceRemaining = m_streamSize - m_offset;
@@ -271,7 +272,7 @@ bool fslib::File::resizeIfNeeded(size_t bufferSize)
     Result fsError = fsFileSetSize(&m_fileHandle, newFileSize);
     if (R_FAILED(fsError))
     {
-        g_fslibErrorString = string::getFormattedString("Error resizing file to fit buffer: 0x%X.", fsError);
+        g_fslibErrorString = string::get_formatted_string("Error resizing file to fit buffer: 0x%X.", fsError);
         return false;
     }
     // Update size

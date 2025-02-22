@@ -44,54 +44,54 @@ namespace fslib
                     3. The path length following the device is not empty.
                     4. The path has no illegal characters in it.
              */
-            bool isValid(void) const;
+            bool is_valid(void) const;
 
             /// @brief Returns a sub-path ending at PathLength.
             /// @param pathLength Length of sub-path to return.
             /// @return Sub-Path.
-            Path subPath(size_t pathLength) const;
+            Path sub_path(size_t pathLength) const;
 
             /// @brief Searches for the first occurrence of Character in path.
             /// @param character Character to search for.
             /// @return Position of character in path. Path::NotFound if the character isn't found.
-            size_t findFirstOf(char character) const;
+            size_t find_first_of(char character) const;
 
             /// @brief Searches for the first occurrence of Character in path starting at Begin.
             /// @param character Character to search for.
             /// @param begin Postion to begin searching from.
             /// @return Position of character in path. Path::NotFound if the character wasn't found.
-            size_t findFirstOf(char character, size_t begin) const;
+            size_t find_first_of(char character, size_t begin) const;
 
             /// @brief Searches backwards through path to find last occurrence of character in path.
             /// @param character Character to search for.
             /// @return Position of character in path. Path::NotFound if the character wasn't found in path.
-            size_t findLastOf(char character) const;
+            size_t find_last_of(char character) const;
 
             /// @brief Searches backwards through path beginning at Begin to find last occurrence of character in path.
             /// @param character Character to search for.
             /// @param begin Position to "begin" at.
             /// @return Position of character in path. Path::NotFound if the character isn't found.
-            size_t findLastOf(char character, size_t begin) const;
+            size_t find_last_of(char character, size_t begin) const;
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
             /// @return Entire path.
-            const char *cString(void) const;
+            const char *c_string(void) const;
 
             /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions. Ex: sdmc
             /// @return Device string.
-            std::string_view getDeviceName(void) const;
+            std::string_view get_device_name(void) const;
 
             /// @brief Returns the path after the device for use with Switch's FS functions. Ex: /Path/To/File.txt
             /// @return Filesystem path.
-            const char *getPath(void) const;
+            const char *get_path(void) const;
 
             /// @brief Returns the extension. After the '.'
             /// @return Path's extension.
-            const char *getExtension(void) const;
+            const char *get_extension(void) const;
 
             /// @brief Returns full path length of the path buffer.
             /// @return Path length.
-            size_t getLength(void) const;
+            size_t get_length(void) const;
 
             /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
             /// @param pathData Path to assign.
@@ -164,7 +164,7 @@ namespace fslib
              *      1. FsLib::Path::NotFound
              *      2. [Path Instance].NotFound.
              */
-            static constexpr uint16_t notFound = -1;
+            static constexpr uint16_t NOT_FOUND = -1;
 
         private:
             // Path buffer. Switch expects a buffer 0x301 in length. unique_ptr deletes copy operators and I didn't want to use vector.
@@ -178,9 +178,9 @@ namespace fslib
             uint16_t m_pathLength = 0;
 
             // This allocates the memory to hold the path according to pathSize.
-            bool allocatePath(uint16_t pathSize);
+            bool allocate_path(uint16_t pathSize);
             // Frees the buffer holding the path data.
-            void freePath(void);
+            void free_path(void);
     };
 
     /// @brief Concatenates two paths. Adds a / if needed.

@@ -42,7 +42,7 @@ namespace fslib
 
             /// @brief Returns if save data info reader was successfully opened.
             /// @return True on success. False on failure.
-            bool isOpen(void) const;
+            bool is_open(void) const;
 
             /// @brief Reads the next save data info entry.
             /// @return True on success. False on failure.
