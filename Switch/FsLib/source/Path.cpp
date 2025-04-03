@@ -155,6 +155,18 @@ std::string_view fslib::Path::get_device_name(void) const
     return std::string_view(m_path, m_deviceEnd - m_path);
 }
 
+std::string_view fslib::Path::get_file_name(void) const
+{
+    size_t lastSlash = Path::find_last_of('/');
+    if (lastSlash == Path::NOT_FOUND)
+    {
+        // Just return empty.
+        return {};
+    }
+    // This could be dangerous. To do: Fix that.
+    return std::string_view(&m_path[lastSlash + 1]);
+}
+
 const char *fslib::Path::get_path(void) const
 {
     return m_deviceEnd + 1;

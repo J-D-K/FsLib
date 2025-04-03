@@ -112,17 +112,9 @@ int main(void)
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&gamePad);
 
-    fslib::SaveInfoReader testFilterReader(FsSaveDataSpaceId_User, FsSaveDataType_Account);
-    if (!testFilterReader)
-    {
-        print("%s\n", fslib::get_error_string());
-        return -4;
-    }
+    fslib::Path testPath = "sdmc:/path/to/file.html.zip";
 
-    while (testFilterReader.read())
-    {
-        print("Save found for %016llX.\n", testFilterReader.get().application_id);
-    }
+    print("testPath.get_file_name() = %s\n", testPath.get_file_name().data());
 
     print("Press + to exit.");
 

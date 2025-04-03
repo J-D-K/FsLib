@@ -81,6 +81,10 @@ namespace fslib
             /// @return Device string.
             std::string_view get_device_name(void) const;
 
+            /// @brief Returns the file name in the path starting at the final '/' found.
+            /// @return File name at the end of the path.
+            std::string_view get_file_name(void) const;
+
             /// @brief Returns the path after the device for use with Switch's FS functions. Ex: /Path/To/File.txt
             /// @return Filesystem path.
             const char *get_path(void) const;
