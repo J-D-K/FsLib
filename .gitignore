@@ -46,6 +46,7 @@ html/
 *.stackdump
 *.exe
 *.out
+*.nro
 # Linker output
 *.ilk
 *.map

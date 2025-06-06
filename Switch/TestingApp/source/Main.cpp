@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <minizip/unzip.h>
+#include <minizip/zip.h>
 #include <switch.h>
 #include <thread>
 
@@ -12,27 +13,15 @@ namespace
 {
     // Va buffer size for print function so we have output in real time.
     constexpr int VA_BUFFER_SIZE = 0x1000;
-    // These are games on my switch that have the data needed to test stuff.
-    // Mario Kart 8 Deluxe has account and device.
-    constexpr uint64_t MARIO_KART_8_DELUXE_APPLICATION_ID = 0x0100152000022000;
-    // Monster Hunter RISE has BCAT
-    constexpr uint64_t MONSTER_HUNTER_RISE_APPLICATION_ID = 0x0100B04011742000;
-    // Super Mario Maker 2 has cache
-    constexpr uint64_t SUPER_MARIO_MAKER_TWO_APPLICATION_ID = 0x01009B90006DC000;
-    // Alternate: Minecraft has it too.
-    constexpr uint64_t MINECRAFT_APPLICATION_ID = 0x0100D71004694000;
-    // Save ID of test system save mount.
-    constexpr uint64_t TARGET_SYSTEM_SAVE = 0x8000000000000011;
-    // Using this path to try to debug something.
-    const char *TEST_ZIP_PATH = "sdmc:/switch/JKSV/MONSTER HUNTER RISE/JK - 2025-01-28_15-16-03.zip";
-    // Array of save data space ids. For some reason All doesn't seem to catch SD card saves?
-    constexpr std::array<FsSaveDataSpaceId, 7> SAVE_DATA_SPACE_IDS = {FsSaveDataSpaceId_System,
-                                                                      FsSaveDataSpaceId_User,
-                                                                      FsSaveDataSpaceId_SdSystem,
-                                                                      FsSaveDataSpaceId_Temporary,
-                                                                      FsSaveDataSpaceId_SdUser,
-                                                                      FsSaveDataSpaceId_ProperSystem,
-                                                                      FsSaveDataSpaceId_SafeMode};
+
+    // This is a test thing so I can debug what's wrong with fslib::dev
+    constexpr uint64_t APPLICATION_ID_FINAL_FANTASY = 0x01006C300E9F0000;
+
+    /// @brief This is the mount point string for ^.
+    constexpr std::string_view STRING_FF_MOUNT = "ff1";
+
+    /// @brief This is the root directory of the FF1 save data on my Switch. Maybe yours too.
+    constexpr std::string_view STRING_FF_SAVE_ROOT = "ff1:/";
 } // namespace
 
 // Feels stupid but needed to get actual output in real time on switch.
@@ -50,31 +39,87 @@ void print(const char *format, ...)
     consoleUpdate(NULL);
 }
 
-// This is a recursive directory printing function.
-void print_directory(const fslib::Path &directoryPath)
+static void copy_directory_to_zip(const fslib::Path &source, zipFile destination)
 {
-    fslib::Directory dir(directoryPath);
-    if (!dir.is_open())
+    // Start by opening the source directory.
+    fslib::Directory sourceDir(source);
+    if (!sourceDir)
     {
-        print("%s\n", fslib::get_error_string());
+        print("Error opening directory for reading!\n");
         return;
     }
 
-    for (int64_t i = 0; i < dir.get_count(); i++)
-    {
-        if (dir.is_directory(i))
-        {
-            // New path
-            fslib::Path newPath = directoryPath / dir[i];
+    print("%s count: %i\n", source.c_string(), sourceDir.get_count());
 
-            // Print
-            print("\tDIR %s\n", dir[i]);
-            // Feed this function the path.
-            print_directory(newPath);
+    // Loop and copy files whole. This doesn't need to be generic and complex like JKSV.
+    for (int64_t i = 0; i < sourceDir.get_count(); i++)
+    {
+        // Just do this here since both conditions can use it.
+        fslib::Path fullSource = source / sourceDir[i];
+
+        // If it's a directory, just feed this function the new arguments.
+        if (sourceDir.is_directory(i))
+        {
+            copy_directory_to_zip(fullSource, destination);
         }
         else
         {
-            print("\tFIL %s\n", dir[i]);
+            // Try to open it.
+            fslib::File sourceFile(fullSource, FsOpenMode_Read);
+            if (!sourceFile)
+            {
+                print("Error opening %s for reading!\n", fullSource.c_string());
+                continue;
+            }
+
+            // Get the file's name/path.
+            const char *zipFilePath = std::strchr(fullSource.c_string(), '/') + 1;
+
+            //  We're not going to worry about the date/time data for this.
+            int zipError = zipOpenNewFileInZip64(destination,
+                                                 zipFilePath,
+                                                 NULL,
+                                                 NULL,
+                                                 0,
+                                                 NULL,
+                                                 0,
+                                                 NULL,
+                                                 Z_DEFLATED,
+                                                 Z_DEFAULT_COMPRESSION,
+                                                 0);
+            if (zipError != ZIP_OK)
+            {
+                print("Error creating %s in ZIP!\n", zipFilePath);
+                continue;
+            }
+
+            // Don't need to call this function every loop.
+            int64_t fileSize = sourceFile.get_size();
+
+            // Using a small buffer on purpose to test this. There's something off with fslib::dev...
+            std::unique_ptr<unsigned char[]> filebuffer = std::make_unique<unsigned char[]>(0x1000);
+
+            for (int64_t i = 0; i < fileSize;)
+            {
+                ssize_t readSize = sourceFile.read(filebuffer.get(), 0x1000);
+                if (readSize == -1)
+                {
+                    print("Error reading from file: %s", fslib::get_error_string());
+                    break;
+                }
+
+                zipError = zipWriteInFileInZip(destination, filebuffer.get(), readSize);
+                if (zipError != ZIP_OK)
+                {
+                    print("Error writing to zip: %i.\n", zipError);
+                    break;
+                }
+
+                i += readSize;
+            }
+
+            // Finish. There's something funky going on here.
+            zipCloseFileInZip(destination);
         }
     }
 }
@@ -100,6 +145,7 @@ int main(void)
         return -3;
     }
 
+    // This should be logged, but screw it
     AccountUid userID;
     accountInitialize(AccountServiceType_Application);
     accountGetPreselectedUser(&userID);
@@ -112,11 +158,24 @@ int main(void)
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&gamePad);
 
-    fslib::Path testPath = "sdmc:/path/to/file.html.zip";
+    if (!fslib::open_account_save_file_system(STRING_FF_MOUNT, APPLICATION_ID_FINAL_FANTASY, userID))
+    {
+        // Let's hope this stays on screen long enough to catch it.
+        print("Error opening FINAL FANTASY save!");
+        return -5;
+    }
 
-    print("testPath.get_file_name() = %s\n", testPath.get_file_name().data());
+    // Try to open the zip on root.
+    zipFile testZip = zipOpen64("sdmc:/ff1.zip", APPEND_STATUS_CREATE);
+    if (!testZip)
+    {
+        print("Error creating test zip!");
+        return -6;
+    }
 
-    print("Press + to exit.");
+    copy_directory_to_zip(STRING_FF_SAVE_ROOT, testZip);
+
+    zipClose(testZip, NULL);
 
     while (appletMainLoop())
     {
@@ -127,6 +186,9 @@ int main(void)
         }
         consoleUpdate(NULL);
     }
+
+    // Just exit stuff.
+    accountExit();
     fslib::device::exit();
     fslib::exit();
     consoleExit(NULL);

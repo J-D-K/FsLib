@@ -10,9 +10,10 @@ namespace
 {
     // Buffer size for writef.
     constexpr size_t VA_BUFFER_SIZE = 0x1000;
+
     // These two strings are use multiple times in the reading and writing functions for errors.
-    const char *ERROR_NOT_OPEN_FOR_READING = "Error: File not open for reading.";
-    const char *ERROR_NOT_OPEN_FOR_WRITING = "Error: File not open for writing.";
+    constexpr std::string_view ERROR_NOT_OPEN_FOR_READING = "Error: File not open for reading.";
+    constexpr std::string_view ERROR_NOT_OPEN_FOR_WRITING = "Error: File not open for writing.";
 } // namespace
 
 extern std::string g_fslibErrorString;

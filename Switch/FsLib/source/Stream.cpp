@@ -42,7 +42,8 @@ void fslib::Stream::seek(int64_t offset, uint8_t origin)
         }
         break;
     }
-    // Just to be sure.
+
+    // This will make sure the offset is actually valid.
     Stream::ensure_offset_is_valid();
 }
 
@@ -57,8 +58,9 @@ void fslib::Stream::ensure_offset_is_valid(void)
     {
         m_offset = 0;
     }
-    else if (m_offset >= m_streamSize)
+    // To do: Decide if this is the right way to approach this...
+    else if (m_offset > m_streamSize)
     {
-        m_offset = m_streamSize - 1;
+        m_offset = m_streamSize;
     }
 }
