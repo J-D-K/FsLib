@@ -54,13 +54,16 @@ namespace fslib
             const char *operator[](int index) const;
 
         private:
-            // Whether or not directory was successfully read.
+            /// @brief Saves whether or not the directory was successfully opened and read.
             bool m_wasRead = false;
-            // Directory handle/service.
+
+            /// @brief Handle to the directory.
             FsDir m_directoryHandle;
-            // Number of entries read from directory.
+
+            /// @brief Total number of entries read from the directory.
             int64_t m_entryCount = 0;
-            // Array of entries.
+
+            /// @brief Entry array.
             std::unique_ptr<FsDirectoryEntry[]> m_directoryList;
 
             /// @brief Closes directory handle. Directory is never kept open. Not needed outside of class.

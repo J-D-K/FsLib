@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <filesystem>
 #include <string>
 
@@ -171,19 +172,24 @@ namespace fslib
             static constexpr uint16_t NOT_FOUND = -1;
 
         private:
-            // Path buffer. Switch expects a buffer 0x301 in length. unique_ptr deletes copy operators and I didn't want to use vector.
+            /// @brief Path buffer. Switch expects a buffer 0x301 in length. Don't want to use vector and not sure how else to really achieve this?
             char *m_path = nullptr;
-            // Where the ':' is in the path.
-            char *m_deviceEnd = nullptr;
-            // Neither of these are going to exceed 0xFFFF.
-            // Actual length of path buffer.
+
+            /// @brief This points to where the device ends in the path.
+            const char *m_deviceEnd = nullptr;
+
+            /// @brief This is the actual length of the path buffer
             uint16_t m_pathSize = 0;
-            // Current length of path.
+
+            /// @brief The current length of the path.
             uint16_t m_pathLength = 0;
 
-            // This allocates the memory to hold the path according to pathSize.
+            /// @brief This allocates and buffer sets it to all 0x00's.
+            /// @param pathSize Size of the buffer to allocate.
+            /// @return True on success. False on failure.
             bool allocate_path(uint16_t pathSize);
-            // Frees the buffer holding the path data.
+
+            /// @brief Frees or deletes the path buffer.
             void free_path(void);
     };
 
