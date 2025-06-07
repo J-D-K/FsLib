@@ -77,8 +77,16 @@ fslib::Path fslib::Path::sub_path(size_t pathLength) const
     fslib::Path newPath;
     if (newPath.allocate_path(m_pathSize))
     {
+        // Make sure this makes it over just in case.
+        newPath.m_pathSize = m_pathSize;
+
         // Copy the sub path to newPath's buffer.
         std::memcpy(newPath.m_path, m_path, pathLength);
+
+        // Safety measure that fixes some stuff even though the path is supposed to be 0'd out.
+        // Maybe the compiler is optimizing it away in allocate path?
+        newPath.m_path[pathLength] = '\0';
+
         // Make sure newPath's data is its own.
         newPath.m_deviceEnd = std::strchr(newPath.m_path, ':');
         newPath.m_pathLength = std::char_traits<char>::length(newPath.m_path);

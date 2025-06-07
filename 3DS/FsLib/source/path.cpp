@@ -79,7 +79,8 @@ fslib::Path::~Path()
 
 bool fslib::Path::isValid(void) const
 {
-    return m_path && m_deviceEnd && std::char_traits<char16_t>::length(m_deviceEnd + 1) > 0 && strpbrk16(m_deviceEnd + 1) == nullptr;
+    return m_path && m_deviceEnd && std::char_traits<char16_t>::length(m_deviceEnd + 1) > 0 &&
+           strpbrk16(m_deviceEnd + 1) == nullptr;
 }
 
 fslib::Path fslib::Path::subPath(size_t pathLength) const
@@ -92,7 +93,13 @@ fslib::Path fslib::Path::subPath(size_t pathLength) const
     fslib::Path newPath;
     if (newPath.allocatePath(m_pathSize))
     {
+        newPath.m_pathSize = m_pathSize;
+
         std::memcpy(newPath.m_path, m_path, pathLength * sizeof(char16_t));
+
+        // Bringing this over from switch.
+        newPath.m_path[pathLength] = static_cast<char16_t>('\0');
+
         newPath.m_deviceEnd = std::char_traits<char16_t>::find(newPath.m_path, m_pathLength, u':');
         newPath.m_pathLength = m_pathLength;
     }
@@ -189,7 +196,9 @@ std::u16string_view fslib::Path::getExtension(void) const
 
 FS_Path fslib::Path::getPath(void) const
 {
-    return {PATH_UTF16, (std::char_traits<char16_t>::length(m_deviceEnd + 1) * sizeof(char16_t)) + sizeof(char16_t), m_deviceEnd + 1};
+    return {PATH_UTF16,
+            (std::char_traits<char16_t>::length(m_deviceEnd + 1) * sizeof(char16_t)) + sizeof(char16_t),
+            m_deviceEnd + 1};
 }
 
 size_t fslib::Path::getLength(void) const
