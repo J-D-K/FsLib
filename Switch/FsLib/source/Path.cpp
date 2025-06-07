@@ -209,6 +209,9 @@ fslib::Path &fslib::Path::operator=(const fslib::Path &path)
     m_pathLength = path.m_pathLength;
     m_deviceEnd = std::strchr(m_path, ':');
 
+    // Safety first~
+    m_path[m_pathLength] = '\0';
+
     return *this;
 }
 
@@ -242,6 +245,9 @@ fslib::Path &fslib::Path::operator=(const char *pathData)
     // Set the rest
     m_deviceEnd = std::strchr(m_path, ':');
     m_pathLength = std::char_traits<char>::length(m_path);
+
+    // Safety~
+    m_path[m_pathLength] = '\0';
 
     // Should be good to go.
     return *this;
@@ -286,6 +292,8 @@ fslib::Path &fslib::Path::operator/=(const char *pathData)
 
     m_pathLength += pathLength;
 
+    m_path[m_pathLength] = '\0';
+
     return *this;
 }
 
@@ -316,6 +324,8 @@ fslib::Path &fslib::Path::operator+=(const char *pathData)
     std::memcpy(&m_path[m_pathLength], pathData, pathLength);
 
     m_pathLength += pathLength;
+
+    m_path[m_pathLength] = '\0';
 
     // Should be good. segfault
     return *this;
