@@ -9,19 +9,19 @@ namespace
 
 extern std::string g_fslibErrorString;
 
-fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveDataSpaceID)
+fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveDataSpaceID, size_t bufferCount)
 {
-    SaveInfoReader::open(saveDataSpaceID);
+    SaveInfoReader::open(saveDataSpaceID, bufferCount);
 }
 
-fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveSpaceID, AccountUid accountID)
+fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveSpaceID, AccountUid accountID, size_t bufferCount)
 {
-    SaveInfoReader::open(saveSpaceID, accountID);
+    SaveInfoReader::open(saveSpaceID, accountID, bufferCount);
 }
 
-fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType)
+fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t bufferCount)
 {
-    SaveInfoReader::open(saveSpaceID, saveType);
+    SaveInfoReader::open(saveSpaceID, saveType, bufferCount);
 }
 
 fslib::SaveInfoReader::~SaveInfoReader()
@@ -29,10 +29,16 @@ fslib::SaveInfoReader::~SaveInfoReader()
     SaveInfoReader::close();
 }
 
-void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID)
+void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID, size_t bufferCount)
 {
+    // Set this just in case.
+    m_isOpen = false;
+
     // Just in case
     SaveInfoReader::close();
+
+    // Save this quick.
+    m_bufferCount = bufferCount;
 
     Result fsError = fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID);
     if (R_FAILED(fsError))
@@ -40,12 +46,17 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID)
         g_fslibErrorString = string::get_formatted_string("Error opening save data info reader: 0x%X.", fsError);
         return;
     }
+
+    SaveInfoReader::allocate_save_info_array(bufferCount);
+
     // Should be good.
     m_isOpen = true;
 }
 
-void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accountID)
+void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accountID, size_t bufferCount)
 {
+    m_isOpen = false;
+
     // Just in case.
     SaveInfoReader::close();
 
@@ -70,11 +81,16 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accou
         g_fslibErrorString = string::get_formatted_string(ERROR_OPENING_WITH_FILTER, fsError);
         return;
     }
+
+    SaveInfoReader::allocate_save_info_array(bufferCount);
+
     m_isOpen = true;
 }
 
-void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType)
+void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t bufferCount)
 {
+    m_isOpen = false;
+
     SaveInfoReader::close();
 
     FsSaveDataFilter saveFilter = {.filter_by_application_id = false,
@@ -96,6 +112,9 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType s
         g_fslibErrorString = string::get_formatted_string(ERROR_OPENING_WITH_FILTER, fsError);
         return;
     }
+
+    SaveInfoReader::allocate_save_info_array(bufferCount);
+
     m_isOpen = true;
 }
 
@@ -115,10 +134,9 @@ bool fslib::SaveInfoReader::is_open(void) const
 
 bool fslib::SaveInfoReader::read(void)
 {
-    // We're only reading one at a time. I don't think libnx has a function to get the count?
-    int64_t totalEntries = 0;
-    Result fsError = fsSaveDataInfoReaderRead(&m_infoReader, &m_saveInfo, 1, &totalEntries);
-    if (R_FAILED(fsError) || totalEntries == 0)
+    // This function will try to read as many as possible. It will return false once the count is 0.
+    Result fsError = fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount);
+    if (R_FAILED(fsError) || m_readCount == 0)
     {
         g_fslibErrorString = string::get_formatted_string("Error reading save data info: 0x%X.", fsError);
         return false;
@@ -126,12 +144,31 @@ bool fslib::SaveInfoReader::read(void)
     return true;
 }
 
-FsSaveDataInfo &fslib::SaveInfoReader::get(void)
+int64_t fslib::SaveInfoReader::get_read_count(void) const
 {
-    return m_saveInfo;
+    return m_readCount;
 }
 
 fslib::SaveInfoReader::operator bool(void) const
 {
     return m_isOpen;
+}
+
+FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index)
+{
+    if (index < 0 || index >= static_cast<int>(m_bufferCount))
+    {
+        // To do: Better solution.
+        return m_saveInfoBuffer[0];
+    }
+    return m_saveInfoBuffer[index];
+}
+
+void fslib::SaveInfoReader::allocate_save_info_array(size_t bufferCount)
+{
+    // Record this.
+    m_bufferCount = bufferCount;
+
+    // Allocate. This should free any previously freed buffers.
+    m_saveInfoBuffer = std::make_unique<FsSaveDataInfo[]>(m_bufferCount);
 }
