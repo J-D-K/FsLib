@@ -76,12 +76,12 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
     m_wasOpened = true;
 }
 
-bool fslib::Directory::isOpen(void) const
+bool fslib::Directory::isOpen() const
 {
     return m_wasOpened;
 }
 
-uint32_t fslib::Directory::getCount(void) const
+uint32_t fslib::Directory::getCount() const
 {
     return m_directoryList.size();
 }
@@ -113,7 +113,7 @@ const char16_t *fslib::Directory::operator[](int index) const
     return reinterpret_cast<const char16_t *>(m_directoryList.at(index).name);
 }
 
-bool fslib::Directory::close(void)
+bool fslib::Directory::close()
 {
     if (!m_wasOpened)
     {

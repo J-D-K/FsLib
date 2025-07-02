@@ -61,7 +61,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, uint64_t
     m_isOpen = true;
 }
 
-void fslib::File::close(void)
+void fslib::File::close()
 {
     if (m_isOpen)
     {
@@ -69,22 +69,22 @@ void fslib::File::close(void)
     }
 }
 
-bool fslib::File::isOpen(void) const
+bool fslib::File::isOpen() const
 {
     return m_isOpen;
 }
 
-uint64_t fslib::File::tell(void) const
+uint64_t fslib::File::tell() const
 {
     return m_offset;
 }
 
-uint64_t fslib::File::getSize(void) const
+uint64_t fslib::File::getSize() const
 {
     return m_fileSize;
 }
 
-bool fslib::File::endOfFile(void) const
+bool fslib::File::endOfFile() const
 {
     return m_offset >= m_fileSize;
 }
@@ -122,7 +122,11 @@ ssize_t fslib::File::read(void *buffer, size_t bufferSize)
     }
 
     uint32_t bytesRead = 0;
-    Result fsError = FSFILE_Read(m_fileHandle, &bytesRead, static_cast<uint64_t>(m_offset), buffer, static_cast<uint32_t>(bufferSize));
+    Result fsError = FSFILE_Read(m_fileHandle,
+                                 &bytesRead,
+                                 static_cast<uint64_t>(m_offset),
+                                 buffer,
+                                 static_cast<uint32_t>(bufferSize));
     if (R_FAILED(fsError))
     {
         g_fslibErrorString = string::getFormattedString("Error reading data from file: 0x%08X.", fsError);
@@ -179,7 +183,7 @@ bool fslib::File::readLine(std::string &line)
     return false;
 }
 
-signed char fslib::File::getByte(void)
+signed char fslib::File::getByte()
 {
     if (!File::isOpenForReading() || m_offset >= m_fileSize)
     {
@@ -258,7 +262,7 @@ bool fslib::File::putByte(char byte)
     return true;
 }
 
-bool fslib::File::flush(void)
+bool fslib::File::flush()
 {
     if (!File::isOpenForWriting())
     {
@@ -274,7 +278,7 @@ bool fslib::File::flush(void)
     return true;
 }
 
-void fslib::File::ensureOffsetIsValid(void)
+void fslib::File::ensureOffsetIsValid()
 {
     if (m_offset < 0)
     {

@@ -89,7 +89,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     m_isOpen = true;
 }
 
-void fslib::File::close(void)
+void fslib::File::close()
 {
     if (m_isOpen)
     {
@@ -98,7 +98,7 @@ void fslib::File::close(void)
     }
 }
 
-bool fslib::File::is_open(void) const
+bool fslib::File::is_open() const
 {
     return m_isOpen;
 }
@@ -155,7 +155,7 @@ bool fslib::File::read_line(char *lineOut, size_t lineLength)
     return false;
 }
 
-signed char fslib::File::get_byte(void)
+signed char fslib::File::get_byte()
 {
     if (!m_isOpen || !File::is_open_for_reading())
     {
@@ -239,7 +239,7 @@ fslib::File &fslib::File::operator<<(const std::string &string)
     return *this;
 }
 
-bool fslib::File::flush(void)
+bool fslib::File::flush()
 {
     if (!m_isOpen || !File::is_open_for_writing())
     {

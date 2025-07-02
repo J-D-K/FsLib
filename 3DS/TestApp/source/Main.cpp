@@ -17,7 +17,7 @@ static std::string utf16ToUtf8(std::u16string_view str)
 extern "C"
 {
     u32 __stacksize__ = 0x20000;
-    void __appInit(void)
+    void __appInit()
     {
         srvInit();
         aptInit();
@@ -25,7 +25,7 @@ extern "C"
         hidInit();
     }
 
-    void __appExit(void)
+    void __appExit()
     {
         hidExit();
         fsExit();
@@ -34,7 +34,7 @@ extern "C"
     }
 }
 
-int main(void)
+int main()
 {
     hidInit();
     gfxInitDefault();

@@ -10,7 +10,7 @@ namespace fslib
     {
         public:
             /// @brief Default constructor for Path
-            Path(void) = default;
+            Path() = default;
 
             /// @brief Constructor for Path. Takes most standard C/C++ string types.
             /// @param path Path to assign.
@@ -45,7 +45,7 @@ namespace fslib
                     3. The path length following the device is not empty.
                     4. The path has no illegal characters in it.
              */
-            bool is_valid(void) const;
+            bool is_valid() const;
 
             /// @brief Returns a sub-path ending at PathLength.
             /// @param pathLength Length of sub-path to return.
@@ -76,27 +76,27 @@ namespace fslib
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
             /// @return Entire path.
-            const char *c_string(void) const;
+            const char *c_string() const;
 
             /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions. Ex: sdmc
             /// @return Device string.
-            std::string_view get_device_name(void) const;
+            std::string_view get_device_name() const;
 
             /// @brief Returns the file name in the path starting at the final '/' found.
             /// @return File name at the end of the path.
-            std::string_view get_file_name(void) const;
+            std::string_view get_filename() const;
 
             /// @brief Returns the path after the device for use with Switch's FS functions. Ex: /Path/To/File.txt
             /// @return Filesystem path.
-            const char *get_path(void) const;
+            const char *get_path() const;
 
             /// @brief Returns the extension. After the '.'
             /// @return Path's extension.
-            const char *get_extension(void) const;
+            const char *get_extension() const;
 
             /// @brief Returns full path length of the path buffer.
             /// @return Path length.
-            size_t get_length(void) const;
+            size_t get_length() const;
 
             /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
             /// @param pathData Path to assign.
@@ -190,7 +190,7 @@ namespace fslib
             bool allocate_path(uint16_t pathSize);
 
             /// @brief Frees or deletes the path buffer.
-            void free_path(void);
+            void free_path();
     };
 
     /// @brief Concatenates two paths. Adds a / if needed.

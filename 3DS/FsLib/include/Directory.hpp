@@ -11,7 +11,7 @@ namespace fslib
     {
         public:
             /// @brief Default initializer for FsLib::Directory.
-            Directory(void) = default;
+            Directory() = default;
 
             /// @brief Opens the directory at DirectoryPath and gets a listing. IsOpen can be checked to see if this was successful.
             /// @param directoryPath Path to directory as either FsLib::Path or UTF-16 formatted string. Ex: u"sdmc:/"
@@ -25,11 +25,11 @@ namespace fslib
 
             /// @brief Returns whether or not opening the directory and reading its contents was successful.
             /// @return True on success. False on failure.
-            bool isOpen(void) const;
+            bool isOpen() const;
 
             /// @brief Returns the number of entries successfully read from the directory.
             /// @return Number of entries read from directory.
-            uint32_t getCount(void) const;
+            uint32_t getCount() const;
 
             /// @brief Returns whether or not the entry at Index in directory listing is a directory or not.
             /// @param index Index of entry to check.
@@ -58,6 +58,6 @@ namespace fslib
 
             /// @brief Closes directory handle. The directory is read in its entirety when open is called. Public access is not needed.
             /// @return
-            bool close(void);
+            bool close();
     };
 } // namespace fslib

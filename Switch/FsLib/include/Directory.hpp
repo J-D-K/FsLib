@@ -10,7 +10,7 @@ namespace fslib
     {
         public:
             /// @brief Default constructor for Directory.
-            Directory(void) = default;
+            Directory() = default;
 
             /// @brief Attempts to open Directory path and read all entries. IsOpen can be used to check if this was successful.
             /// @param directoryPath Path to directory.
@@ -24,11 +24,11 @@ namespace fslib
 
             /// @brief Returns if directory was successfully opened.
             /// @return True if it was. False if it wasn't.
-            bool is_open(void) const;
+            bool is_open() const;
 
             /// @brief Returns total number of entries read from directory.
             /// @return Total numbers of entries read from directory.
-            int64_t get_count(void) const;
+            int64_t get_count() const;
 
             /// @brief Returns the size of the entry at Index.
             /// @param Index Index of entry.
@@ -46,7 +46,7 @@ namespace fslib
             bool is_directory(int index) const;
 
             /// @brief This can be used like isOpen.
-            operator bool(void) const;
+            operator bool() const;
 
             /// @brief Returns entry name at Index.
             /// @param Index Index of entry.
@@ -67,6 +67,6 @@ namespace fslib
             std::unique_ptr<FsDirectoryEntry[]> m_directoryList;
 
             /// @brief Closes directory handle. Directory is never kept open. Not needed outside of class.
-            void close(void);
+            void close();
     };
 } // namespace fslib

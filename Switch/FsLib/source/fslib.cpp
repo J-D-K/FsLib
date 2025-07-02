@@ -22,7 +22,7 @@ static inline bool device_name_is_in_use(std::string_view deviceName)
     return s_deviceMap.find(deviceName) != s_deviceMap.end();
 }
 
-bool fslib::initialize(void)
+bool fslib::initialize()
 {
     // Init sdmc.
     FsFileSystem sdmc;
@@ -39,7 +39,7 @@ bool fslib::initialize(void)
     return true;
 }
 
-void fslib::exit(void)
+void fslib::exit()
 {
     // Loop through and close all open devices in map.
     for (auto &[deviceName, fileSystem] : s_deviceMap)
@@ -49,7 +49,7 @@ void fslib::exit(void)
     }
 }
 
-const char *fslib::get_error_string(void)
+const char *fslib::get_error_string()
 {
     return g_fslibErrorString.c_str();
 }

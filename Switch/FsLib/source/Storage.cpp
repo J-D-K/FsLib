@@ -41,7 +41,7 @@ void fslib::Storage::open(FsBisPartitionId partitionID)
     m_isOpen = true;
 }
 
-void fslib::Storage::close(void)
+void fslib::Storage::close()
 {
     fsStorageClose(&m_storageHandle);
 }
@@ -64,7 +64,7 @@ ssize_t fslib::Storage::read(void *buffer, size_t bufferSize)
     return bufferSize;
 }
 
-signed char fslib::Storage::read_byte(void)
+signed char fslib::Storage::read_byte()
 {
     if (m_offset >= m_streamSize)
     {

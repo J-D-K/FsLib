@@ -18,14 +18,14 @@ namespace fslib
     /// @brief Initializes FsLib.
     /// @note Once FsLib::Dev is implemented for Switch this will get more interesting.
     /// @return True on success. False on failure.
-    bool initialize(void);
+    bool initialize();
 
     /// @brief Exits FsLib closing any remaining open devices.
-    void exit(void);
+    void exit();
 
     /// @brief Returns the internal error string for slightly more descriptive errors than a bool.
     /// @return Internal error string.
-    const char *get_error_string(void);
+    const char *get_error_string();
 
     /**
      * @brief Maps FileSystem to DeviceName internally.

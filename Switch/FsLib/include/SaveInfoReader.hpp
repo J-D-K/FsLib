@@ -9,7 +9,7 @@ namespace fslib
     {
         public:
             /// @brief Default constructor for save data info reader.
-            SaveInfoReader(void) = default;
+            SaveInfoReader() = default;
 
             /// @brief Constructor for SaveInfoReader. isOpen() can be checked if this was successful.
             /// @param saveDataSpaceID Save data space to open.
@@ -43,22 +43,22 @@ namespace fslib
             void open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t bufferCount);
 
             /// @brief Closes the save data info reader. This is called in the destructor too.
-            void close(void);
+            void close();
 
             /// @brief Returns if save data info reader was successfully opened.
             /// @return True on success. False on failure.
-            bool is_open(void) const;
+            bool is_open() const;
 
             /// @brief Reads the next save data info entry.
             /// @return True on success. False on failure.
-            bool read(void);
+            bool read();
 
             /// @brief Returns the number of FsSaveDataInfo entries read from the system.
             /// @return Number of FsSaveDataInfo entries read from the system.
-            int64_t get_read_count(void) const;
+            int64_t get_read_count() const;
 
             /// @brief Operator that can be used in place of isOpen.
-            operator bool(void) const;
+            operator bool() const;
 
             /// @brief Operator used to retrieve references to the FsSavDataInfo array.
             /// @param index Index of the FsSaveDataInfo struct to get.

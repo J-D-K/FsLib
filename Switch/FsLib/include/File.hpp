@@ -13,7 +13,7 @@ namespace fslib
     {
         public:
             /// @brief Default file constructor.
-            File(void) = default;
+            File() = default;
 
             /**
              * @brief Attempts to open file at FilePath with OpenFlags. IsOpen can be used to check if this was successful.
@@ -34,11 +34,11 @@ namespace fslib
             void open(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0);
 
             /// @brief Closes file handle if needed. Destructor takes care of this for you normally.
-            void close(void);
+            void close();
 
             /// @brief Returns if file was successfully opened.
             /// @return
-            bool is_open(void) const;
+            bool is_open() const;
 
             /// @brief Attempts to read ReadSize bytes into Buffer from file.
             /// @param buffer Buffer to write into.
@@ -54,7 +54,7 @@ namespace fslib
 
             /// @brief Attempts to read a single character or byte from file.
             /// @return Byte read.
-            signed char get_byte(void);
+            signed char get_byte();
 
             /// @brief Attempts to write Buffer of BufferSize bytes to file.
             /// @param buffer Buffer containing data.
@@ -85,7 +85,7 @@ namespace fslib
 
             /// @brief Flushes file.
             /// @return True on success. False on failure.
-            bool flush(void);
+            bool flush();
 
         private:
             /// @brief File handle.
@@ -101,14 +101,14 @@ namespace fslib
 
             /// @brief Private: Returns if file has flag set to read.
             /// @return True if flags are correct. False if not.
-            inline bool is_open_for_reading(void) const
+            inline bool is_open_for_reading() const
             {
                 return (m_openFlags & FsOpenMode_Read);
             }
 
             /// @brief Private: Returns if file has flag set to write.
             /// @return True if flags are correct. False if not.
-            inline bool is_open_for_writing(void) const
+            inline bool is_open_for_writing() const
             {
                 return (m_openFlags & FsOpenMode_Write) || (m_openFlags & FsOpenMode_Append);
             }

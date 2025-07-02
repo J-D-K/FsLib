@@ -13,7 +13,7 @@ namespace fslib
     {
         public:
             /// @brief  Default storage constructor.
-            Storage(void) = default;
+            Storage() = default;
 
             /// @brief Attempts to open PartitionID as raw storage.
             /// @param partitionID ID of partition to open.
@@ -29,7 +29,7 @@ namespace fslib
             void open(FsBisPartitionId partitionID);
 
             /// @brief Closes storage handle.
-            void close(void);
+            void close();
 
             /**
              * @brief Attempts to read from storage.
@@ -44,7 +44,7 @@ namespace fslib
 
             /// @brief Reads a single byte from storage.
             /// @return Byte read on success. -1 on failure.
-            signed char read_byte(void);
+            signed char read_byte();
 
         private:
             /// @brief Handle to storage opened.

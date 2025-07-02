@@ -9,7 +9,7 @@ namespace
 
 extern std::string g_fslibErrorString;
 
-bool fslib::device::initialize(void)
+bool fslib::device::initialize()
 {
     Result fsError = fsOpenDeviceOperator(&s_deviceOperator);
     if (R_FAILED(fsError))
@@ -20,13 +20,13 @@ bool fslib::device::initialize(void)
     return true;
 }
 
-void fslib::device::exit(void)
+void fslib::device::exit()
 {
     // Maybe I should check if this is even open?
     fsDeviceOperatorClose(&s_deviceOperator);
 }
 
-bool fslib::device::sd_is_inserted(void)
+bool fslib::device::sd_is_inserted()
 {
     bool sdInserted = false;
     Result fsError = fsDeviceOperatorIsSdCardInserted(&s_deviceOperator, &sdInserted);
@@ -38,7 +38,7 @@ bool fslib::device::sd_is_inserted(void)
     return sdInserted;
 }
 
-bool fslib::device::gamecard_is_inserted(void)
+bool fslib::device::gamecard_is_inserted()
 {
     bool gameCardInserted = false;
     Result fsError = fsDeviceOperatorIsGameCardInserted(&s_deviceOperator, &gameCardInserted);

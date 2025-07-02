@@ -15,14 +15,14 @@ namespace fslib
 {
     /// @brief Opens and mounts SD card to u"sdmc:/"
     /// @return True on success. False on failure.
-    bool initialize(void);
+    bool initialize();
 
     /// @brief Exits and closes all open handles.
-    void exit(void);
+    void exit();
 
     /// @brief Returns internal error string with slightly more information than just a bool can provide.
     /// @return Error string.
-    const char *getErrorString(void);
+    const char *getErrorString();
 
     /// @brief Adds Archive to devices.
     /// @param deviceName Name of the device. Ex: u"sdmc".

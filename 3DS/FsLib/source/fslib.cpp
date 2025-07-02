@@ -20,7 +20,7 @@ static inline bool deviceNameIsInUse(std::u16string_view deviceName)
     return s_deviceMap.find(deviceName) != s_deviceMap.end();
 }
 
-bool fslib::initialize(void)
+bool fslib::initialize()
 {
     // Try to init FS just in case;
     Result fsError = fsInit();
@@ -38,7 +38,7 @@ bool fslib::initialize(void)
     return true;
 }
 
-void fslib::exit(void)
+void fslib::exit()
 {
     for (auto &[deviceName, archive] : s_deviceMap)
     {
@@ -47,7 +47,7 @@ void fslib::exit(void)
     fsExit();
 }
 
-const char *fslib::getErrorString(void)
+const char *fslib::getErrorString()
 {
     return g_fslibErrorString.c_str();
 }

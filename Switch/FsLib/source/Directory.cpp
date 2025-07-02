@@ -95,12 +95,12 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     m_wasRead = true;
 }
 
-bool fslib::Directory::is_open(void) const
+bool fslib::Directory::is_open() const
 {
     return m_wasRead;
 }
 
-int64_t fslib::Directory::get_count(void) const
+int64_t fslib::Directory::get_count() const
 {
     return m_entryCount;
 }
@@ -132,7 +132,7 @@ bool fslib::Directory::is_directory(int index) const
     return m_directoryList[index].type == FsDirEntryType_Dir;
 }
 
-fslib::Directory::operator bool(void) const
+fslib::Directory::operator bool() const
 {
     return m_wasRead;
 }
@@ -146,7 +146,7 @@ const char *fslib::Directory::operator[](int index) const
     return m_directoryList[index].name;
 }
 
-void fslib::Directory::close(void)
+void fslib::Directory::close()
 {
     fsDirClose(&m_directoryHandle);
 }

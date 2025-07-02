@@ -13,7 +13,7 @@ namespace fslib
     {
         public:
             /// @brief Default FsLib::File constructor.
-            File(void) = default;
+            File() = default;
 
             /**
              * @brief Attempts to open FilePath with OpenFlags. FileSize is optional unless trying to create new Extra Data type files.
@@ -35,23 +35,23 @@ namespace fslib
             void open(const fslib::Path &filePath, uint32_t openFlags, uint64_t fileSize = 0);
 
             /// @brief Can be used to manually close the file handle if needed.
-            void close(void);
+            void close();
 
             /// @brief Returns whether opening the file was successful or not.
             /// @return True on success. False on failure.
-            bool isOpen(void) const;
+            bool isOpen() const;
 
             /// @brief Returns the current offset of the file.
             /// @return Current file offset.
-            uint64_t tell(void) const;
+            uint64_t tell() const;
 
             /// @brief Returns the size of the file.
             /// @return File's current size.
-            uint64_t getSize(void) const;
+            uint64_t getSize() const;
 
             /// @brief Returns whether or not the end of the file has been reached.
             /// @return True if the end is reached. False if not.
-            bool endOfFile(void) const;
+            bool endOfFile() const;
 
             /// @brief Seeks to a position in file. Offsets are bounds checked.
             /// @param offset Offset to seek to.
@@ -77,7 +77,7 @@ namespace fslib
 
             /// @brief Reads one char or byte from file.
             /// @return Byte read on success. -1 on failure.
-            signed char getByte(void);
+            signed char getByte();
 
             /// @brief Attempts to write Buffer to File. File is automatically resized to fit Buffer if needed.
             /// @param buffer Buffer to write to file.
@@ -104,7 +104,7 @@ namespace fslib
 
             /// @brief Flushes the file.
             /// @return True on success. False on failure.
-            bool flush(void);
+            bool flush();
 
             /// @brief Used to seek from the beginning of the file.
             static constexpr uint8_t beginning = 0;
@@ -127,7 +127,7 @@ namespace fslib
             int64_t m_offset, m_fileSize;
 
             /// @brief Private: Corrects if offset is out of bounds. Ex: m_Offset < 0 or m_Offset > m_FileSize
-            void ensureOffsetIsValid(void);
+            void ensureOffsetIsValid();
 
             /// @brief Attempts to resize a file if the buffer size is too large to fit in the remaining space.
             /// @param BufferSize Size of buffer to check.
@@ -136,14 +136,14 @@ namespace fslib
 
             /// @brief Returns whether or not the file is open for reading by checking m_Flags.
             /// @return True if it is. False if it isn't.
-            inline bool isOpenForReading(void) const
+            inline bool isOpenForReading() const
             {
                 return m_openFlags & FS_OPEN_READ;
             }
 
             /// @brief Returns whether or not the file is open for writing by checking m_Flags.
             /// @return True if it is. False if it isn't.
-            inline bool isOpenForWriting(void) const
+            inline bool isOpenForWriting() const
             {
                 return m_openFlags & FS_OPEN_WRITE;
             }

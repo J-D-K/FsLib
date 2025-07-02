@@ -3,7 +3,7 @@
 
 extern "C"
 {
-    void __appInit(void)
+    void __appInit()
     {
         srvInit();
         aptInit();
@@ -11,7 +11,7 @@ extern "C"
         fsInit();
     }
 
-    void __appExit(void)
+    void __appExit()
     {
         fsExit();
         hidExit();

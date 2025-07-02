@@ -77,7 +77,7 @@ fslib::Path::~Path()
     Path::freePath();
 }
 
-bool fslib::Path::isValid(void) const
+bool fslib::Path::isValid() const
 {
     return m_path && m_deviceEnd && std::char_traits<char16_t>::length(m_deviceEnd + 1) > 0 &&
            strpbrk16(m_deviceEnd + 1) == nullptr;
@@ -159,17 +159,17 @@ size_t fslib::Path::findLastOf(char16_t character, size_t begin) const
     return Path::notFound;
 }
 
-const char16_t *fslib::Path::cString(void) const
+const char16_t *fslib::Path::cString() const
 {
     return m_path;
 }
 
-std::u16string_view fslib::Path::getDevice(void) const
+std::u16string_view fslib::Path::getDevice() const
 {
     return std::u16string_view(m_path, m_deviceEnd - m_path);
 }
 
-std::u16string_view fslib::Path::getFileName(void) const
+std::u16string_view fslib::Path::getFileName() const
 {
     size_t fileNameBegin = Path::findLastOf(u'/');
     size_t fileNameEnd = Path::findFirstOf(u'.');
@@ -183,7 +183,7 @@ std::u16string_view fslib::Path::getFileName(void) const
     return std::u16string_view(&m_path[fileNameBegin], fileNameEnd - fileNameBegin);
 }
 
-std::u16string_view fslib::Path::getExtension(void) const
+std::u16string_view fslib::Path::getExtension() const
 {
     size_t extensionBegin = Path::findLastOf(u'.');
     if (extensionBegin == Path::notFound)
@@ -194,14 +194,14 @@ std::u16string_view fslib::Path::getExtension(void) const
     return std::u16string_view(&m_path[extensionBegin] + 1, m_pathLength);
 }
 
-FS_Path fslib::Path::getPath(void) const
+FS_Path fslib::Path::getPath() const
 {
     return {PATH_UTF16,
             (std::char_traits<char16_t>::length(m_deviceEnd + 1) * sizeof(char16_t)) + sizeof(char16_t),
             m_deviceEnd + 1};
 }
 
-size_t fslib::Path::getLength(void) const
+size_t fslib::Path::getLength() const
 {
     return m_pathLength;
 }
@@ -356,7 +356,7 @@ bool fslib::Path::allocatePath(uint16_t pathSize)
     return true;
 }
 
-void fslib::Path::freePath(void)
+void fslib::Path::freePath()
 {
     if (m_path)
     {

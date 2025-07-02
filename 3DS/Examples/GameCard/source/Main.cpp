@@ -8,7 +8,7 @@ static std::string UTF16ToUTF8(std::u16string_view Str)
     return std::string(reinterpret_cast<const char *>(Buffer));
 }
 
-int main(void)
+int main()
 {
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);

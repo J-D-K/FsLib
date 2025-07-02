@@ -12,7 +12,7 @@ class Derived : public Base
 {
     public:
         // In this case, it prevents two unneeded lines. This is acceptable and more readable.
-        Derived(void) : Base(variable) {};
+        Derived() : Base(variable) {};
 };
 ```
 
@@ -31,7 +31,7 @@ namespace fslib
 class ClassName
 {
     public:
-        ClassName(void) = default;
+        ClassName() = default;
     
     private:
         // Member variables.
@@ -54,9 +54,9 @@ typedef enum
 class ClassName
 {
     public:
-        ClassName(void) = default;
+        ClassName() = default;
 
-        void member_function_name(void);
+        void member_function_name();
 };
 ```
 
@@ -65,13 +65,13 @@ class ClassName
 class BaseClass
 {
     public:
-        void member_method(void);
+        void member_method();
 }
 
 class DerivedClass : public BaseClass
 {
     public:
-        void member_method_b(void)
+        void member_method_b()
         {
             BaseClass::member_method();
         }
@@ -83,7 +83,7 @@ class DerivedClass : public BaseClass
 class ClassName
 {
     public:
-        ClassName(void) = default;
+        ClassName() = default;
 
     private:
         int m_classNameVariable = 0;
@@ -93,7 +93,7 @@ class ClassName
 
 7. Functions: Lower snake case, prefixed with the namespace they belong to. No `namespace x{` in source files. Ex:
 ```cpp
-void fslib::function_name(void)
+void fslib::function_name()
 {
     // Do stuff here.
 }

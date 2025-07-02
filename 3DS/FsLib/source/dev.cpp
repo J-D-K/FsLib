@@ -41,7 +41,7 @@ static inline bool fileIsValid(int fileID)
 }
 
 // This "installs" the SDMC_DEVOPTAB in place of archive_dev's
-bool fslib::dev::initializeSDMC(void)
+bool fslib::dev::initializeSDMC()
 {
     if (AddDevice(&SDMC_DEVOPTAB) < 0)
     {
@@ -61,7 +61,9 @@ extern "C"
         fslib::Path path;
         {
             char16_t pathBuffer[fslib::MAX_PATH] = {0};
-            utf8_to_utf16(reinterpret_cast<uint16_t *>(pathBuffer), reinterpret_cast<const uint8_t *>(filePath), fslib::MAX_PATH);
+            utf8_to_utf16(reinterpret_cast<uint16_t *>(pathBuffer),
+                          reinterpret_cast<const uint8_t *>(filePath),
+                          fslib::MAX_PATH);
             path = pathBuffer;
         }
 

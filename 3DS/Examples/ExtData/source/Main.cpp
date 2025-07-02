@@ -14,7 +14,7 @@ static constexpr uint64_t TITLE_ID = 0x00040000001B8700;
 // This is the target folder on SD to backup and restore from.
 static constexpr std::u16string_view TARGET_DIRECTORY = u"sdmc:/MinecraftSave";
 
-int main(void)
+int main()
 {
     // This is standard ctrulib stuff.
     gfxInitDefault();
@@ -46,7 +46,8 @@ int main(void)
         return -3;
     }
 
-    printf("Press A to backup ExtData Normally\nPress Y to backup ExtData Accurately\nPress X to copy SD card to ExtData\nStart to exit.\n");
+    printf("Press A to backup ExtData Normally\nPress Y to backup ExtData Accurately\nPress X to copy SD card to "
+           "ExtData\nStart to exit.\n");
     while (aptMainLoop())
     {
         hidScanInput();

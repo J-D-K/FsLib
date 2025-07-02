@@ -124,7 +124,7 @@ static void copy_directory_to_zip(const fslib::Path &source, zipFile destination
     }
 }
 
-int main(void)
+int main()
 {
     // Initialize fslib
     if (!fslib::initialize())

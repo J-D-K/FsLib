@@ -14,7 +14,7 @@ namespace fslib
     {
         public:
             /// @brief Default path constructor.
-            Path(void) = default;
+            Path() = default;
 
             /// @brief Creates a new path for use with FsLib
             /// @param path Path to assign from.
@@ -41,7 +41,7 @@ namespace fslib
 
             /// @brief Performs checks and returns if path is valid for use with FsLib.
             /// @return True if path is valid. False if it is not.
-            bool isValid(void) const;
+            bool isValid() const;
 
             /// @brief Returns a sub-path ending at PathLength
             /// @param pathLength Length of subpath to return.
@@ -62,27 +62,27 @@ namespace fslib
 
             /// @brief Returns the entire path as a C const char16_t* String
             /// @return Pointer to path string buffer.
-            const char16_t *cString(void) const;
+            const char16_t *cString() const;
 
             /// @brief Returns the device as a UTF-16 u16string_view for use with FsLib internally.
             /// @return Device string.
-            std::u16string_view getDevice(void) const;
+            std::u16string_view getDevice() const;
 
             /// @brief Returns file name as u16string_view.
             /// @return File name
-            std::u16string_view getFileName(void) const;
+            std::u16string_view getFileName() const;
 
             /// @brief Returns extension of path as u16string_view.
             /// @return Path's extension.
-            std::u16string_view getExtension(void) const;
+            std::u16string_view getExtension() const;
 
             /// @brief Returns an FS_Path for use with 3DS FS functions.
             /// @return FS_Path
-            FS_Path getPath(void) const;
+            FS_Path getPath() const;
 
             /// @brief Returns length of the entire path string.
             /// @return Length of path string.
-            size_t getLength(void) const;
+            size_t getLength() const;
 
             /// @brief Assigns Path from various standard UTF-16 string types.
             /// @param path Path to assign from
@@ -172,7 +172,7 @@ namespace fslib
             bool allocatePath(uint16_t pathSize);
 
             /// @brief Frees memory used for path buffer if it isn't nullptr.
-            void freePath(void);
+            void freePath();
     };
 
     /// @brief Concatenates a path to a string and returns a new one. Checks are performed and / is added if needed.

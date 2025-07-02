@@ -61,7 +61,7 @@ fslib::Path::~Path()
     Path::free_path();
 }
 
-bool fslib::Path::is_valid(void) const
+bool fslib::Path::is_valid() const
 {
     return m_path && m_deviceEnd && std::char_traits<char>::length(m_deviceEnd + 1) > 0 &&
            std::strpbrk(m_deviceEnd + 1, FORBIDDEN_PATH_CHARACTERS) == NULL;
@@ -153,17 +153,17 @@ size_t fslib::Path::find_last_of(char character, size_t begin) const
     return Path::NOT_FOUND;
 }
 
-const char *fslib::Path::c_string(void) const
+const char *fslib::Path::c_string() const
 {
     return m_path;
 }
 
-std::string_view fslib::Path::get_device_name(void) const
+std::string_view fslib::Path::get_device_name() const
 {
     return std::string_view(m_path, m_deviceEnd - m_path);
 }
 
-std::string_view fslib::Path::get_file_name(void) const
+std::string_view fslib::Path::get_filename() const
 {
     size_t lastSlash = Path::find_last_of('/');
     if (lastSlash == Path::NOT_FOUND)
@@ -175,12 +175,12 @@ std::string_view fslib::Path::get_file_name(void) const
     return std::string_view(&m_path[lastSlash + 1]);
 }
 
-const char *fslib::Path::get_path(void) const
+const char *fslib::Path::get_path() const
 {
     return m_deviceEnd + 1;
 }
 
-const char *fslib::Path::get_extension(void) const
+const char *fslib::Path::get_extension() const
 {
     size_t extensionBegin = Path::find_last_of('.');
     if (extensionBegin == Path::NOT_FOUND)
@@ -190,7 +190,7 @@ const char *fslib::Path::get_extension(void) const
     return &m_path[extensionBegin + 1];
 }
 
-size_t fslib::Path::get_length(void) const
+size_t fslib::Path::get_length() const
 {
     return m_pathLength;
 }
@@ -361,7 +361,7 @@ bool fslib::Path::allocate_path(uint16_t pathSize)
     return true;
 }
 
-void fslib::Path::free_path(void)
+void fslib::Path::free_path()
 {
     if (m_path)
     {

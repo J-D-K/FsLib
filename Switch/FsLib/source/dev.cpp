@@ -36,7 +36,7 @@ namespace
                                         .seek_r = fslib_dev_seek};
 } // namespace
 
-bool fslib::dev::initialize_sdmc(void)
+bool fslib::dev::initialize_sdmc()
 {
     // This should kill fs_dev.
     fsdevUnmountAll();
