@@ -4,6 +4,7 @@
 #include "fslib.hpp"
 #include "string.hpp"
 #include <cstdarg>
+#include <cstring>
 #include <string>
 
 namespace
@@ -21,6 +22,25 @@ extern std::string g_fslibErrorString;
 fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize)
 {
     File::open(filePath, openFlags, fileSize);
+}
+
+fslib::File::File(fslib::File &&file)
+{
+    // Just let the operator do the work.
+    *this = std::move(file);
+}
+
+fslib::File &fslib::File::operator=(fslib::File &&file)
+{
+    // Steal the handle/service.
+    std::memcpy(&m_fileHandle, &file.m_fileHandle, sizeof(FsFile));
+    std::memset(&file.m_fileHandle, 0x00, sizeof(FsFile));
+
+    // Steal the flags.
+    m_openFlags = file.m_openFlags;
+    file.m_openFlags = 0;
+
+    return *this;
 }
 
 fslib::File::~File()

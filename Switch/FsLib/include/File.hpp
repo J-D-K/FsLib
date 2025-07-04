@@ -24,6 +24,19 @@ namespace fslib
              */
             File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0);
 
+            /// @brief Move constructor.
+            /// @param file File to eviscerate.
+            File(File &&file);
+
+            /// @brief Move assignment operator.
+            /// @param file File to eviscerate.
+            File &operator=(File &&file);
+
+            // None of this nonsense around here!
+            File(const File &) = delete;
+            File &operator=(const File &) = delete;
+
+
             /// @brief Closes file handle if it's still open.
             ~File();
 
