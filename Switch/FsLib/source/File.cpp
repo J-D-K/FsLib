@@ -32,6 +32,16 @@ fslib::File::File(fslib::File &&file)
 
 fslib::File &fslib::File::operator=(fslib::File &&file)
 {
+    // Steal the parent stuff.
+    m_offset = file.m_offset;
+    file.m_offset = 0;
+
+    m_streamSize = file.m_streamSize;
+    file.m_streamSize = 0;
+
+    m_isOpen = file.m_isOpen;
+    file.m_isOpen = false;
+
     // Steal the handle/service.
     std::memcpy(&m_fileHandle, &file.m_fileHandle, sizeof(FsFile));
     std::memset(&file.m_fileHandle, 0x00, sizeof(FsFile));

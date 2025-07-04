@@ -9,7 +9,7 @@ static constexpr uint32_t FsOpenMode_Create = BIT(8);
 namespace fslib
 {
     /// @brief Class for opening, reading, and writing to files.
-    class File : public fslib::Stream
+    class File final : public fslib::Stream
     {
         public:
             /// @brief Default file constructor.
