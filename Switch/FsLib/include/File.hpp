@@ -1,6 +1,7 @@
 #pragma once
 #include "Path.hpp"
 #include "Stream.hpp"
+#include "error.hpp"
 #include <switch.h>
 
 /// @brief This is an added OpenMode flag for FsLib on Switch so File::Open knows for sure it's supposed to create the file.
@@ -26,16 +27,15 @@ namespace fslib
 
             /// @brief Move constructor.
             /// @param file File to eviscerate.
-            File(File &&file);
+            File(File &&file) noexcept;
 
             /// @brief Move assignment operator.
             /// @param file File to eviscerate.
-            File &operator=(File &&file);
+            File &operator=(File &&file) noexcept;
 
             // None of this nonsense around here!
             File(const File &) = delete;
             File &operator=(const File &) = delete;
-
 
             /// @brief Closes file handle if it's still open.
             ~File();
@@ -50,7 +50,6 @@ namespace fslib
             void close();
 
             /// @brief Returns if file was successfully opened.
-            /// @return
             bool is_open() const;
 
             /// @brief Attempts to read ReadSize bytes into Buffer from file.
@@ -62,8 +61,12 @@ namespace fslib
             /// @brief Attempts to read a line from file until `\n` or `\r` is reached.
             /// @param lineOut Buffer to read line into.
             /// @param lineLength Size of line buffer.
-            /// @return True on success. False on failure or line exceeding LineLength.
             bool read_line(char *lineOut, size_t lineLength);
+
+            /// @brief Attempts to read a line from file until '\n' is reached.
+            /// @param lineOut C++ string to write the line data to.
+            bool read_line(std::string &lineOut);
+
 
             /// @brief Attempts to read a single character or byte from file.
             /// @return Byte read.
@@ -78,26 +81,21 @@ namespace fslib
             /// @brief Attempts to write a formatted string to file.
             /// @param format Format of string.
             /// @param arguments Arguments.
-            /// @return True on success. False on failure.
             bool writef(const char *format, ...);
 
             /// @brief Writes a single byte to file.
             /// @param byte Byte to write.
-            /// @return True on success. False on failure.
             bool put_byte(char byte);
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
-            /// @return Reference to file.
             File &operator<<(const char *string);
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
-            /// @return Reference to file.
             File &operator<<(const std::string &string);
 
             /// @brief Flushes file.
-            /// @return True on success. False on failure.
             bool flush();
 
         private:
@@ -109,21 +107,28 @@ namespace fslib
 
             /// @brief Private: Resizes file if Buffer is too large to fit in remaining space.
             /// @param bufferSize Size of buffer.
-            /// @return True on success. False on failure.
             bool resize_if_needed(size_t bufferSize);
 
             /// @brief Private: Returns if file has flag set to read.
-            /// @return True if flags are correct. False if not.
             inline bool is_open_for_reading() const
             {
-                return (m_openFlags & FsOpenMode_Read);
+                bool openForRead = (m_openFlags & FsOpenMode_Read);
+                if (!openForRead)
+                {
+                    error::occurred(error::codes::NOT_OPEN_FOR_READING);
+                }
+                return openForRead;
             }
 
             /// @brief Private: Returns if file has flag set to write.
-            /// @return True if flags are correct. False if not.
             inline bool is_open_for_writing() const
             {
-                return (m_openFlags & FsOpenMode_Write) || (m_openFlags & FsOpenMode_Append);
+                bool openForWrite = (m_openFlags & FsOpenMode_Write) || (m_openFlags & FsOpenMode_Append);
+                if (!openForWrite)
+                {
+                    error::occurred(error::codes::NOT_OPEN_FOR_WRITING);
+                }
+                return openForWrite;
             }
     };
 } // namespace fslib

@@ -16,27 +16,28 @@ namespace fslib
             /// @param path Path to assign.
             Path(const Path &path);
 
-            /// @brief Constructor for Path. Takes most standard C/C++ string types.
-            /// @param pathData String to assign.
-            Path(const char *pathData);
+            /// @brief Move constructor for path.
+            /// @param path Path to eviscerate.
+            Path(Path &&path) noexcept;
 
-            /// @brief Constructor for Path. Takes most standard C/C++ string types.
-            /// @param pathData String to assign.
-            Path(const std::string &pathData);
+            /// @brief Constructor for path.
+            /// @param path String to assign.
+            Path(const char *path);
 
-            /// @brief Constructor for Path. Takes most standard C/C++ string types.
-            /// @param pathData String to assign.
-            Path(std::string_view pathData);
+            /// @brief Constructor for path.
+            /// @param path String to assign.
+            Path(const std::string &path);
 
-            /// @brief Constructor for Path. Takes most standard C/C++ string types.
-            /// @param pathData String to assign.
-            Path(const std::filesystem::path &pathData);
+            /// @brief Constructor for path.
+            /// @param path String to assign.
+            Path(std::string_view path);
 
-            /// @brief Frees memory used for path.
-            ~Path();
+            /// @brief Constructor for path.
+            /// @param path Path to assign.
+            Path(const std::filesystem::path &path);
 
             /**
-             * @brief Returns whether or not path is valid for use with FsLib and Switch's FS.
+             * @brief Return whether or not path is valid for use with FsLib and Switch's FS.
              *
              * @return True if it is. False if it's not.
              * @note Based on four conditions:
@@ -45,7 +46,7 @@ namespace fslib
                     3. The path length following the device is not empty.
                     4. The path has no illegal characters in it.
              */
-            bool is_valid() const;
+            bool is_valid() const noexcept;
 
             /// @brief Returns a sub-path ending at PathLength.
             /// @param pathLength Length of sub-path to return.
@@ -54,128 +55,117 @@ namespace fslib
 
             /// @brief Searches for the first occurrence of Character in path.
             /// @param character Character to search for.
-            /// @return Position of character in path. Path::NotFound if the character isn't found.
-            size_t find_first_of(char character) const;
+            /// @return Position of character in path. Path::NOT_FOUND if the character isn't found.
+            size_t find_first_of(char character) const noexcept;
 
             /// @brief Searches for the first occurrence of Character in path starting at Begin.
             /// @param character Character to search for.
             /// @param begin Postion to begin searching from.
-            /// @return Position of character in path. Path::NotFound if the character wasn't found.
-            size_t find_first_of(char character, size_t begin) const;
+            /// @return Position of character in path. Path::NOT_FOUND if the character wasn't found.
+            size_t find_first_of(char character, size_t begin) const noexcept;
 
             /// @brief Searches backwards through path to find last occurrence of character in path.
             /// @param character Character to search for.
-            /// @return Position of character in path. Path::NotFound if the character wasn't found in path.
-            size_t find_last_of(char character) const;
+            /// @return Position of character in path. Path::NOT_FOUND if the character wasn't found in path.
+            size_t find_last_of(char character) const noexcept;
 
             /// @brief Searches backwards through path beginning at Begin to find last occurrence of character in path.
             /// @param character Character to search for.
             /// @param begin Position to "begin" at.
-            /// @return Position of character in path. Path::NotFound if the character isn't found.
-            size_t find_last_of(char character, size_t begin) const;
+            /// @return Position of character in path. Path::NOT_FOUND if the character isn't found.
+            size_t find_last_of(char character, size_t begin) const noexcept;
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
-            /// @return Entire path.
-            const char *c_string() const;
+            const char *full_path() const noexcept;
 
-            /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions. Ex: sdmc
-            /// @return Device string.
-            std::string_view get_device_name() const;
+            /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions.
+            /// @note Trying to use .data() with this will just result in the entire path being returned.
+            std::string_view get_device_name() const noexcept;
 
             /// @brief Returns the file name in the path starting at the final '/' found.
-            /// @return File name at the end of the path.
-            std::string_view get_filename() const;
+            const char *get_filename() const noexcept;
 
             /// @brief Returns the path after the device for use with Switch's FS functions. Ex: /Path/To/File.txt
-            /// @return Filesystem path.
-            const char *get_path() const;
+            const char *get_path() const noexcept;
 
             /// @brief Returns the extension. After the '.'
-            /// @return Path's extension.
-            const char *get_extension() const;
+            const char *get_extension() const noexcept;
 
             /// @brief Returns full path length of the path buffer.
-            /// @return Path length.
-            size_t get_length() const;
+            size_t get_length() const noexcept;
 
             /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
             /// @param pathData Path to assign.
-            /// @return Reference to path
             Path &operator=(const Path &path);
 
-            /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
-            /// @param pathData String to assign.
-            /// @return Reference to path
-            Path &operator=(const char *pathData);
+            /// @brief Move = operator.
+            /// @param path Path to eviscerate.
+            Path &operator=(Path &&path) noexcept;
 
-            /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
-            /// @param pathData String to assign.
-            /// @return Reference to path
-            Path &operator=(const std::string &pathData);
+            /// @brief Assigns path
+            /// @param path String to assign from.
+            Path &operator=(const char *path);
 
-            /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
-            /// @param pathData String to assign.
-            /// @return Reference to path
-            Path &operator=(std::string_view pathData);
+            /// @brief Assigns path
+            /// @param path String to assign from.
+            Path &operator=(const std::string &path);
 
-            /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
-            /// @param pathData String to assign.
-            /// @return Reference to path
-            Path &operator=(const std::filesystem::path &pathData);
+            /// @brief Assigns path
+            /// @param pathData String to assign from.
+            Path &operator=(std::string_view path);
 
-            /// @brief Appends P to Path. Adds / if needed. Performs minor checks on P before appending.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator/=(const char *pathData);
+            /// @brief Assigns path from path passed.
+            /// @param path Path to assign from.
+            Path &operator=(const std::filesystem::path &path);
 
-            /// @brief Appends P to Path. Adds / if needed. Performs minor checks on P before appending.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator/=(const std::string &pathData);
+            /// @brief Appends path to Path.
+            /// @param path String to append.
+            Path &operator/=(const char *path) noexcept;
 
-            /// @brief Appends P to Path. Adds / if needed. Performs minor checks on P before appending.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator/=(std::string_view pathData);
+            /// @brief Appends path to Path.
+            /// @param path String to append.
+            Path &operator/=(const std::string &path) noexcept;
 
-            /// @brief Appends P to Path. Adds / if needed. Performs minor checks on P before appending.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator/=(const std::filesystem::path &pathData);
+            /// @brief Appends path to Path.
+            /// @param path String to append.
+            Path &operator/=(std::string_view path) noexcept;
 
-            /// @brief Appends P to Path without any checks or / added.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator+=(const char *pathData);
+            /// @brief Appends path to Path.
+            /// @param path String to append.
+            Path &operator/=(const std::filesystem::path &path) noexcept;
 
-            /// @brief Appends P to Path without any checks or / added.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator+=(const std::string &pathData);
+            /// @brief Appends path to Path. Unchecked.
+            /// @param path String to append.
+            Path &operator+=(const char *path) noexcept;
 
-            /// @brief Appends P to Path without any checks or / added.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator+=(std::string_view pathData);
+            /// @brief Appends path to Path. Unchecked.
+            /// @param path String to append.
+            Path &operator+=(const std::string &path) noexcept;
 
-            /// @brief Appends P to Path without any checks or / added.
-            /// @param pathData String to append.
-            /// @return Reference to path.
-            Path &operator+=(const std::filesystem::path &pathData);
+            /// @brief Appends path to Path. Unchecked.
+            /// @param path String to append.
+            Path &operator+=(std::string_view path) noexcept;
+
+            /// @brief Appends path to Path. Unchecked.
+            /// @param path String to append.
+            Path &operator+=(const std::filesystem::path &path) noexcept;
 
             /**
              * @brief Value returned by Find[X]Of functions if the search fails.
              * @note This can be used two ways:
-             *      1. FsLib::Path::NotFound
-             *      2. [Path Instance].NotFound.
+             *      1. FsLib::Path::NOT_FOUND
+             *      2. [Path Instance].NOT_FOUND.
              */
             static constexpr uint16_t NOT_FOUND = -1;
 
         private:
-            /// @brief Path buffer. Switch expects a buffer 0x301 in length. Don't want to use vector and not sure how else to really achieve this?
-            char *m_path = nullptr;
+            /// @brief Path buffer.
+            /** @note The Switch seems to only really like buffers 0x301 in length? Using STL containers with short
+             * paths can seemingly cause random errors for no reason?
+            */
+            std::unique_ptr<char[]> m_path = nullptr;
 
-            /// @brief This points to where the device ends in the path.
+            /// @brief This is the position where the device ends.
             const char *m_deviceEnd = nullptr;
 
             /// @brief This is the actual length of the path buffer
@@ -183,61 +173,46 @@ namespace fslib
 
             /// @brief The current length of the path.
             uint16_t m_pathLength = 0;
-
-            /// @brief This allocates and buffer sets it to all 0x00's.
-            /// @param pathSize Size of the buffer to allocate.
-            /// @return True on success. False on failure.
-            bool allocate_path(uint16_t pathSize);
-
-            /// @brief Frees or deletes the path buffer.
-            void free_path();
     };
+
 
     /// @brief Concatenates two paths. Adds a / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1.
-    /// @return New path consisting of both paths.
     fslib::Path operator/(const fslib::Path &pathA, const char *pathB);
 
     /// @brief Concatenates two paths. Adds a / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1.
-    /// @return New path consisting of both paths.
     fslib::Path operator/(const fslib::Path &pathA, const std::string &pathB);
 
     /// @brief Concatenates two paths. Adds a / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1.
-    /// @return New path consisting of both paths.
     fslib::Path operator/(const fslib::Path &pathA, std::string_view pathB);
 
     /// @brief Concatenates two paths. Adds a / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1.
-    /// @return New path consisting of both paths.
     fslib::Path operator/(const fslib::Path &pathA, const std::filesystem::path &pathB);
 
     /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1
-    /// @return New pat consisting of both paths.
     fslib::Path operator+(const fslib::Path &pathA, const char *pathB);
 
     /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1
-    /// @return New pat consisting of both paths.
     fslib::Path operator+(const fslib::Path &pathA, const std::string &pathB);
 
     /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1
-    /// @return New pat consisting of both paths.
     fslib::Path operator+(const fslib::Path &pathA, std::string_view pathB);
 
-    /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
+    /// @brief Concatenates two paths. Adds a / if needed.
     /// @param pathA Base path.
-    /// @param pathB Path to concatenate to Path1
-    /// @return New pat consisting of both paths.
+    /// @param pathB Path to concatenate to Path1.
     fslib::Path operator+(const fslib::Path &pathA, const std::filesystem::path &pathB);
 } // namespace fslib

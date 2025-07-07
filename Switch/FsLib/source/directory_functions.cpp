@@ -1,30 +1,23 @@
 #include "directory_functions.hpp"
-#include "errorCommon.h"
+#include "error.hpp"
 #include "fslib.hpp"
-#include "string.hpp"
 #include <switch.h>
-
-extern std::string g_fslibErrorString;
 
 bool fslib::create_directory(const fslib::Path &directoryPath)
 {
     if (!directoryPath.is_valid())
     {
-        g_fslibErrorString = ERROR_INVALID_PATH;
         return false;
     }
 
-    FsFileSystem *fileSystem;
-    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &fileSystem))
+    FsFileSystem *filesystem;
+    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem))
     {
-        g_fslibErrorString = ERROR_DEVICE_NOT_FOUND;
         return false;
     }
 
-    Result fsError = fsFsCreateDirectory(fileSystem, directoryPath.get_path());
-    if (R_FAILED(fsError))
+    if (error::occurred(fsFsCreateDirectory(filesystem, directoryPath.get_path())))
     {
-        g_fslibErrorString = string::get_formatted_string("Error creating directory: 0x%X.", fsError);
         return false;
     }
 
@@ -54,33 +47,28 @@ bool fslib::delete_directory(const fslib::Path &directoryPath)
 {
     if (!directoryPath.is_valid())
     {
-        g_fslibErrorString = ERROR_INVALID_PATH;
         return false;
     }
 
-    FsFileSystem *fileSystem;
-    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &fileSystem))
+    FsFileSystem *filesystem;
+    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem))
     {
-        g_fslibErrorString = ERROR_DEVICE_NOT_FOUND;
         return false;
     }
 
-    Result fsError = fsFsDeleteDirectory(fileSystem, directoryPath.get_path());
-    if (R_FAILED(fsError))
+    if (error::occurred(fsFsDeleteDirectory(filesystem, directoryPath.get_path())))
     {
-        g_fslibErrorString = string::get_formatted_string("Error deleting directory: 0x%X.", fsError);
         return false;
     }
+
     return true;
 }
 
 bool fslib::delete_directory_recursively(const fslib::Path &directoryPath)
 {
-    fslib::Directory targetDirectory(directoryPath);
+    fslib::Directory targetDirectory{directoryPath};
     if (!targetDirectory.is_open())
     {
-        g_fslibErrorString =
-            string::get_formatted_string("Error deleting directory recursively: %s", g_fslibErrorString.c_str());
         return false;
     }
 
@@ -98,7 +86,7 @@ bool fslib::delete_directory_recursively(const fslib::Path &directoryPath)
     }
 
     // This will prevent this function from trying to delete the root (device:/) and reporting failure. Nintendo's doesn't.
-    const char *pathBegin = std::char_traits<char>::find(directoryPath.c_string(), directoryPath.get_length(), '/');
+    const char *pathBegin = std::char_traits<char>::find(directoryPath.full_path(), directoryPath.get_length(), '/');
     if (std::char_traits<char>::length(pathBegin) > 1 && !fslib::delete_directory(directoryPath))
     {
         return false;
@@ -113,14 +101,14 @@ bool fslib::directory_exists(const fslib::Path &directoryPath)
         return false;
     }
 
-    FsFileSystem *fileSystem;
-    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &fileSystem))
+    FsFileSystem *filesystem;
+    if (!fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem))
     {
         return false;
     }
 
     FsDir directoryHandle;
-    Result fsError = fsFsOpenDirectory(fileSystem,
+    Result fsError = fsFsOpenDirectory(filesystem,
                                        directoryPath.get_path(),
                                        FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles,
                                        &directoryHandle);
@@ -136,22 +124,19 @@ bool fslib::rename_directory(const fslib::Path &oldPath, const fslib::Path &newP
 {
     if (!oldPath.is_valid() || !newPath.is_valid() || oldPath.get_device_name() != newPath.get_device_name())
     {
-        g_fslibErrorString = ERROR_INVALID_PATH;
         return false;
     }
 
-    FsFileSystem *fileSystem;
-    if (!fslib::get_file_system_by_device_name(oldPath.get_device_name(), &fileSystem))
+    FsFileSystem *filesystem;
+    if (!fslib::get_file_system_by_device_name(oldPath.get_device_name(), &filesystem))
     {
-        g_fslibErrorString = ERROR_DEVICE_NOT_FOUND;
         return false;
     }
 
-    Result fsError = fsFsRenameDirectory(fileSystem, oldPath.get_path(), newPath.get_path());
-    if (R_FAILED(fsError))
+    if (error::occurred(fsFsRenameDirectory(filesystem, oldPath.get_path(), newPath.get_path())))
     {
-        g_fslibErrorString = string::get_formatted_string("Error renaming directory: 0x%X.", fsError);
         return false;
     }
+
     return true;
 }

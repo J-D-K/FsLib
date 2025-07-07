@@ -1,13 +1,6 @@
+#include "error.hpp"
 #include "fslib.hpp"
-#include "string.hpp"
 #include <string>
-
-namespace
-{
-    const char *ERROR_OPENING_WITH_FILTER = "Error opening SaveInfoReader with filter: 0x%X.";
-}
-
-extern std::string g_fslibErrorString;
 
 fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveDataSpaceID, size_t bufferCount)
 {
@@ -40,10 +33,8 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID, size_t buffe
     // Save this quick.
     m_bufferCount = bufferCount;
 
-    Result fsError = fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID);
-    if (R_FAILED(fsError))
+    if (error::occurred(fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID)))
     {
-        g_fslibErrorString = string::get_formatted_string("Error opening save data info reader: 0x%X.", fsError);
         return;
     }
 
@@ -57,10 +48,8 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accou
 {
     m_isOpen = false;
 
-    // Just in case.
     SaveInfoReader::close();
 
-    // Filter
     FsSaveDataFilter saveFilter = {.filter_by_application_id = false,
                                    .filter_by_save_data_type = false,
                                    .filter_by_user_id = true,
@@ -75,10 +64,8 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accou
                                             .save_data_rank = FsSaveDataRank_Primary,
                                             .save_data_index = 0}};
 
-    Result fsError = fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter);
-    if (R_FAILED(fsError))
+    if (error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter)))
     {
-        g_fslibErrorString = string::get_formatted_string(ERROR_OPENING_WITH_FILTER, fsError);
         return;
     }
 
@@ -106,10 +93,8 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType s
                                             .save_data_rank = FsSaveDataRank_Primary,
                                             .save_data_index = 0}};
 
-    Result fsError = fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter);
-    if (R_FAILED(fsError))
+    if (error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter)))
     {
-        g_fslibErrorString = string::get_formatted_string(ERROR_OPENING_WITH_FILTER, fsError);
         return;
     }
 
@@ -135,10 +120,8 @@ bool fslib::SaveInfoReader::is_open() const
 bool fslib::SaveInfoReader::read()
 {
     // This function will try to read as many as possible. It will return false once the count is 0.
-    Result fsError = fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount);
-    if (R_FAILED(fsError) || m_readCount == 0)
+    if (error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount)))
     {
-        g_fslibErrorString = string::get_formatted_string("Error reading save data info: 0x%X.", fsError);
         return false;
     }
     return true;

@@ -38,7 +38,7 @@ namespace
 
 bool fslib::dev::initialize_sdmc()
 {
-    // This should kill fs_dev.
+    // fs_dev is a mess and I don't want to use it. Kill it.
     fsdevUnmountAll();
 
     // Add my own SD device to newlib.
@@ -53,11 +53,7 @@ bool fslib::dev::initialize_sdmc()
 // This will return if the file id exists in the map.
 static inline bool file_is_valid(int fileID)
 {
-    if (s_fileMap.find(fileID) == s_fileMap.end())
-    {
-        return false;
-    }
-    return true;
+    return s_fileMap.find(fileID) != s_fileMap.end();
 }
 
 // Defintions of functions above.
@@ -72,7 +68,7 @@ extern "C"
         uint32_t openFlags = 0;
 
         // This is our path so we don't need to constantly construct a path.
-        fslib::Path filePath = path;
+        fslib::Path filePath(path);
         if (!filePath.is_valid())
         {
             reent->_errno = ENOENT;

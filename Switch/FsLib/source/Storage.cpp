@@ -1,9 +1,6 @@
 #include "Storage.hpp"
-#include "string.hpp"
+#include "error.hpp"
 #include <string>
-
-// Globally used error string.
-extern std::string g_fslibErrorString;
 
 fslib::Storage::Storage(FsBisPartitionId partitionID)
 {
@@ -20,23 +17,19 @@ fslib::Storage::~Storage()
 
 void fslib::Storage::open(FsBisPartitionId partitionID)
 {
-    // Just in case this is reused.
+    m_isOpen = false;
+
     Storage::close();
 
-    Result fsError = fsOpenBisStorage(&m_storageHandle, partitionID);
-    if (R_FAILED(fsError))
+    if (error::occurred(fsOpenBisStorage(&m_storageHandle, partitionID)))
     {
-        g_fslibErrorString = string::get_formatted_string("Error opening partition ID %X: 0x%X.", partitionID, fsError);
         return;
     }
 
-    fsError = fsStorageGetSize(&m_storageHandle, &m_streamSize);
-    if (R_FAILED(fsError))
+    if (error::occurred(fsStorageGetSize(&m_storageHandle, &m_streamSize)))
     {
-        g_fslibErrorString = string::get_formatted_string("Error getting storage size: 0x%X.", fsError);
         return;
     }
-    // Offset is always 0 since storage is read only.
     m_offset = 0;
     m_isOpen = true;
 }
@@ -53,12 +46,11 @@ ssize_t fslib::Storage::read(void *buffer, size_t bufferSize)
         bufferSize = m_streamSize - m_offset;
     }
 
-    Result fsError = fsStorageRead(&m_storageHandle, m_offset, buffer, static_cast<uint64_t>(bufferSize));
-    if (R_FAILED(fsError))
+    if (error::occurred(fsStorageRead(&m_storageHandle, m_offset, buffer, static_cast<uint64_t>(bufferSize))))
     {
-        g_fslibErrorString = string::get_formatted_string("Error reading from storage: 0x%X.", fsError);
-        return 0;
+        return -1;
     }
+
     // There isn't really a way to make sure this worked 100%...
     m_offset += bufferSize;
     return bufferSize;
@@ -72,10 +64,8 @@ signed char fslib::Storage::read_byte()
     }
 
     char byte = 0x00;
-    Result fsError = fsStorageRead(&m_storageHandle, m_offset++, &byte, 1);
-    if (R_FAILED(fsError))
+    if (error::occurred(fsStorageRead(&m_storageHandle, m_offset++, &byte, 1)))
     {
-        g_fslibErrorString = string::get_formatted_string("Error reading byte from storage: 0x%X.", fsError);
         return -1;
     }
     return byte;
