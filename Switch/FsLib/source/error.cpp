@@ -17,20 +17,22 @@ const char *fslib::error::get_string() noexcept
 
 bool fslib::error::occurred(Result code, const std::source_location &location)
 {
-    // I just want the source file. Not the whole path.
-    std::string_view filename = location.file_name();
-    size_t nameBegin = filename.find_last_of('/');
+    if (code != 0)
+    {
+        // I just want the source file. Not the whole path.
+        std::string_view filename = location.file_name();
+        size_t nameBegin = filename.find_last_of('/');
 
-    char errorBuffer[VA_BUFFER_SIZE] = {0};
-    std::snprintf(errorBuffer,
-                  VA_BUFFER_SIZE,
-                  "%s::%s::%i : 0x%X",
-                  filename.substr(nameBegin + 1).data(),
-                  location.function_name(),
-                  location.line(),
-                  code);
+        char errorBuffer[VA_BUFFER_SIZE] = {0};
+        std::snprintf(errorBuffer,
+                      VA_BUFFER_SIZE,
+                      "%s::%s::%i : 0x%X",
+                      filename.substr(nameBegin + 1).data(),
+                      location.function_name(),
+                      location.line(),
+                      code);
 
-    s_errorString.assign(errorBuffer);
-
+        s_errorString.assign(errorBuffer);
+    }
     return code != 0;
 }
