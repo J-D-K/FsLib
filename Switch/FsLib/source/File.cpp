@@ -22,13 +22,13 @@ fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileS
     File::open(filePath, openFlags, fileSize);
 }
 
-fslib::File::File(fslib::File &&file)
+fslib::File::File(fslib::File &&file) noexcept
 {
     // Just let the operator do the work.
     *this = std::move(file);
 }
 
-fslib::File &fslib::File::operator=(fslib::File &&file)
+fslib::File &fslib::File::operator=(fslib::File &&file) noexcept
 {
     // Steal the parent stuff.
     m_offset = file.m_offset;
@@ -112,7 +112,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     m_isOpen = true;
 }
 
-void fslib::File::close()
+void fslib::File::close() noexcept
 {
     if (m_isOpen)
     {
@@ -121,12 +121,12 @@ void fslib::File::close()
     }
 }
 
-bool fslib::File::is_open() const
+bool fslib::File::is_open() const noexcept
 {
     return m_isOpen;
 }
 
-ssize_t fslib::File::read(void *buffer, size_t bufferSize)
+ssize_t fslib::File::read(void *buffer, size_t bufferSize) noexcept
 {
     if (!m_isOpen || !File::is_open_for_reading())
     {
@@ -146,7 +146,7 @@ ssize_t fslib::File::read(void *buffer, size_t bufferSize)
     return bytesRead;
 }
 
-bool fslib::File::read_line(char *lineOut, size_t lineLength)
+bool fslib::File::read_line(char *lineOut, size_t lineLength) noexcept
 {
     if (!m_isOpen || !File::is_open_for_reading())
     {
@@ -194,7 +194,7 @@ bool fslib::File::read_line(std::string &lineOut)
     return true;
 }
 
-signed char fslib::File::get_byte()
+signed char fslib::File::get_byte() noexcept
 {
     if (!m_isOpen || !File::is_open_for_reading())
     {
@@ -211,7 +211,7 @@ signed char fslib::File::get_byte()
     return byte;
 }
 
-ssize_t fslib::File::write(const void *buffer, size_t bufferSize)
+ssize_t fslib::File::write(const void *buffer, size_t bufferSize) noexcept
 {
     if (!m_isOpen || !File::is_open_for_writing() || !File::resize_if_needed(bufferSize))
     {
@@ -228,7 +228,7 @@ ssize_t fslib::File::write(const void *buffer, size_t bufferSize)
     return bufferSize;
 }
 
-bool fslib::File::writef(const char *format, ...)
+bool fslib::File::writef(const char *format, ...) noexcept
 {
     char vaBuffer[VA_BUFFER_SIZE] = {0};
 
@@ -240,7 +240,7 @@ bool fslib::File::writef(const char *format, ...)
     return File::write(vaBuffer, std::char_traits<char>::length(vaBuffer)) != -1;
 }
 
-bool fslib::File::put_byte(char byte)
+bool fslib::File::put_byte(char byte) noexcept
 {
     // L o L
     if (!m_isOpen || !File::is_open_for_writing() || !File::resize_if_needed(1))
@@ -256,19 +256,19 @@ bool fslib::File::put_byte(char byte)
     return true;
 }
 
-fslib::File &fslib::File::operator<<(const char *string)
+fslib::File &fslib::File::operator<<(const char *string) noexcept
 {
     File::write(string, std::char_traits<char>::length(string));
     return *this;
 }
 
-fslib::File &fslib::File::operator<<(const std::string &string)
+fslib::File &fslib::File::operator<<(const std::string &string) noexcept
 {
     File::write(string.c_str(), string.length());
     return *this;
 }
 
-bool fslib::File::flush()
+bool fslib::File::flush() noexcept
 {
     if (!m_isOpen || !File::is_open_for_writing())
     {
@@ -283,7 +283,7 @@ bool fslib::File::flush()
     return true;
 }
 
-bool fslib::File::resize_if_needed(size_t bufferSize)
+bool fslib::File::resize_if_needed(size_t bufferSize) noexcept
 {
     // Size remaining in file.
     size_t spaceRemaining = m_streamSize - m_offset;

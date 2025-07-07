@@ -2,12 +2,12 @@
 #include "error.hpp"
 #include <string>
 
-fslib::Storage::Storage(FsBisPartitionId partitionID)
+fslib::Storage::Storage(FsBisPartitionId partitionID) noexcept
 {
     Storage::open(partitionID);
 }
 
-fslib::Storage::~Storage()
+fslib::Storage::~Storage() noexcept
 {
     if (m_isOpen)
     {
@@ -15,7 +15,7 @@ fslib::Storage::~Storage()
     }
 }
 
-void fslib::Storage::open(FsBisPartitionId partitionID)
+void fslib::Storage::open(FsBisPartitionId partitionID) noexcept
 {
     m_isOpen = false;
 
@@ -34,12 +34,12 @@ void fslib::Storage::open(FsBisPartitionId partitionID)
     m_isOpen = true;
 }
 
-void fslib::Storage::close()
+void fslib::Storage::close() noexcept
 {
     fsStorageClose(&m_storageHandle);
 }
 
-ssize_t fslib::Storage::read(void *buffer, size_t bufferSize)
+ssize_t fslib::Storage::read(void *buffer, size_t bufferSize) noexcept
 {
     if (m_offset + static_cast<int64_t>(bufferSize) > m_streamSize)
     {
@@ -56,7 +56,7 @@ ssize_t fslib::Storage::read(void *buffer, size_t bufferSize)
     return bufferSize;
 }
 
-signed char fslib::Storage::read_byte()
+signed char fslib::Storage::read_byte() noexcept
 {
     if (m_offset >= m_streamSize)
     {

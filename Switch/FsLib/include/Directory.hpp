@@ -79,6 +79,6 @@ namespace fslib
             std::unique_ptr<FsDirectoryEntry[]> m_directoryList;
 
             /// @brief Closes directory handle. Directory is never kept open. Not needed outside of class.
-            void close();
+            void close() noexcept;
     };
 } // namespace fslib

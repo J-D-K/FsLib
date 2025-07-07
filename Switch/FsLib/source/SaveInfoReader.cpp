@@ -103,7 +103,7 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType s
     m_isOpen = true;
 }
 
-void fslib::SaveInfoReader::close()
+void fslib::SaveInfoReader::close() noexcept
 {
     if (m_isOpen)
     {
@@ -112,12 +112,12 @@ void fslib::SaveInfoReader::close()
     }
 }
 
-bool fslib::SaveInfoReader::is_open() const
+bool fslib::SaveInfoReader::is_open() const noexcept
 {
     return m_isOpen;
 }
 
-bool fslib::SaveInfoReader::read()
+bool fslib::SaveInfoReader::read() noexcept
 {
     // This function will try to read as many as possible. It will return false once the count is 0.
     if (error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount)))
@@ -127,17 +127,17 @@ bool fslib::SaveInfoReader::read()
     return true;
 }
 
-int64_t fslib::SaveInfoReader::get_read_count() const
+int64_t fslib::SaveInfoReader::get_read_count() const noexcept
 {
     return m_readCount;
 }
 
-fslib::SaveInfoReader::operator bool() const
+fslib::SaveInfoReader::operator bool() const noexcept
 {
     return m_isOpen;
 }
 
-FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index)
+FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index) noexcept
 {
     if (index < 0 || index >= static_cast<int>(m_bufferCount))
     {

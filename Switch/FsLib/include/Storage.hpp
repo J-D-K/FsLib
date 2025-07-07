@@ -18,18 +18,18 @@ namespace fslib
             /// @brief Attempts to open PartitionID as raw storage.
             /// @param partitionID ID of partition to open.
             /// @note IsOpen can be used to see if the operation succeeded.
-            Storage(FsBisPartitionId partitionID);
+            Storage(FsBisPartitionId partitionID) noexcept;
 
             /// @brief Closes storage handle at destruction.
-            ~Storage();
+            ~Storage() noexcept;
 
             /// @brief Attempts to open PartitionID as raw storage.
             /// @param partitionID ID of partition to open.
             /// @note IsOpen can be used to see if the operation succeeded.
-            void open(FsBisPartitionId partitionID);
+            void open(FsBisPartitionId partitionID) noexcept;
 
             /// @brief Closes storage handle.
-            void close();
+            void close() noexcept;
 
             /**
              * @brief Attempts to read from storage.
@@ -40,11 +40,11 @@ namespace fslib
              * @note The underlying Switch storage reading functions have no way to really keep track of how much was read or where you
              * are located (offset). I've done the best I can to correct for this.
              */
-            ssize_t read(void *buffer, size_t bufferSize);
+            ssize_t read(void *buffer, size_t bufferSize) noexcept;
 
             /// @brief Reads a single byte from storage.
             /// @return Byte read on success. -1 on failure.
-            signed char read_byte();
+            signed char read_byte() noexcept;
 
         private:
             /// @brief Handle to storage opened.

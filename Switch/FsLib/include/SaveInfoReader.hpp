@@ -43,27 +43,27 @@ namespace fslib
             void open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t bufferCount);
 
             /// @brief Closes the save data info reader. This is called in the destructor too.
-            void close();
+            void close() noexcept;
 
             /// @brief Returns if save data info reader was successfully opened.
             /// @return True on success. False on failure.
-            bool is_open() const;
+            bool is_open() const noexcept;
 
             /// @brief Reads the next save data info entry.
             /// @return True on success. False on failure.
-            bool read();
+            bool read() noexcept;
 
             /// @brief Returns the number of FsSaveDataInfo entries read from the system.
             /// @return Number of FsSaveDataInfo entries read from the system.
-            int64_t get_read_count() const;
+            int64_t get_read_count() const noexcept;
 
             /// @brief Operator that can be used in place of isOpen.
-            operator bool() const;
+            operator bool() const noexcept;
 
             /// @brief Operator used to retrieve references to the FsSavDataInfo array.
             /// @param index Index of the FsSaveDataInfo struct to get.
             /// @return Reference to the FsSaveDataInfo struct at index. Bounds checking is performed.
-            FsSaveDataInfo &operator[](int index);
+            FsSaveDataInfo &operator[](int index) noexcept;
 
         private:
             /// @brief Underlying FsSaveDataInfoReader.

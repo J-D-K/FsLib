@@ -141,7 +141,7 @@ const char *fslib::Directory::operator[](int index) const noexcept
     return m_directoryList[index].name;
 }
 
-void fslib::Directory::close()
+void fslib::Directory::close() noexcept
 {
     fsDirClose(&m_directoryHandle);
 }
