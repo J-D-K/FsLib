@@ -4,15 +4,14 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <minizip/unzip.h>
-#include <minizip/zip.h>
-#include <switch.h>
 #include <thread>
 
 namespace
 {
     // Va buffer size for print function so we have output in real time.
     constexpr int VA_BUFFER_SIZE = 0x1000;
+
+    std::string_view PATH = "sdmc:/really/long/path/of/folders/to/test/to/make/sure/i/didnt/break/anything";
 } // namespace
 
 // Feels stupid but needed to get actual output in real time on switch.
@@ -62,6 +61,21 @@ int main()
     padInitializeDefault(&gamePad);
 
     print("fslib::TestingApp\n\n");
+
+    if (!fslib::file_exists("sdmc:/config/JKSV/cache.bin"))
+    {
+        print("%s\n", fslib::error::get_string());
+    }
+
+    if (!fslib::create_directories_recursively(PATH))
+    {
+        print("%s\n", fslib::error::get_string());
+    }
+
+    if (!fslib::delete_directory_recursively("sdmc:/really"))
+    {
+        print("%s\n", fslib::error::get_string());
+    }
 
     while (appletMainLoop())
     {

@@ -120,7 +120,8 @@ bool fslib::SaveInfoReader::is_open() const noexcept
 bool fslib::SaveInfoReader::read() noexcept
 {
     // This function will try to read as many as possible. It will return false once the count is 0.
-    if (error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount)))
+    if (error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount)) ||
+        m_readCount <= 0)
     {
         return false;
     }
