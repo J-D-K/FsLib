@@ -23,12 +23,16 @@ bool fslib::error::occurred(Result code, const std::source_location &location)
         std::string_view filename = location.file_name();
         size_t nameBegin = filename.find_last_of('/');
 
+        // I don't want the return type for this.
+        std::string_view functionName = location.function_name();
+        size_t functionBegin = functionName.find_first_of(' ');
+
         char errorBuffer[VA_BUFFER_SIZE] = {0};
         std::snprintf(errorBuffer,
                       VA_BUFFER_SIZE,
-                      "%s::%s::%i : 0x%X",
+                      "fslib::%s::%s::%i : 0x%X",
                       filename.substr(nameBegin + 1).data(),
-                      location.function_name(),
+                      functionName.substr(functionBegin + 1).data(),
                       location.line(),
                       code);
 
