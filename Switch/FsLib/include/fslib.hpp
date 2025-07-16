@@ -53,20 +53,20 @@ namespace fslib
      *
      * @param deviceRoot Root of device.
      * @param sizeOut The size retrieved if successful.
-     * @return True on success. False on failure.
+     * @return Size on success. -1 on failure.
      * @note This function requires a path to work. DeviceRoot should be `sdmc:/` instead of `sdmc`, for example.
      */
-    bool get_device_free_space(const fslib::Path &deviceRoot, int64_t &sizeOut);
+    int64_t get_device_free_space(const fslib::Path &deviceRoot);
 
     /**
      * @brief Attempts to get the total space of Device passed.
      *
      * @param deviceRoot Root of device.
      * @param sizeOut The size retrieved if successful.
-     * @return True on success. False on failure.
+     * @return Size on success. -1 on failure.
      * @note This function requires a path to work. DeviceRoot should be `sdmc:/` instead of `sdmc`, for example.
      */
-    bool get_device_total_space(const fslib::Path &deviceRoot, int64_t &sizeOut);
+    int64_t get_device_total_space(const fslib::Path &deviceRoot);
 
     /// @brief Closes filesystem mapped to DeviceName
     /// @param deviceName Name of device to close.

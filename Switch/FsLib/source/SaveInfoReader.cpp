@@ -24,51 +24,37 @@ fslib::SaveInfoReader::~SaveInfoReader()
 
 void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID, size_t bufferCount)
 {
-    // Set this just in case.
     m_isOpen = false;
-
-    // Just in case
     SaveInfoReader::close();
 
-    // Save this quick.
-    m_bufferCount = bufferCount;
-
-    if (error::occurred(fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID)))
-    {
-        return;
-    }
-
+    const bool openError = error::occurred(fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID));
+    if (openError) { return; }
     SaveInfoReader::allocate_save_info_array(bufferCount);
 
-    // Should be good.
     m_isOpen = true;
 }
 
 void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accountID, size_t bufferCount)
 {
     m_isOpen = false;
-
     SaveInfoReader::close();
 
-    FsSaveDataFilter saveFilter = {.filter_by_application_id = false,
-                                   .filter_by_save_data_type = false,
-                                   .filter_by_user_id = true,
-                                   .filter_by_system_save_data_id = false,
-                                   .filter_by_index = false,
-                                   .save_data_rank = FsSaveDataRank_Primary,
-                                   .padding = {0},
-                                   .attr = {.application_id = 0,
-                                            .uid = accountID,
-                                            .system_save_data_id = 0,
-                                            .save_data_type = 0,
-                                            .save_data_rank = FsSaveDataRank_Primary,
-                                            .save_data_index = 0}};
+    const FsSaveDataFilter saveFilter = {.filter_by_application_id      = false,
+                                         .filter_by_save_data_type      = false,
+                                         .filter_by_user_id             = true,
+                                         .filter_by_system_save_data_id = false,
+                                         .filter_by_index               = false,
+                                         .save_data_rank                = FsSaveDataRank_Primary,
+                                         .padding                       = {0},
+                                         .attr                          = {.application_id      = 0,
+                                                                           .uid                 = accountID,
+                                                                           .system_save_data_id = 0,
+                                                                           .save_data_type      = 0,
+                                                                           .save_data_rank      = FsSaveDataRank_Primary,
+                                                                           .save_data_index     = 0}};
 
-    if (error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter)))
-    {
-        return;
-    }
-
+    const bool openError = error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter));
+    if (openError) { return; }
     SaveInfoReader::allocate_save_info_array(bufferCount);
 
     m_isOpen = true;
@@ -77,33 +63,29 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accou
 void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t bufferCount)
 {
     m_isOpen = false;
-
     SaveInfoReader::close();
 
-    FsSaveDataFilter saveFilter = {.filter_by_application_id = false,
-                                   .filter_by_save_data_type = true,
-                                   .filter_by_user_id = false,
-                                   .filter_by_system_save_data_id = false,
-                                   .filter_by_index = false,
-                                   .save_data_rank = FsSaveDataRank_Primary,
-                                   .padding = {0},
-                                   .attr = {.application_id = 0,
-                                            .uid = {0},
-                                            .save_data_type = saveType,
-                                            .save_data_rank = FsSaveDataRank_Primary,
-                                            .save_data_index = 0}};
+    const FsSaveDataFilter saveFilter = {.filter_by_application_id      = false,
+                                         .filter_by_save_data_type      = true,
+                                         .filter_by_user_id             = false,
+                                         .filter_by_system_save_data_id = false,
+                                         .filter_by_index               = false,
+                                         .save_data_rank                = FsSaveDataRank_Primary,
+                                         .padding                       = {0},
+                                         .attr                          = {.application_id  = 0,
+                                                                           .uid             = {0},
+                                                                           .save_data_type  = saveType,
+                                                                           .save_data_rank  = FsSaveDataRank_Primary,
+                                                                           .save_data_index = 0}};
 
-    if (error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter)))
-    {
-        return;
-    }
-
+    const bool openError = error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter));
+    if (openError) { return; }
     SaveInfoReader::allocate_save_info_array(bufferCount);
 
     m_isOpen = true;
 }
 
-void fslib::SaveInfoReader::close() noexcept
+void fslib::SaveInfoReader::close()
 {
     if (m_isOpen)
     {
@@ -112,33 +94,33 @@ void fslib::SaveInfoReader::close() noexcept
     }
 }
 
-bool fslib::SaveInfoReader::is_open() const noexcept
+bool fslib::SaveInfoReader::is_open() const
 {
     return m_isOpen;
 }
 
-bool fslib::SaveInfoReader::read() noexcept
+bool fslib::SaveInfoReader::read()
 {
     // This function will try to read as many as possible. It will return false once the count is 0.
-    if (error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount)) ||
-        m_readCount <= 0)
-    {
-        return false;
-    }
+    const bool readError =
+        error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount));
+    const bool validCount = m_readCount > 0;
+    if (readError || !validCount) { return false; }
+
     return true;
 }
 
-int64_t fslib::SaveInfoReader::get_read_count() const noexcept
+int64_t fslib::SaveInfoReader::get_read_count() const
 {
     return m_readCount;
 }
 
-fslib::SaveInfoReader::operator bool() const noexcept
+fslib::SaveInfoReader::operator bool() const
 {
     return m_isOpen;
 }
 
-FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index) noexcept
+FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index)
 {
     if (index < 0 || index >= static_cast<int>(m_bufferCount))
     {

@@ -9,11 +9,8 @@ namespace
 
 bool fslib::device::initialize()
 {
-    if (error::occurred(fsOpenDeviceOperator(&s_deviceOperator)))
-    {
-        return false;
-    }
-    return true;
+    const bool openError = error::occurred(fsOpenDeviceOperator(&s_deviceOperator));
+    return !openError;
 }
 
 void fslib::device::exit()
@@ -24,20 +21,16 @@ void fslib::device::exit()
 
 bool fslib::device::sd_is_inserted()
 {
-    bool sdInserted = false;
-    if (error::occurred(fsDeviceOperatorIsSdCardInserted(&s_deviceOperator, &sdInserted)))
-    {
-        return false;
-    }
+    bool sdInserted      = false;
+    const bool readError = error::occurred(fsDeviceOperatorIsSdCardInserted(&s_deviceOperator, &sdInserted));
+    if (readError) { return false; }
     return sdInserted;
 }
 
 bool fslib::device::gamecard_is_inserted()
 {
     bool gameCardInserted = false;
-    if (error::occurred(fsDeviceOperatorIsGameCardInserted(&s_deviceOperator, &gameCardInserted)))
-    {
-        return false;
-    }
+    const bool readError  = error::occurred(fsDeviceOperatorIsGameCardInserted(&s_deviceOperator, &gameCardInserted));
+    if (readError) { return false; }
     return gameCardInserted;
 }

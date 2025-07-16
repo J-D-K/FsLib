@@ -27,14 +27,14 @@ namespace fslib
 
             /// @brief Move constructor.
             /// @param file File to eviscerate.
-            File(File &&file) noexcept;
+            File(File &&file);
 
             /// @brief Move assignment operator.
             /// @param file File to eviscerate.
-            File &operator=(File &&file) noexcept;
+            File &operator=(File &&file);
 
             // None of this nonsense around here!
-            File(const File &) = delete;
+            File(const File &)            = delete;
             File &operator=(const File &) = delete;
 
             /// @brief Closes file handle if it's still open.
@@ -47,21 +47,21 @@ namespace fslib
             void open(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0);
 
             /// @brief Closes file handle if needed. Destructor takes care of this for you normally.
-            void close() noexcept;
+            void close();
 
             /// @brief Returns if file was successfully opened.
-            bool is_open() const noexcept;
+            bool is_open() const;
 
             /// @brief Attempts to read ReadSize bytes into Buffer from file.
             /// @param buffer Buffer to write into.
             /// @param readSize Buffer's capacity.
             /// @return Number of bytes read.
-            ssize_t read(void *buffer, size_t bufferSize) noexcept;
+            ssize_t read(void *buffer, uint64_t bufferSize);
 
             /// @brief Attempts to read a line from file until `\n` or `\r` is reached.
             /// @param lineOut Buffer to read line into.
             /// @param lineLength Size of line buffer.
-            bool read_line(char *lineOut, size_t lineLength) noexcept;
+            bool read_line(char *lineOut, size_t lineLength);
 
             /// @brief Attempts to read a line from file until '\n' is reached.
             /// @param lineOut C++ string to write the line data to.
@@ -69,65 +69,57 @@ namespace fslib
 
             /// @brief Attempts to read a single character or byte from file.
             /// @return Byte read.
-            signed char get_byte() noexcept;
+            signed char get_byte();
 
             /// @brief Attempts to write Buffer of BufferSize bytes to file.
             /// @param buffer Buffer containing data.
             /// @param bufferSize Size of Buffer.
             /// @return Number of bytes (assumed to be) written to file. -1 on error.
-            ssize_t write(const void *buffer, size_t bufferSize) noexcept;
+            ssize_t write(const void *buffer, uint64_t bufferSize);
 
             /// @brief Attempts to write a formatted string to file.
             /// @param format Format of string.
             /// @param arguments Arguments.
-            bool writef(const char *format, ...) noexcept;
+            bool writef(const char *format, ...);
 
             /// @brief Writes a single byte to file.
             /// @param byte Byte to write.
-            bool put_byte(char byte) noexcept;
+            bool put_byte(char byte);
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
-            File &operator<<(const char *string) noexcept;
+            File &operator<<(const char *string);
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
-            File &operator<<(const std::string &string) noexcept;
+            File &operator<<(const std::string &string);
 
             /// @brief Flushes file.
-            bool flush() noexcept;
+            bool flush();
 
         private:
             /// @brief File handle.
-            FsFile m_fileHandle;
+            FsFile m_fileHandle{};
 
             /// @brief Stores flags used to open file.
-            uint32_t m_openFlags = 0;
+            uint32_t m_openFlags{};
 
             /// @brief Private: Resizes file if Buffer is too large to fit in remaining space.
             /// @param bufferSize Size of buffer.
-            bool resize_if_needed(size_t bufferSize) noexcept;
+            bool resize_if_needed(size_t bufferSize);
 
             /// @brief Private: Returns if file has flag set to read.
-            inline bool is_open_for_reading() const noexcept
+            inline bool is_open_for_reading() const
             {
-                bool openForRead = (m_openFlags & FsOpenMode_Read);
-                if (!openForRead)
-                {
-                    error::occurred(error::codes::NOT_OPEN_FOR_READING);
-                }
-                return openForRead;
+                const bool openForRead = (m_openFlags & FsOpenMode_Read);
+                return m_isOpen && openForRead;
             }
 
             /// @brief Private: Returns if file has flag set to write.
-            inline bool is_open_for_writing() const noexcept
+            inline bool is_open_for_writing() const
             {
-                bool openForWrite = (m_openFlags & FsOpenMode_Write) || (m_openFlags & FsOpenMode_Append);
-                if (!openForWrite)
-                {
-                    error::occurred(error::codes::NOT_OPEN_FOR_WRITING);
-                }
-                return openForWrite;
+                const bool openForWrite = (m_openFlags & FsOpenMode_Write);
+                return m_isOpen && openForWrite;
             }
     };
 } // namespace fslib

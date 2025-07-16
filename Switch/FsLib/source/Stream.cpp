@@ -1,26 +1,26 @@
 #include "Stream.hpp"
 
-bool fslib::Stream::is_open() const noexcept
+bool fslib::Stream::is_open() const
 {
     return m_isOpen;
 }
 
-int64_t fslib::Stream::tell() const noexcept
+int64_t fslib::Stream::tell() const
 {
     return m_offset;
 }
 
-int64_t fslib::Stream::get_size() const noexcept
+int64_t fslib::Stream::get_size() const
 {
     return m_streamSize;
 }
 
-bool fslib::Stream::end_of_stream() const noexcept
+bool fslib::Stream::end_of_stream() const
 {
     return m_offset >= m_streamSize;
 }
 
-void fslib::Stream::seek(int64_t offset, uint8_t origin) noexcept
+void fslib::Stream::seek(int64_t offset, uint8_t origin)
 {
     switch (origin)
     {
@@ -43,24 +43,16 @@ void fslib::Stream::seek(int64_t offset, uint8_t origin) noexcept
         break;
     }
 
-    // This will make sure the offset is actually valid.
     Stream::ensure_offset_is_valid();
 }
 
-fslib::Stream::operator bool() const noexcept
+fslib::Stream::operator bool() const
 {
     return m_isOpen;
 }
 
-void fslib::Stream::ensure_offset_is_valid() noexcept
+void fslib::Stream::ensure_offset_is_valid()
 {
-    if (m_offset < 0)
-    {
-        m_offset = 0;
-    }
-    // To do: Decide if this is the right way to approach this...
-    else if (m_offset > m_streamSize)
-    {
-        m_offset = m_streamSize;
-    }
+    if (m_offset < 0) { m_offset = 0; }
+    else if (m_offset > m_streamSize) { m_offset = m_streamSize; }
 }

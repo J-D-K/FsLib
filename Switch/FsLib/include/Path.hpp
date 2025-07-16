@@ -18,7 +18,7 @@ namespace fslib
 
             /// @brief Move constructor for path.
             /// @param path Path to eviscerate.
-            Path(Path &&path) noexcept;
+            Path(Path &&path);
 
             /// @brief Constructor for path.
             /// @param path String to assign.
@@ -46,7 +46,7 @@ namespace fslib
                     3. The path length following the device is not empty.
                     4. The path has no illegal characters in it.
              */
-            bool is_valid() const noexcept;
+            bool is_valid() const;
 
             /// @brief Returns a sub-path ending at PathLength.
             /// @param pathLength Length of sub-path to return.
@@ -56,43 +56,43 @@ namespace fslib
             /// @brief Searches for the first occurrence of Character in path.
             /// @param character Character to search for.
             /// @return Position of character in path. Path::NOT_FOUND if the character isn't found.
-            size_t find_first_of(char character) const noexcept;
+            size_t find_first_of(char character) const;
 
             /// @brief Searches for the first occurrence of Character in path starting at Begin.
             /// @param character Character to search for.
             /// @param begin Postion to begin searching from.
             /// @return Position of character in path. Path::NOT_FOUND if the character wasn't found.
-            size_t find_first_of(char character, size_t begin) const noexcept;
+            size_t find_first_of(char character, size_t begin) const;
 
             /// @brief Searches backwards through path to find last occurrence of character in path.
             /// @param character Character to search for.
             /// @return Position of character in path. Path::NOT_FOUND if the character wasn't found in path.
-            size_t find_last_of(char character) const noexcept;
+            size_t find_last_of(char character) const;
 
             /// @brief Searches backwards through path beginning at Begin to find last occurrence of character in path.
             /// @param character Character to search for.
             /// @param begin Position to "begin" at.
             /// @return Position of character in path. Path::NOT_FOUND if the character isn't found.
-            size_t find_last_of(char character, size_t begin) const noexcept;
+            size_t find_last_of(char character, size_t begin) const;
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
-            const char *full_path() const noexcept;
+            const char *full_path() const;
 
             /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions.
             /// @note Trying to use .data() with this will just result in the entire path being returned.
-            std::string_view get_device_name() const noexcept;
+            std::string_view get_device_name() const;
 
             /// @brief Returns the file name in the path starting at the final '/' found.
-            const char *get_filename() const noexcept;
+            const char *get_filename() const;
 
             /// @brief Returns the path after the device for use with Switch's FS functions. Ex: /Path/To/File.txt
-            const char *get_path() const noexcept;
+            const char *get_path() const;
 
             /// @brief Returns the extension. After the '.'
-            const char *get_extension() const noexcept;
+            const char *get_extension() const;
 
             /// @brief Returns full path length of the path buffer.
-            size_t get_length() const noexcept;
+            size_t get_length() const;
 
             /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
             /// @param pathData Path to assign.
@@ -100,7 +100,7 @@ namespace fslib
 
             /// @brief Move = operator.
             /// @param path Path to eviscerate.
-            Path &operator=(Path &&path) noexcept;
+            Path &operator=(Path &&path);
 
             /// @brief Assigns path
             /// @param path String to assign from.
@@ -120,35 +120,35 @@ namespace fslib
 
             /// @brief Appends path to Path.
             /// @param path String to append.
-            Path &operator/=(const char *path) noexcept;
+            Path &operator/=(const char *path);
 
             /// @brief Appends path to Path.
             /// @param path String to append.
-            Path &operator/=(const std::string &path) noexcept;
+            Path &operator/=(const std::string &path);
 
             /// @brief Appends path to Path.
             /// @param path String to append.
-            Path &operator/=(std::string_view path) noexcept;
+            Path &operator/=(std::string_view path);
 
             /// @brief Appends path to Path.
             /// @param path String to append.
-            Path &operator/=(const std::filesystem::path &path) noexcept;
+            Path &operator/=(const std::filesystem::path &path);
 
             /// @brief Appends path to Path. Unchecked.
             /// @param path String to append.
-            Path &operator+=(const char *path) noexcept;
+            Path &operator+=(const char *path);
 
             /// @brief Appends path to Path. Unchecked.
             /// @param path String to append.
-            Path &operator+=(const std::string &path) noexcept;
+            Path &operator+=(const std::string &path);
 
             /// @brief Appends path to Path. Unchecked.
             /// @param path String to append.
-            Path &operator+=(std::string_view path) noexcept;
+            Path &operator+=(std::string_view path);
 
             /// @brief Appends path to Path. Unchecked.
             /// @param path String to append.
-            Path &operator+=(const std::filesystem::path &path) noexcept;
+            Path &operator+=(const std::filesystem::path &path);
 
             /**
              * @brief Value returned by Find[X]Of functions if the search fails.

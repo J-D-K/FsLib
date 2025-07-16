@@ -65,7 +65,6 @@ html/
 .vscode/c_cpp_properties.json
 *.code-workspace
 .history
-.clang-format
 .clang-tidy
 .editorconfig
 

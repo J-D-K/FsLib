@@ -6,13 +6,11 @@
 bool fslib::open_bis_filesystem(std::string_view deviceName, FsBisPartitionId partitionID)
 {
     FsFileSystem filesystem;
+    const bool openError = error::occurred(fsOpenBisFileSystem(&filesystem, partitionID, ""));
+    if (openError) { return false; }
 
-    if (error::occurred(fsOpenBisFileSystem(&filesystem, partitionID, "")))
-    {
-        return false;
-    }
-
-    if (!fslib::map_file_system(deviceName, &filesystem))
+    const bool mapped = fslib::map_file_system(deviceName, &filesystem);
+    if (!mapped)
     {
         fsFsClose(&filesystem);
         return false;

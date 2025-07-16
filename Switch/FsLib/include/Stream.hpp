@@ -14,19 +14,19 @@ namespace fslib
 
             /// @brief Checks if stream was successfully opened.
             /// @return True on success. False on failure.
-            bool is_open() const noexcept;
+            bool is_open() const;
 
             /// @brief Gets the current offset in the stream.
             /// @return Current offset of the stream.
-            int64_t tell() const noexcept;
+            int64_t tell() const;
 
             /// @brief Gets the size of the current stream.
             /// @return Stream's size.
-            int64_t get_size() const noexcept;
+            int64_t get_size() const;
 
             /// @brief Returns if the end of the stream has been reached.
             /// @return True if end of stream has been reached. False if it hasn't.
-            bool end_of_stream() const noexcept;
+            bool end_of_stream() const;
 
             /**
              * @brief Seeks to Offset relative to Origin
@@ -38,10 +38,10 @@ namespace fslib
              *      2. FsLib::SeekOrigin::Current
              *      3. FsLib::SeekOrigin::End
              */
-            void seek(int64_t offset, uint8_t origin) noexcept;
+            void seek(int64_t offset, uint8_t origin);
 
             /// @brief Operator that can be used like isOpen().
-            operator bool() const noexcept;
+            operator bool() const;
 
             /// @brief Used to seek from the beginning of the stream.
             static constexpr uint8_t BEGINNING = 0;
@@ -64,6 +64,6 @@ namespace fslib
             bool m_isOpen = false;
 
             /// @brief Ensures offset isn't out of bounds after a seek is performed.
-            void ensure_offset_is_valid() noexcept;
+            void ensure_offset_is_valid();
     };
 } // namespace fslib
