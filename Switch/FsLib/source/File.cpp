@@ -75,10 +75,8 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     openFlags &= ~FsOpenMode_Create;
 
     const bool openError = error::occurred(fsFsOpenFile(filesystem, path, openFlags, &m_fileHandle));
-    if (openError) { return; }
-
-    const bool sizeError = error::occurred(fsFileGetSize(&m_fileHandle, &m_streamSize));
-    if (sizeError) { return; }
+    const bool sizeError = !openError && error::occurred(fsFileGetSize(&m_fileHandle, &m_streamSize));
+    if (openError || sizeError) { return; }
 
     m_openFlags = openFlags;
     m_offset    = openAppend ? m_streamSize : 0;

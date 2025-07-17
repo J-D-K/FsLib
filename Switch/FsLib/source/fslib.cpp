@@ -79,6 +79,7 @@ int64_t fslib::get_device_free_space(const fslib::Path &deviceRoot)
     const bool deviceInUse        = device_name_is_in_use(device);
     const bool spaceError         = deviceInUse && error::occurred(fsFsGetFreeSpace(&s_deviceMap[device], path, &freeSpace));
     if (!deviceInUse || spaceError) { return -1; }
+
     return freeSpace;
 }
 
@@ -92,6 +93,7 @@ int64_t fslib::get_device_total_space(const fslib::Path &deviceRoot)
     const bool deviceInUse        = device_name_is_in_use(device);
     const bool spaceError         = deviceInUse && error::occurred(fsFsGetTotalSpace(&s_deviceMap[device], path, &totalSpace));
     if (!deviceInUse || spaceError) { return -1; }
+
     return totalSpace;
 }
 

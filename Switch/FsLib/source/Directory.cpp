@@ -24,15 +24,15 @@ fslib::Directory::Directory(Directory &&directory)
 fslib::Directory &fslib::Directory::operator=(Directory &&directory)
 {
     // Start by copying this to make sure we have EVERYTHING~
-    std::memcpy(&m_directoryHandle, &directory.m_directoryHandle, sizeof(FsDir));
-    m_directoryList = std::move(directory.m_directoryList);
-    m_entryCount    = directory.m_entryCount;
-    m_wasRead       = directory.m_wasRead;
+    m_directoryHandle = directory.m_directoryHandle;
+    m_directoryList   = std::move(directory.m_directoryList);
+    m_entryCount      = directory.m_entryCount;
+    m_wasRead         = directory.m_wasRead;
 
-    std::memset(&directory.m_directoryHandle, 0x00, sizeof(FsDir));
-    m_directoryList = nullptr; // Not really sure if this is needed after std::move, but jic.
-    m_entryCount    = 0;
-    m_wasRead       = 0;
+    directory.m_directoryHandle = {0};
+    m_directoryList             = nullptr; // Not really sure if this is needed after std::move, but jic.
+    m_entryCount                = 0;
+    m_wasRead                   = 0;
 
     return *this;
 }
@@ -43,22 +43,13 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
 
     // This so directories can be reused.
     m_wasRead = false;
-
-    if (!directoryPath.is_valid())
-    {
-        error::occurred(error::codes::INVALID_PATH);
-        return;
-    }
+    if (!directoryPath.is_valid()) { return; }
 
     FsFileSystem *filesystem{};
     const std::string_view device = directoryPath.get_device_name();
     const char *path              = directoryPath.get_path();
     const bool deviceFound        = fslib::get_file_system_by_device_name(device, &filesystem);
-    if (!deviceFound)
-    {
-        error::occurred(error::codes::DEVICE_NOT_FOUND);
-        return;
-    }
+    if (!deviceFound) { return; }
 
     const bool dirError   = error::occurred(fsFsOpenDirectory(filesystem, path, FLAGS_DIR_OPEN, &m_directoryHandle));
     const bool countError = !dirError && error::occurred(fsDirGetEntryCount(&m_directoryHandle, &m_entryCount));
