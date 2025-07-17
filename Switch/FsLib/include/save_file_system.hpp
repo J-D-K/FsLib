@@ -15,8 +15,8 @@ namespace fslib
     bool open_system_save_file_system(std::string_view deviceName,
                                       uint64_t systemSaveID,
                                       FsSaveDataSpaceId saveDataSpaceID = FsSaveDataSpaceId_System,
-                                      FsSaveDataRank saveDataRank = FsSaveDataRank_Primary,
-                                      AccountUid accountID = {0});
+                                      FsSaveDataRank saveDataRank       = FsSaveDataRank_Primary,
+                                      AccountUid accountID              = {0});
 
     /// @brief Attempts to open account save data with ApplicationID and UserID and map it to DeviceName.
     /// @param deviceName Name of device to map to.
@@ -29,7 +29,7 @@ namespace fslib
                                        uint64_t applicationID,
                                        AccountUid userID,
                                        FsSaveDataSpaceId saveDataSpaceID = FsSaveDataSpaceId_User,
-                                       FsSaveDataRank saveDataRank = FsSaveDataRank_Primary);
+                                       FsSaveDataRank saveDataRank       = FsSaveDataRank_Primary);
 
     /// @brief Attempts to open BCAT save data with ApplicationID and map it to DeviceName.
     /// @param deviceName Name of device to map to.
@@ -60,7 +60,7 @@ namespace fslib
                                      uint64_t applicationID,
                                      uint16_t saveDataIndex,
                                      FsSaveDataSpaceId saveDataSpaceID = FsSaveDataSpaceId_User,
-                                     FsSaveDataRank saveDataRank = FsSaveDataRank_Primary);
+                                     FsSaveDataRank saveDataRank       = FsSaveDataRank_Primary);
 
     /// @brief Attempts to open system BCAT save data and map it to DeviceName.
     /// @param deviceName Name of device to map to.

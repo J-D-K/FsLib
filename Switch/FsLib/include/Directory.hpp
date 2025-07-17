@@ -1,5 +1,6 @@
 #pragma once
 #include "Path.hpp"
+
 #include <memory>
 #include <switch.h>
 
@@ -14,7 +15,8 @@ namespace fslib
 
             /// @brief Attempts to open Directory path and read all entries. IsOpen can be used to check if this was successful.
             /// @param directoryPath Path to directory.
-            /// @param sortListing Optional. Whether or not the listing is sorted Directories->Files and then alphabetically. This is done by default.
+            /// @param sortListing Optional. Whether or not the listing is sorted Directories->Files and then alphabetically.
+            /// This is done by default.
             Directory(const fslib::Path &directoryPath, bool sortListing = true);
 
             /// @brief Move constructor for directory.
@@ -67,16 +69,16 @@ namespace fslib
 
         private:
             /// @brief Saves whether or not the directory was successfully opened and read.
-            bool m_wasRead = false;
+            bool m_wasRead{};
 
             /// @brief Handle to the directory.
-            FsDir m_directoryHandle;
+            FsDir m_directoryHandle{};
 
             /// @brief Total number of entries read from the directory.
-            int64_t m_entryCount = 0;
+            int64_t m_entryCount{};
 
             /// @brief Entry array.
-            std::unique_ptr<FsDirectoryEntry[]> m_directoryList;
+            std::unique_ptr<FsDirectoryEntry[]> m_directoryList{};
 
             /// @brief Checks and returns whether or not the index is within bounds.
             /// @param index Index to check.

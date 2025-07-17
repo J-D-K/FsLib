@@ -1,5 +1,6 @@
 #pragma once
 #include "Path.hpp"
+
 #include <cstdint>
 
 namespace fslib

@@ -70,16 +70,16 @@ namespace fslib
             FsSaveDataInfoReader m_infoReader;
 
             /// @brief Saves whether opening the reader was successful.
-            bool m_isOpen = false;
+            bool m_isOpen{};
 
             /// @brief Number of FsSaveDataInfo struct buffers to allocate for reading.
-            size_t m_bufferCount = 0;
+            size_t m_bufferCount{};
 
             /// @brief Number of entries read when read() is called.
-            int64_t m_readCount = 0;
+            int64_t m_readCount{};
 
             /// @brief SaveDataInfo buffer array.
-            std::unique_ptr<FsSaveDataInfo[]> m_saveInfoBuffer = nullptr;
+            std::unique_ptr<FsSaveDataInfo[]> m_saveInfoBuffer{};
 
             /// @brief Private function that allocates the buffer array and records the count.
             /// @param bufferCount Number of FsSaveDataInfo structs to allocate.

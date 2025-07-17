@@ -13,8 +13,8 @@ namespace fslib
      *
      * @param directoryPath Path of directories.
      * @return True on success. False on failure.
-     * @note This can be kind of slow. At the moment, I'm not sure if there's a bug or Switch has some kind of limit on folder depth, but
-     * after a certain point this will fail. Use only where <b>absolutely needed</b>.
+     * @note This can be kind of slow. At the moment, I'm not sure if there's a bug or Switch has some kind of limit on folder
+     * depth, but after a certain point this will fail. Use only where <b>absolutely needed</b>.
      */
     bool create_directories_recursively(const fslib::Path &directoryPath);
 

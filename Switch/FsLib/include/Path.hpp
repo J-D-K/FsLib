@@ -162,19 +162,18 @@ namespace fslib
             /// @brief Path buffer.
             /** @note The Switch seems to only really like buffers 0x301 in length? Using STL containers with short
              * paths can seemingly cause random errors for no reason?
-            */
-            std::unique_ptr<char[]> m_path = nullptr;
+             */
+            std::unique_ptr<char[]> m_path{};
 
             /// @brief This is the position where the device ends.
-            const char *m_deviceEnd = nullptr;
+            const char *m_deviceEnd{};
 
             /// @brief This is the actual length of the path buffer
-            uint16_t m_pathSize = 0;
+            uint16_t m_pathSize{};
 
             /// @brief The current length of the path.
-            uint16_t m_pathLength = 0;
+            uint16_t m_pathLength{};
     };
-
 
     /// @brief Concatenates two paths. Adds a / if needed.
     /// @param pathA Base path.

@@ -2,6 +2,7 @@
 #include "Path.hpp"
 #include "Stream.hpp"
 #include "error.hpp"
+
 #include <switch.h>
 
 /// @brief This is an added OpenMode flag for FsLib on Switch so File::Open knows for sure it's supposed to create the file.

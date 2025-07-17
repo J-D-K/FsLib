@@ -23,7 +23,7 @@ bool fslib::device::sd_is_inserted()
 {
     bool sdInserted      = false;
     const bool readError = error::occurred(fsDeviceOperatorIsSdCardInserted(&s_deviceOperator, &sdInserted));
-    if (readError) { return false; }
+    if(readError) { return false; }
     return sdInserted;
 }
 
@@ -31,6 +31,6 @@ bool fslib::device::gamecard_is_inserted()
 {
     bool gameCardInserted = false;
     const bool readError  = error::occurred(fsDeviceOperatorIsGameCardInserted(&s_deviceOperator, &gameCardInserted));
-    if (readError) { return false; }
+    if(readError) { return false; }
     return gameCardInserted;
 }

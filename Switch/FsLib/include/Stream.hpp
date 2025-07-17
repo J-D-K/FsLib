@@ -54,14 +54,14 @@ namespace fslib
 
         protected:
             /// @brief Current offset in stream.
-            int64_t m_offset = 0;
+            int64_t m_offset{};
 
             /// @brief Total size of the stream being accessed.
-            int64_t m_streamSize = 0;
+            int64_t m_streamSize{};
 
             /// @brief Whether or not opening the stream was successful.
             /// @note This is handled by derived classes.
-            bool m_isOpen = false;
+            bool m_isOpen{};
 
             /// @brief Ensures offset isn't out of bounds after a seek is performed.
             void ensure_offset_is_valid();

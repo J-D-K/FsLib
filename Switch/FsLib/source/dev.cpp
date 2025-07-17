@@ -1,6 +1,8 @@
 #include "dev.hpp"
+
 #include "File.hpp"
 #include "file_functions.hpp"
+
 #include <fcntl.h>
 #include <string_view>
 #include <switch.h>
@@ -42,16 +44,13 @@ bool fslib::dev::initialize_sdmc()
     fsdevUnmountAll();
 
     // Add my own SD device to newlib.
-    if (AddDevice(&SDMC_DEVOPT) < 0) { return false; }
+    if(AddDevice(&SDMC_DEVOPT) < 0) { return false; }
 
     return true;
 }
 
 // This will return if the file id exists in the map.
-static inline bool file_is_valid(int id)
-{
-    return s_fileMap.find(id) != s_fileMap.end();
-}
+static inline bool file_is_valid(int id) { return s_fileMap.find(id) != s_fileMap.end(); }
 
 // Defintions of functions above.
 extern "C"
@@ -66,13 +65,13 @@ extern "C"
 
         // This is our path so we don't need to constantly construct a path.
         const fslib::Path filePath{path};
-        if (!filePath.is_valid())
+        if(!filePath.is_valid())
         {
             reent->_errno = ENOENT;
             return -1;
         }
 
-        switch (flags & O_ACCMODE)
+        switch(flags & O_ACCMODE)
         {
             case O_RDONLY:
             {
@@ -103,13 +102,13 @@ extern "C"
         const bool append     = (flags & O_APPEND);
         const bool create     = (flags & O_CREAT);
         const bool fileExists = fslib::file_exists(filePath);
-        if (append && !fileExists) { openFlags |= FsOpenMode_Create; }
-        else if (append) { openFlags |= FsOpenMode_Append; }
-        else if (create) { openFlags |= FsOpenMode_Create; }
+        if(append && !fileExists) { openFlags |= FsOpenMode_Create; }
+        else if(append) { openFlags |= FsOpenMode_Append; }
+        else if(create) { openFlags |= FsOpenMode_Create; }
 
         // Try opening the file first.
         fslib::File newFile{filePath, openFlags};
-        if (!newFile) { return -1; }
+        if(!newFile) { return -1; }
 
         const int newFileID         = currentFileID++;
         *static_cast<int *>(fileID) = newFileID;
@@ -123,7 +122,7 @@ extern "C"
         int id = *static_cast<int *>(fileID);
 
         // Check to make sure it exists in map.
-        if (!file_is_valid(id))
+        if(!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
@@ -137,7 +136,7 @@ extern "C"
     static ssize_t fslib_dev_write(struct _reent *reent, void *fileID, const char *buffer, size_t bufferSize)
     {
         int id = *static_cast<int *>(fileID);
-        if (!file_is_valid(id))
+        if(!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
@@ -148,7 +147,7 @@ extern "C"
     static ssize_t fslib_dev_read(struct _reent *reent, void *fileID, char *buffer, size_t bufferSize)
     {
         int id = *static_cast<int *>(fileID);
-        if (!file_is_valid(id))
+        if(!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
@@ -159,14 +158,14 @@ extern "C"
     static ssize_t fslib_dev_seek(struct _reent *reent, void *fileID, off_t offset, int direction)
     {
         int id = *static_cast<int *>(fileID);
-        if (!file_is_valid(id))
+        if(!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
         }
 
         fslib::File &target = s_fileMap.at(id);
-        switch (direction)
+        switch(direction)
         {
             case SEEK_SET:
             {
