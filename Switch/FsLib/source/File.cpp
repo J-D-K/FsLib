@@ -48,27 +48,27 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
 {
     File::close();
 
-    if(!filePath.is_valid()) { return; }
+    if (!filePath.is_valid()) { return; }
 
     FsFileSystem *filesystem{};
     const std::string_view device = filePath.get_device_name();
     const char *path              = filePath.get_path();
     const bool filesystemFound    = fslib::get_file_system_by_device_name(device, &filesystem);
-    if(!filesystemFound) { return; }
+    if (!filesystemFound) { return; }
 
     const bool openCreate = (openFlags & FsOpenMode_Create); // This is a flag added to fslib to make this easier.
     const bool openWrite  = (openFlags & FsOpenMode_Write);
     const bool openAppend = (openFlags & FsOpenMode_Append);
-    if(openAppend && !openWrite) { openFlags |= FsOpenMode_Write; }
+    if (openAppend && !openWrite) { openFlags |= FsOpenMode_Write; }
 
     // This is needed in case FsOpenMode_Create is passed and the file already exists.
     const bool fileNeedsDelete = openCreate && fslib::file_exists(filePath);
     const bool fileDeleted     = fileNeedsDelete && fslib::delete_file(filePath);
-    if(fileNeedsDelete && !fileDeleted) { return; }
+    if (fileNeedsDelete && !fileDeleted) { return; }
 
     const bool fileNeedsCreate = openCreate && !fslib::file_exists(filePath);
     const bool fileCreated     = fileNeedsCreate && fslib::create_file(filePath, fileSize);
-    if(fileNeedsCreate && !fileCreated) { return; }
+    if (fileNeedsCreate && !fileCreated) { return; }
 
     // We need to strip this before passing the flags to the system. It's a helper flag for fslib and the Switch doesn't like
     // it.
@@ -76,7 +76,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
 
     const bool openError = error::occurred(fsFsOpenFile(filesystem, path, openFlags, &m_fileHandle));
     const bool sizeError = !openError && error::occurred(fsFileGetSize(&m_fileHandle, &m_streamSize));
-    if(openError || sizeError) { return; }
+    if (openError || sizeError) { return; }
 
     m_openFlags = openFlags;
     m_offset    = openAppend ? m_streamSize : 0;
@@ -86,7 +86,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
 
 void fslib::File::close()
 {
-    if(!m_isOpen) { return; }
+    if (!m_isOpen) { return; }
     fsFileClose(&m_fileHandle);
     m_isOpen = false;
 }
@@ -95,12 +95,12 @@ bool fslib::File::is_open() const { return m_isOpen; }
 
 ssize_t fslib::File::read(void *buffer, size_t bufferSize)
 {
-    if(!File::is_open_for_reading()) { return -1; }
+    if (!File::is_open_for_reading()) { return -1; }
 
     uint64_t bytesRead{};
     const bool readError     = error::occurred(fsFileRead(&m_fileHandle, m_offset, buffer, bufferSize, 0, &bytesRead));
     const bool readSizeCheck = bytesRead <= bufferSize; // This check is in place from the 3DS.
-    if(readError || !readSizeCheck)
+    if (readError || !readSizeCheck)
     {
         // This will signal failure.
         return -1;
@@ -111,14 +111,14 @@ ssize_t fslib::File::read(void *buffer, size_t bufferSize)
 
 bool fslib::File::read_line(char *lineOut, size_t lineLength)
 {
-    if(!File::is_open_for_reading()) { return false; }
+    if (!File::is_open_for_reading()) { return false; }
 
     signed char nextChar{};
-    for(size_t i = 0; i < lineLength; i++)
+    for (size_t i = 0; i < lineLength; i++)
     {
         const bool goodRead = !Stream::end_of_stream() && (nextChar = File::get_byte()) != -1;
-        if(!goodRead) { return false; }
-        if(nextChar == '\n') { return true; }
+        if (!goodRead) { return false; }
+        if (nextChar == '\n') { return true; }
 
         lineOut[i] = nextChar;
     }
@@ -127,18 +127,18 @@ bool fslib::File::read_line(char *lineOut, size_t lineLength)
 
 bool fslib::File::read_line(std::string &lineOut)
 {
-    if(!File::is_open_for_reading()) { return false; }
+    if (!File::is_open_for_reading()) { return false; }
 
     lineOut.clear();
 
     signed char next{};
-    for(int64_t i = 0; i < m_streamSize; i++)
+    for (int64_t i = 0; i < m_streamSize; i++)
     {
         const bool goodByte = (next = File::get_byte()) != -1;
-        if(!goodByte) { return false; }
+        if (!goodByte) { return false; }
 
         const bool lineEnd = next == '\n';
-        if(lineEnd) { return true; }
+        if (lineEnd) { return true; }
         lineOut += next;
     }
     return false;
@@ -146,13 +146,13 @@ bool fslib::File::read_line(std::string &lineOut)
 
 signed char fslib::File::get_byte()
 {
-    if(!File::is_open_for_reading()) { return -1; }
+    if (!File::is_open_for_reading()) { return -1; }
 
     char byte{};
     uint64_t bytesRead{};
     const bool streamEnd = Stream::end_of_stream();
     const bool readError = !streamEnd && error::occurred(fsFileRead(&m_fileHandle, m_offset++, &byte, 1, 0, &bytesRead));
-    if(readError) { return -1; }
+    if (readError) { return -1; }
     return byte;
 }
 
@@ -160,11 +160,11 @@ ssize_t fslib::File::write(const void *buffer, size_t bufferSize)
 {
     const bool openForWrite = File::is_open_for_writing();
     const bool resized      = openForWrite && File::resize_if_needed(bufferSize);
-    if(!openForWrite || !resized) { return -1; }
+    if (!openForWrite || !resized) { return -1; }
     // print("Write check");
 
     const bool writeError = error::occurred(fsFileWrite(&m_fileHandle, m_offset, buffer, bufferSize, 0));
-    if(writeError) { return -1; }
+    if (writeError) { return -1; }
     // There's no real way to verify this was completely successful on Switch
     m_offset += bufferSize;
     return bufferSize;
@@ -186,11 +186,11 @@ bool fslib::File::put_byte(char byte)
 {
     const bool openForWrite = File::is_open_for_writing();
     const bool resized      = File::resize_if_needed(1); // This is funny.
-    if(!openForWrite || !resized) { return false; }
+    if (!openForWrite || !resized) { return false; }
 
     // I'm not calling another function for 1 byte.
     const bool writeError = error::occurred(fsFileWrite(&m_fileHandle, m_offset++, &byte, 1, 0));
-    if(writeError) { return false; }
+    if (writeError) { return false; }
     return true;
 }
 
@@ -208,10 +208,10 @@ fslib::File &fslib::File::operator<<(const std::string &string)
 
 bool fslib::File::flush()
 {
-    if(!File::is_open_for_writing()) { return false; }
+    if (!File::is_open_for_writing()) { return false; }
 
     const bool flushError = error::occurred(fsFileFlush(&m_fileHandle));
-    if(flushError) { return false; }
+    if (flushError) { return false; }
     return true;
 }
 
@@ -219,10 +219,10 @@ bool fslib::File::resize_if_needed(size_t bufferSize)
 {
     const size_t spaceRemaining = m_streamSize - m_offset;
     const int64_t newFileSize   = m_offset + bufferSize; // We may or may not use this.
-    if(bufferSize <= spaceRemaining) { return true; }
+    if (bufferSize <= spaceRemaining) { return true; }
 
     const bool setSizeError = error::occurred(fsFileSetSize(&m_fileHandle, newFileSize));
-    if(setSizeError) { return false; }
+    if (setSizeError) { return false; }
 
     m_streamSize = newFileSize;
     return true;

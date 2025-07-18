@@ -2,7 +2,7 @@
 BasedOnStyle: GNU
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
-AlignArrayOfStructures: Right
+AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
   Enabled: true
   AcrossEmptyLines: false
@@ -12,11 +12,11 @@ AlignConsecutiveAssignments:
   PadOperators: false
 AlignConsecutiveBitFields:
   Enabled: true
-  AcrossEmptyLines: true
-  AcrossComments: true
-  AlignCompound: true
-  AlignFunctionPointers: true
-  PadOperators: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+  AlignCompound: false
+  AlignFunctionPointers: false
+  PadOperators: false
 AlignConsecutiveDeclarations:
   Enabled: false
   AcrossEmptyLines: false
@@ -25,14 +25,14 @@ AlignConsecutiveDeclarations:
   AlignFunctionPointers: false
   PadOperators: false
 AlignConsecutiveMacros:
-  Enabled: true
+  Enabled: false
   AcrossEmptyLines: false
   AcrossComments: false
   AlignCompound: false
   AlignFunctionPointers: false
   PadOperators: false
 AlignConsecutiveShortCaseStatements:
-  Enabled: true
+  Enabled: false
   AcrossEmptyLines: false
   AcrossComments: false
   AlignCaseArrows: false
@@ -75,8 +75,7 @@ AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: true
-AlwaysBreakAfterDeclarationReturnType: false
-AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 AttributeMacros:
   - __capability
@@ -96,31 +95,30 @@ BraceWrapping:
   AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
-  BeforeLambdaBody: true
+  BeforeLambdaBody: false
   BeforeWhile: true
   IndentBraces: true
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakAdjacentStringLiterals: true
-BreakAfterAttributes: Always
+BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
 BreakAfterReturnType: None
 BreakArrays: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Allman
-BreakBeforeConceptDeclarations: Always
+BreakBeforeConceptDeclarations: Never
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: AfterColon
+BreakConstructorInitializers: BeforeComma
 BreakFunctionDefinitionParameters: false
-BreakInheritanceList: AfterComma
+BreakInheritanceList: BeforeColon
 BreakStringLiterals: true
-BreakTemplateDeclarations: MultiLine
+BreakTemplateDeclarations: Yes
 ColumnLimit: 128
 CommentPragmas: "^ IWYU pragma:"
-CompactNamespaces: true
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
+CompactNamespaces: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
@@ -129,7 +127,7 @@ DisableFormat: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
 ExperimentalAutoDetectBinPacking: false
-FixNamespaceComments: true
+FixNamespaceComments: false
 ForEachMacros:
   - foreach
   - Q_FOREACH
@@ -155,14 +153,14 @@ IncludeIsMainSourceRegex: ""
 IndentAccessModifiers: true
 IndentCaseBlocks: false
 IndentCaseLabels: true
-IndentExternBlock: Indent
-IndentGotoLabels: false
+IndentExternBlock: AfterExternBlock
+IndentGotoLabels: true
 IndentPPDirectives: AfterHash
 IndentRequiresClause: true
 IndentWidth: 4
-IndentWrappedFunctionNames: true
+IndentWrappedFunctionNames: false
 InsertBraces: false
-InsertNewlineAtEOF: true
+InsertNewlineAtEOF: false
 InsertTrailingCommas: None
 IntegerLiteralSeparator:
   Binary: 0
@@ -174,8 +172,8 @@ IntegerLiteralSeparator:
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLines:
-  AtEndOfFile: true
-  AtStartOfBlock: false
+  AtEndOfFile: false
+  AtStartOfBlock: true
   AtStartOfFile: true
 LambdaBodyIndentation: Signature
 LineEnding: LF
@@ -201,9 +199,9 @@ PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyIndentedWhitespace: 0
-PenaltyReturnTypeOnItsOwnLine: 60
+PenaltyReturnTypeOnItsOwnLine: 1000
 PointerAlignment: Right
-QualifierAlignment: Leave
+QualifierAlignment: Left
 ReferenceAlignment: Pointer
 ReflowComments: true
 RemoveBracesLLVM: false
@@ -227,7 +225,7 @@ SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeJsonColon: false
-SpaceBeforeParens: Never
+SpaceBeforeParens: ControlStatementsExceptControlMacros
 SpaceBeforeParensOptions:
   AfterControlStatements: false
   AfterForeachMacros: false
@@ -256,7 +254,7 @@ SpacesInParensOptions:
   InEmptyParentheses: false
   Other: false
 SpacesInSquareBrackets: false
-Standard: c++03
+Standard: Latest
 StatementAttributeLikeMacros:
   - Q_EMIT
 StatementMacros:
@@ -272,4 +270,5 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - PP_STRINGIZE
   - STRINGIZE
+AllowAllConstructorInitializersOnNextLine: false
 Language: Cpp

@@ -26,7 +26,7 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID, size_t buffe
     SaveInfoReader::close();
 
     const bool openError = error::occurred(fsOpenSaveDataInfoReader(&m_infoReader, saveDataSpaceID));
-    if(openError) { return; }
+    if (openError) { return; }
     SaveInfoReader::allocate_save_info_array(bufferCount);
 
     m_isOpen = true;
@@ -37,24 +37,22 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, AccountUid accou
     m_isOpen = false;
     SaveInfoReader::close();
 
-    const FsSaveDataFilter saveFilter = {
-        .filter_by_application_id      = false,
-        .filter_by_save_data_type      = false,
-        .filter_by_user_id             = true,
-        .filter_by_system_save_data_id = false,
-        .filter_by_index               = false,
-        .save_data_rank                = FsSaveDataRank_Primary,
-        .padding                       = {0},
-        .attr                          = {.application_id      = 0,
-                                          .uid                 = accountID,
-                                          .system_save_data_id = 0,
-                                          .save_data_type      = 0,
-                                          .save_data_rank      = FsSaveDataRank_Primary,
-                                          .save_data_index     = 0}
-    };
+    const FsSaveDataFilter saveFilter = {.filter_by_application_id      = false,
+                                         .filter_by_save_data_type      = false,
+                                         .filter_by_user_id             = true,
+                                         .filter_by_system_save_data_id = false,
+                                         .filter_by_index               = false,
+                                         .save_data_rank                = FsSaveDataRank_Primary,
+                                         .padding                       = {0},
+                                         .attr                          = {.application_id      = 0,
+                                                                           .uid                 = accountID,
+                                                                           .system_save_data_id = 0,
+                                                                           .save_data_type      = 0,
+                                                                           .save_data_rank      = FsSaveDataRank_Primary,
+                                                                           .save_data_index     = 0}};
 
     const bool openError = error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter));
-    if(openError) { return; }
+    if (openError) { return; }
     SaveInfoReader::allocate_save_info_array(bufferCount);
 
     m_isOpen = true;
@@ -65,23 +63,21 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType s
     m_isOpen = false;
     SaveInfoReader::close();
 
-    const FsSaveDataFilter saveFilter = {
-        .filter_by_application_id      = false,
-        .filter_by_save_data_type      = true,
-        .filter_by_user_id             = false,
-        .filter_by_system_save_data_id = false,
-        .filter_by_index               = false,
-        .save_data_rank                = FsSaveDataRank_Primary,
-        .padding                       = {0},
-        .attr                          = {.application_id  = 0,
-                                          .uid             = {0},
-                                          .save_data_type  = saveType,
-                                          .save_data_rank  = FsSaveDataRank_Primary,
-                                          .save_data_index = 0}
-    };
+    const FsSaveDataFilter saveFilter = {.filter_by_application_id      = false,
+                                         .filter_by_save_data_type      = true,
+                                         .filter_by_user_id             = false,
+                                         .filter_by_system_save_data_id = false,
+                                         .filter_by_index               = false,
+                                         .save_data_rank                = FsSaveDataRank_Primary,
+                                         .padding                       = {0},
+                                         .attr                          = {.application_id  = 0,
+                                                                           .uid             = {0},
+                                                                           .save_data_type  = saveType,
+                                                                           .save_data_rank  = FsSaveDataRank_Primary,
+                                                                           .save_data_index = 0}};
 
     const bool openError = error::occurred(fsOpenSaveDataInfoReaderWithFilter(&m_infoReader, saveSpaceID, &saveFilter));
-    if(openError) { return; }
+    if (openError) { return; }
     SaveInfoReader::allocate_save_info_array(bufferCount);
 
     m_isOpen = true;
@@ -89,7 +85,7 @@ void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType s
 
 void fslib::SaveInfoReader::close()
 {
-    if(m_isOpen)
+    if (m_isOpen)
     {
         fsSaveDataInfoReaderClose(&m_infoReader);
         m_isOpen = false;
@@ -104,7 +100,7 @@ bool fslib::SaveInfoReader::read()
     const bool readError =
         error::occurred(fsSaveDataInfoReaderRead(&m_infoReader, m_saveInfoBuffer.get(), m_bufferCount, &m_readCount));
     const bool validCount = m_readCount > 0;
-    if(readError || !validCount) { return false; }
+    if (readError || !validCount) { return false; }
 
     return true;
 }
@@ -115,7 +111,7 @@ fslib::SaveInfoReader::operator bool() const { return m_isOpen; }
 
 FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index)
 {
-    if(index < 0 || index >= static_cast<int>(m_bufferCount))
+    if (index < 0 || index >= static_cast<int>(m_bufferCount))
     {
         // To do: Better solution.
         return m_saveInfoBuffer[0];

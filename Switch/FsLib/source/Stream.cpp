@@ -10,7 +10,7 @@ bool fslib::Stream::end_of_stream() const { return m_offset >= m_streamSize; }
 
 void fslib::Stream::seek(int64_t offset, uint8_t origin)
 {
-    switch(origin)
+    switch (origin)
     {
         case Stream::BEGINNING:
         {
@@ -38,6 +38,6 @@ fslib::Stream::operator bool() const { return m_isOpen; }
 
 void fslib::Stream::ensure_offset_is_valid()
 {
-    if(m_offset < 0) { m_offset = 0; }
-    else if(m_offset > m_streamSize) { m_offset = m_streamSize; }
+    if (m_offset < 0) { m_offset = 0; }
+    else if (m_offset > m_streamSize) { m_offset = m_streamSize; }
 }
