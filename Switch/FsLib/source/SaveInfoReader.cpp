@@ -109,15 +109,13 @@ int64_t fslib::SaveInfoReader::get_read_count() const { return m_readCount; }
 
 fslib::SaveInfoReader::operator bool() const { return m_isOpen; }
 
-FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index)
+FsSaveDataInfo &fslib::SaveInfoReader::at(int index)
 {
-    if (index < 0 || index >= static_cast<int>(m_bufferCount))
-    {
-        // To do: Better solution.
-        return m_saveInfoBuffer[0];
-    }
+    if (index < 0 || index >= m_readCount) { return m_saveInfoBuffer[0]; }
     return m_saveInfoBuffer[index];
 }
+
+FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index) { return m_saveInfoBuffer[index]; }
 
 void fslib::SaveInfoReader::allocate_save_info_array(size_t bufferCount)
 {

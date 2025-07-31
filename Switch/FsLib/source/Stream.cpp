@@ -12,25 +12,10 @@ void fslib::Stream::seek(int64_t offset, uint8_t origin)
 {
     switch (origin)
     {
-        case Stream::BEGINNING:
-        {
-            m_offset = offset;
-        }
-        break;
-
-        case Stream::CURRENT:
-        {
-            m_offset += offset;
-        }
-        break;
-
-        case Stream::END:
-        {
-            m_offset = m_streamSize + offset;
-        }
-        break;
+        case Stream::BEGINNING: m_offset = offset; break;
+        case Stream::CURRENT: m_offset += offset; break;
+        case Stream::END: m_offset = m_streamSize + offset; break;
     }
-
     Stream::ensure_offset_is_valid();
 }
 

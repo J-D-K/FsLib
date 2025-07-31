@@ -60,9 +60,12 @@ namespace fslib
             /// @brief Operator that can be used in place of isOpen.
             operator bool() const;
 
+            /// @brief Returns a reference to the FsSaveDataInfo at index. Bounds checking is performed.
+            FsSaveDataInfo &at(int index);
+
             /// @brief Operator used to retrieve references to the FsSavDataInfo array.
             /// @param index Index of the FsSaveDataInfo struct to get.
-            /// @return Reference to the FsSaveDataInfo struct at index. Bounds checking is performed.
+            /// @return Reference to the FsSaveDataInfo struct at index.
             FsSaveDataInfo &operator[](int index);
 
         private:

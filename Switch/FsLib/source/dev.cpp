@@ -73,24 +73,9 @@ extern "C"
 
         switch (flags & O_ACCMODE)
         {
-            case O_RDONLY:
-            {
-                openFlags = FsOpenMode_Read;
-            }
-            break;
-
-            case O_WRONLY:
-            {
-                openFlags = FsOpenMode_Write;
-            }
-            break;
-
-            case O_RDWR:
-            {
-                openFlags = FsOpenMode_Read | FsOpenMode_Write;
-            }
-            break;
-
+            case O_RDONLY: openFlags = FsOpenMode_Read; break;
+            case O_WRONLY: openFlags = FsOpenMode_Write; break;
+            case O_RDWR: openFlags = FsOpenMode_Read | FsOpenMode_Write; break;
             default:
             {
                 reent->_errno = EINVAL;
@@ -119,7 +104,7 @@ extern "C"
     static int fslib_dev_close(struct _reent *reent, void *fileID)
     {
         // Dereference pointer to int.
-        int id = *static_cast<int *>(fileID);
+        const int id = *static_cast<int *>(fileID);
 
         // Check to make sure it exists in map.
         if (!file_is_valid(id))
@@ -135,7 +120,7 @@ extern "C"
 
     static ssize_t fslib_dev_write(struct _reent *reent, void *fileID, const char *buffer, size_t bufferSize)
     {
-        int id = *static_cast<int *>(fileID);
+        const int id = *static_cast<int *>(fileID);
         if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
@@ -146,7 +131,7 @@ extern "C"
 
     static ssize_t fslib_dev_read(struct _reent *reent, void *fileID, char *buffer, size_t bufferSize)
     {
-        int id = *static_cast<int *>(fileID);
+        const int id = *static_cast<int *>(fileID);
         if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
@@ -157,7 +142,7 @@ extern "C"
 
     static ssize_t fslib_dev_seek(struct _reent *reent, void *fileID, off_t offset, int direction)
     {
-        int id = *static_cast<int *>(fileID);
+        const int id = *static_cast<int *>(fileID);
         if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
@@ -167,23 +152,9 @@ extern "C"
         fslib::File &target = s_fileMap.at(id);
         switch (direction)
         {
-            case SEEK_SET:
-            {
-                target.seek(offset, target.BEGINNING);
-            }
-            break;
-
-            case SEEK_CUR:
-            {
-                target.seek(offset, target.CURRENT);
-            }
-            break;
-
-            case SEEK_END:
-            {
-                target.seek(offset, target.END);
-            }
-            break;
+            case SEEK_SET: target.seek(offset, target.BEGINNING); break;
+            case SEEK_CUR: target.seek(offset, target.CURRENT); break;
+            case SEEK_END: target.seek(offset, target.END); break;
         }
         return target.tell();
     }

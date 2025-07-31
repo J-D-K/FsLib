@@ -92,11 +92,7 @@ bool fslib::Directory::is_directory(int index) const
 
 fslib::Directory::operator bool() const { return m_wasRead; }
 
-const char *fslib::Directory::operator[](int index) const
-{
-    if (!Directory::index_check(index)) { return nullptr; }
-    return m_directoryList[index].name;
-}
+const char *fslib::Directory::operator[](int index) const { return m_directoryList[index].name; }
 
 bool fslib::Directory::index_check(int index) const { return index >= 0 && index < m_entryCount; }
 
@@ -106,13 +102,13 @@ static bool compare_entries(const FsDirectoryEntry &entryA, const FsDirectoryEnt
 {
     if (entryA.type != entryB.type) { return entryA.type == FsDirEntryType_Dir; }
 
-    size_t entryALength  = std::char_traits<char>::length(entryA.name);
-    size_t entryBLength  = std::char_traits<char>::length(entryB.name);
-    size_t shortestEntry = entryALength < entryBLength ? entryALength : entryBLength;
+    const size_t entryALength  = std::char_traits<char>::length(entryA.name);
+    const size_t entryBLength  = std::char_traits<char>::length(entryB.name);
+    const size_t shortestEntry = entryALength < entryBLength ? entryALength : entryBLength;
     for (size_t i = 0; i < shortestEntry;)
     {
-        int charA = std::tolower(entryA.name[i]);
-        int charB = std::tolower(entryB.name[i]);
+        const int charA = std::tolower(entryA.name[i]);
+        const int charB = std::tolower(entryB.name[i]);
         if (charA != charB) { return charA < charB; }
     }
     return false;
