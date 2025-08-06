@@ -35,7 +35,7 @@ bool fslib::openExtData(std::u16string_view deviceName, uint32_t extDataID)
         return false;
     }
 
-    if (fslib::mapArchiveToDevice(deviceName, archive))
+    if (!fslib::mapArchiveToDevice(deviceName, archive))
     {
         FSUSER_CloseArchive(archive);
         return false;
