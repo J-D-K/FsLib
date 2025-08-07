@@ -295,7 +295,7 @@ bool fslib::File::resizeIfNeeded(size_t bufferSize)
     size_t spaceRemaining = m_fileSize - m_offset;
 
     // Everything is fine.
-    if (spaceRemaining >= m_fileSize)
+    if (spaceRemaining >= bufferSize)
     {
         return true;
     }
