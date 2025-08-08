@@ -133,40 +133,18 @@ fslib::Path &fslib::Path::operator=(std::u16string_view path)
     const size_t deviceEnd = path.find_first_of(CHAR16_SLASH);
     if (deviceEnd == path.npos) { return *this; }
 
-    const std::u16string_view device  = path.substr(0, deviceEnd);
+    const std::u16string_view device  = path.substr(0, deviceEnd + 1);
     const std::u16string_view absPath = path.substr(deviceEnd + 1);
     size_t pathBegin                  = absPath.find_first_not_of(CHAR16_SLASH);
     size_t pathEnd                    = absPath.find_last_not_of(CHAR16_SLASH);
-    m_path                            = device;
-    m_path += absPath.substr(pathBegin, pathEnd - pathBegin);
+    if (pathBegin == absPath.npos || pathEnd == absPath.npos) { return *this; }
+
+    m_path = device;
+    m_path += absPath.substr(pathBegin, (pathEnd - pathBegin) + 1);
     return *this;
 }
 
-fslib::Path &fslib::Path::operator/=(const char16_t *path)
-{
-    return *this /= std::u16string_view(path);
-
-    // size_t pathLength         = 0;
-    // const char16_t *pathBegin = nullptr;
-    // getTrimmedPath(pathData, &pathBegin, pathLength);
-
-    // // Check to make sure buffer has enough space.
-    // if ((m_pathLength + pathLength) + 1 >= m_pathSize)
-    // {
-    //     // To do: The thing.
-    //     return *this;
-    // }
-
-    // // This is to avoid doubling up slashes after the device.
-    // if (m_path[m_pathLength - 1] != u'/') { m_path[m_pathLength++] = u'/'; }
-
-    // // Copy trimmed path to the end of our current path.
-    // std::memcpy(&m_path[m_pathLength], pathBegin, pathLength * sizeof(char16_t));
-
-    // m_pathLength += pathLength;
-
-    // return *this;
-}
+fslib::Path &fslib::Path::operator/=(const char16_t *path) { return *this /= std::u16string_view(path); }
 
 fslib::Path &fslib::Path::operator/=(const uint16_t *path)
 {
@@ -179,14 +157,15 @@ fslib::Path &fslib::Path::operator/=(const std::u16string &path) { return *this 
 fslib::Path &fslib::Path::operator/=(std::u16string_view path)
 {
     const size_t pathBegin = path.find_first_not_of(CHAR16_SLASH);
-    const size_t pathEnd   = path.find_last_not_of(CHAR16_SLASH);
+    const size_t pathEnd   = path.find_last_not_of(CHAR16_SLASH) + 1;
+    if (pathBegin == path.npos || pathEnd == path.npos) { return *this; }
     if (m_path.back() != CHAR16_SLASH) { m_path.append(u"/"); }
 
-    m_path += path.substr(pathBegin, pathEnd - pathBegin);
+    m_path += path.substr(pathBegin, (pathEnd - pathBegin) + 1);
     return *this;
 }
 
-fslib::Path &fslib::Path::operator+=(const char16_t *path) { return *this = std::u16string_view(path); }
+fslib::Path &fslib::Path::operator+=(const char16_t *path) { return *this += std::u16string_view(path); }
 
 fslib::Path &fslib::Path::operator+=(const uint16_t *path)
 {
@@ -198,7 +177,7 @@ fslib::Path &fslib::Path::operator+=(const std::u16string &path) { return *this 
 
 fslib::Path &fslib::Path::operator+=(std::u16string_view path)
 {
-    m_path += path;
+    m_path.append(path);
     return *this;
 }
 
