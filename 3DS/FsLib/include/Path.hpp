@@ -1,13 +1,12 @@
 #pragma once
 #include <3ds.h>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 namespace fslib
 {
     /// @brief The maximum path length FsLib on 3DS supports.
-    static constexpr size_t MAX_PATH = 0x301;
+    inline constexpr size_t MAX_PATH = 0x301;
 
     /// @brief Class to make working with UTF-16 paths easier to manage.
     class Path
@@ -41,48 +40,48 @@ namespace fslib
 
             /// @brief Performs checks and returns if path is valid for use with FsLib.
             /// @return True if path is valid. False if it is not.
-            bool isValid() const;
+            bool is_valid() const;
 
             /// @brief Returns a sub-path ending at PathLength
             /// @param pathLength Length of subpath to return.
             /// @return Sub-path.
-            Path subPath(size_t pathLength) const;
+            Path sub_path(size_t pathLength) const;
 
             /// @brief Searches for first occurrence of Character in Path. Overload starts at Begin.
             /// @param character Character to search.
             /// @return Position of Character or Path::NotFound on failure.
-            size_t findFirstOf(char16_t character) const;
-            size_t findFirstOf(char16_t character, size_t begin) const;
+            size_t find_first_of(char16_t character) const;
+            size_t find_first_of(char16_t character, size_t begin) const;
 
             /// @brief Searches backwards to find last occurrence of Character in string. Overload starts at begin.
             /// @param character Character to search for.
             /// @return Position of Character or Path::NotFound on failure.
-            size_t findLastOf(char16_t character) const;
-            size_t findLastOf(char16_t character, size_t begin) const;
+            size_t find_last_of(char16_t character) const;
+            size_t find_last_of(char16_t character, size_t begin) const;
 
             /// @brief Returns the entire path as a C const char16_t* String
             /// @return Pointer to path string buffer.
-            const char16_t *cString() const;
+            const char16_t *full_path() const;
 
             /// @brief Returns the device as a UTF-16 u16string_view for use with FsLib internally.
             /// @return Device string.
-            std::u16string_view getDevice() const;
+            std::u16string_view get_device() const;
 
             /// @brief Returns file name as u16string_view.
             /// @return File name
-            std::u16string_view getFileName() const;
+            const char16_t get_filename() const;
 
             /// @brief Returns extension of path as u16string_view.
             /// @return Path's extension.
-            std::u16string_view getExtension() const;
+            const char16_t *get_extension() const;
 
             /// @brief Returns an FS_Path for use with 3DS FS functions.
             /// @return FS_Path
-            FS_Path getPath() const;
+            FS_Path get_path() const;
 
             /// @brief Returns length of the entire path string.
             /// @return Length of path string.
-            size_t getLength() const;
+            size_t get_length() const;
 
             /// @brief Assigns Path from various standard UTF-16 string types.
             /// @param path Path to assign from
@@ -150,29 +149,14 @@ namespace fslib
             Path &operator+=(std::u16string_view pathData);
 
             /// @brief This is the value that is returned when find[X]Of can't find the character.
-            static constexpr uint16_t notFound = -1;
+            static constexpr uint16_t NOT_FOUND = -1;
 
         private:
-            /// @brief Buffer 0x301 + Device length * sizeof(char16_t) bytes long containing path data.
-            char16_t *m_path = nullptr;
+            /// @brief 3DS doesn't have weird problems with path buffer sizes like switch so...
+            std::u16string m_path{};
 
             /// @brief Pointer to where the end of the device in the path is located.
-            const char16_t *m_deviceEnd = nullptr;
-
-            /// @brief Size of path buffer.
-            uint16_t m_pathSize = 0;
-
-            /// @brief Current length of the path.
-            uint16_t m_pathLength = 0;
-
-            /// @brief Allocates memory to hold path.
-            /// @param pathSize Size of buffer for path.
-            /// @return True on success. False on failure.
-            /// @note The path is a raw pointer to allocated memory so copies can be made.
-            bool allocatePath(uint16_t pathSize);
-
-            /// @brief Frees memory used for path buffer if it isn't nullptr.
-            void freePath();
+            const char16_t *m_deviceEnd{};
     };
 
     /// @brief Concatenates a path to a string and returns a new one. Checks are performed and / is added if needed.

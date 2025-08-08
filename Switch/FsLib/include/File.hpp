@@ -103,7 +103,7 @@ namespace fslib
             FsFile m_fileHandle{};
 
             /// @brief Stores flags used to open file.
-            uint32_t m_openFlags{};
+            uint32_t m_flags{};
 
             /// @brief Private: Resizes file if Buffer is too large to fit in remaining space.
             /// @param bufferSize Size of buffer.
@@ -112,14 +112,14 @@ namespace fslib
             /// @brief Private: Returns if file has flag set to read.
             inline bool is_open_for_reading() const
             {
-                const bool openForRead = (m_openFlags & FsOpenMode_Read);
+                const bool openForRead = (m_flags & FsOpenMode_Read);
                 return m_isOpen && openForRead;
             }
 
             /// @brief Private: Returns if file has flag set to write.
             inline bool is_open_for_writing() const
             {
-                const bool openForWrite = (m_openFlags & FsOpenMode_Write);
+                const bool openForWrite = (m_flags & FsOpenMode_Write);
                 return m_isOpen && openForWrite;
             }
     };

@@ -1,130 +1,83 @@
+#include "error.hpp"
 #include "fslib.hpp"
 #include "string.hpp"
+
 #include <algorithm>
 #include <cstring>
 #include <string>
 
-extern std::string g_fslibErrorString;
+// Definition at bottom.
+static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryEntry &entryB);
 
-// This sorts the entries Directories->File, then pseudo-alphabetically.
-static bool compareEntries(const FS_DirectoryEntry &entryA, const FS_DirectoryEntry &entryB)
-{
-    if (entryA.attributes != entryB.attributes)
-    {
-        return entryA.attributes & FS_ATTRIBUTE_DIRECTORY;
-    }
-
-    // Get the shortest length to avoid reading out-of-bounds.
-    size_t entryALength = std::char_traits<uint16_t>::length(entryA.name);
-    size_t entryBLength = std::char_traits<uint16_t>::length(entryB.name);
-    size_t shortestEntry = entryALength < entryBLength ? entryALength : entryBLength;
-    for (size_t i = 0; i < shortestEntry; i++)
-    {
-        // Lower case the character so that doesn't impact sorting.
-        int charA = std::tolower(entryA.name[i]);
-        int charB = std::tolower(entryB.name[i]);
-        if (charA != charB)
-        {
-            return charA < charB;
-        }
-    }
-    return false;
-}
-
-fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortEntries)
-{
-    Directory::open(directoryPath, sortEntries);
-}
+fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortEntries) { Directory::open(directoryPath, sortEntries); }
 
 void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
 {
-    // Just in case directory is reused.
     m_wasOpened = false;
-    m_directoryList.clear();
+    m_list.clear();
 
-    FS_Archive archive;
-    if (!fslib::processDeviceAndPath(directoryPath, &archive))
-    {
-        // Function will set error string.
-        return;
-    }
+    FS_Archive archive{};
+    const bool found = fslib::get_archive_by_device_name(directoryPath.get_device(), archive);
+    if (!found) { return; }
 
-    Result fsError = FSUSER_OpenDirectory(&m_directoryHandle, archive, directoryPath.getPath());
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening directory: 0x%08X.", fsError);
-        return;
-    }
+    const bool openError = error::libctru(FSUSER_OpenDirectory(&m_handle, archive, directoryPath.get_path()));
+    if (openError) { return; }
 
-    // Switch has a function to fetch entry count. 3DS doesn't, so we have to loop and load one at a time.
-    uint32_t entriesRead = 0;
-    FS_DirectoryEntry currentEntry;
-    while (R_SUCCEEDED(FSDIR_Read(m_directoryHandle, &entriesRead, 1, &currentEntry)) && entriesRead == 1)
-    {
-        m_directoryList.push_back(currentEntry);
-    }
-    // The directory was read and there's no reason to keep it open.
+    uint32_t entriesRead{};
+    FS_DirectoryEntry entry{};
+    while (R_SUCCEEDED(FSDIR_Read(&m_handle, &entriesRead, 1, &entry)) && entriesRead == 1) { m_list.push_back(entry); }
     Directory::close();
 
-    // Sort entries if requested.
-    if (sortEntries)
-    {
-        std::sort(m_directoryList.begin(), m_directoryList.end(), compareEntries);
-    }
+    if (sortEntries) { std::sort(m_list.begin(), m_list.end(), compare_entries); }
 
-    // Should be good to go?
     m_wasOpened = true;
 }
 
-bool fslib::Directory::isOpen() const
+bool fslib::Directory::is_open() const { return m_wasOpened; }
+
+size_t fslib::Directory::get_count() const { return m_list.size(); }
+
+bool fslib::Directory::is_directory(int index) const
 {
-    return m_wasOpened;
+    const bool indexValid = Directory::index_check(index);
+    if (!indexValid) { return false; }
+    return m_list[index].attributes & FS_ATTRIBUTE_DIRECTORY;
 }
 
-uint32_t fslib::Directory::getCount() const
+const char16_t *fslib::Directory::get_entry(int index) const
 {
-    return m_directoryList.size();
+    const bool indexValid = Directory::index_check(index);
+    if (!indexValid) { return nullptr; }
+    return reinterpret_cast<const char16_t *>(m_list[index].name);
 }
 
-bool fslib::Directory::isDirectory(int index) const
-{
-    if (index < 0 || index >= static_cast<int>(m_directoryList.size()))
-    {
-        return false;
-    }
-    return m_directoryList.at(index).attributes & FS_ATTRIBUTE_DIRECTORY;
-}
-
-std::u16string_view fslib::Directory::getEntry(int index) const
-{
-    if (index < 0 || index >= static_cast<int>(m_directoryList.size()))
-    {
-        return std::u16string_view(u"nullptr");
-    }
-    return std::u16string_view(reinterpret_cast<const char16_t *>(m_directoryList.at(index).name));
-}
-
-const char16_t *fslib::Directory::operator[](int index) const
-{
-    if (index < 0 || index >= static_cast<int>(m_directoryList.size()))
-    {
-        return nullptr;
-    }
-    return reinterpret_cast<const char16_t *>(m_directoryList.at(index).name);
-}
+const char16_t *fslib::Directory::operator[](int index) const { return reinterpret_cast<const char16_t *>(m_list[index].name); }
 
 bool fslib::Directory::close()
 {
-    if (!m_wasOpened)
+    if (!m_wasOpened) { return false; }
+
+    const bool closeError = error::libctru(FSDIR_Close(m_handle));
+    if (closeError) { return false; }
+    return true;
+}
+
+static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryEntry &entryB)
+{
     {
-        return false;
+        const uint32_t attributesA = entryA.attributes;
+        const uint32_t attributesB = entryB.attributes;
+        if (attributesA != attributesB) { return attributesA & FS_ATTRIBUTE_DIRECTORY; }
     }
 
-    Result fsError = FSDIR_Close(m_directoryHandle);
-    if (R_FAILED(fsError))
+    const int lengthA  = std::char_traits<uint16_t>::length(entryA.name);
+    const int lengthB  = std::char_traits<uint16_t>::length(entryB.name);
+    const int shortest = lengthA < lengthB ? lengthA : lengthB;
+    for (int i = 0; i < shortest; i++)
     {
-        g_fslibErrorString = string::getFormattedString("Error closing directory: 0x%08X.", fsError);
-        return false;
+        const int charA = std::tolower(entryA.name[i]);
+        const int charB = std::tolower(entryB.name[i]);
+        if (charA != charB) { return charA < charB; }
     }
     return true;
 }

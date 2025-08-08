@@ -1,4 +1,6 @@
 #include "fslib.hpp"
+
+#include <array>
 #include <fcntl.h>
 #include <memory>
 #include <string>
@@ -6,199 +8,153 @@
 #include <unordered_map>
 
 /*
-    This is to help make FsLib work like a drop-in replacement for ctrulib's archive_dev. It's more of a compatibility layer to make libs work
-    than a full replacement. It's basically a wrapper for newlib files -> FsLib files.
+    This is to help make FsLib work like a drop-in replacement for ctrulib's archive_dev. It's more of a compatibility layer to
+   make libs work than a full replacement. It's basically a wrapper for newlib files -> FsLib files.
 */
 
 // Declarations.
 extern "C"
 {
-    static int fslibDevOpen(struct _reent *reent, void *fileID, const char *filePath, int flags, int mode);
-    static int fslibDevClose(struct _reent *reent, void *fileID);
-    static ssize_t fslibDevWrite(struct _reent *reent, void *fileID, const char *buffer, size_t bufferSize);
-    static ssize_t fslibDevRead(struct _reent *reent, void *fileID, char *buffer, size_t bufferSize);
-    static off_t fslibDevSeek(struct _reent *reent, void *fileID, off_t offset, int origin);
+    static int fslib_dev_open(struct _reent *reent, void *fileID, const char *filePath, int flags, int mode);
+    static int fslib_dev_close(struct _reent *reent, void *fileID);
+    static ssize_t fslib_dev_write(struct _reent *reent, void *fileID, const char *buffer, size_t bufferSize);
+    static ssize_t fslib_dev_read(struct _reent *reent, void *fileID, char *buffer, size_t bufferSize);
+    static off_t fslib_dev_seek(struct _reent *reent, void *fileID, off_t offset, int origin);
 }
 
 namespace
 {
     // SD devoptab
-    constexpr devoptab_t SDMC_DEVOPTAB = {.name = "sdmc",
+    constexpr devoptab_t SDMC_DEVOPTAB = {.name       = "sdmc",
                                           .structSize = sizeof(unsigned int),
-                                          .open_r = fslibDevOpen,
-                                          .close_r = fslibDevClose,
-                                          .write_r = fslibDevWrite,
-                                          .read_r = fslibDevRead,
-                                          .seek_r = fslibDevSeek};
+                                          .open_r     = fslib_dev_open,
+                                          .close_r    = fslib_dev_close,
+                                          .write_r    = fslib_dev_write,
+                                          .read_r     = fslib_dev_read,
+                                          .seek_r     = fslib_dev_seek};
     // Map of open files.
     std::unordered_map<int, fslib::File> s_fileMap;
 } // namespace
 
 // This checks if the file exists in the map.
-static inline bool fileIsValid(int fileID)
-{
-    return s_fileMap.find(fileID) != s_fileMap.end();
-}
+static inline bool file_is_valid(int fileID) { return s_fileMap.find(fileID) != s_fileMap.end(); }
 
 // This "installs" the SDMC_DEVOPTAB in place of archive_dev's
 bool fslib::dev::initializeSDMC()
 {
-    if (AddDevice(&SDMC_DEVOPTAB) < 0)
-    {
-        return false;
-    }
+    if (AddDevice(&SDMC_DEVOPTAB) < 0) { return false; }
     return true;
 }
 
 extern "C"
 {
-    static int fslibDevOpen(struct _reent *reent, void *fileID, const char *filePath, int flags, int mode)
+    static int fslib_dev_open(struct _reent *reent, void *fileID, const char *filePath, int flags, int mode)
     {
         // This is how we'll keep track of the current file id.
-        static int currentFileID = 0;
+        static int currentID{};
 
         // Path we're going to use. UTF-8 -> UTF-16 conversion is scoped so it's free asap.
-        fslib::Path path;
+        fslib::Path path{};
         {
-            char16_t pathBuffer[fslib::MAX_PATH] = {0};
-            utf8_to_utf16(reinterpret_cast<uint16_t *>(pathBuffer),
-                          reinterpret_cast<const uint8_t *>(filePath),
-                          fslib::MAX_PATH);
-            path = pathBuffer;
+            std::array<uint16_t, fslib::MAX_PATH> pathBuffer = {0};
+            const uint8_t *pathData                          = reinterpret_cast<const uint8_t *>(filePath);
+            const ssize_t unitCount                          = utf8_to_utf16(pathBuffer.data(), pathData, fslib::MAX_PATH);
+            path                                             = pathBuffer.data();
         }
 
-        // I'm not rewriting this check.
-        if (!path.isValid())
+        if (!path.is_valid())
         {
             reent->_errno = ENOENT;
             return -1;
         }
 
-        uint32_t openFlags = 0;
+        uint32_t openFlags{};
         switch (flags & O_ACCMODE)
         {
-            case O_RDONLY:
-            {
-                openFlags = FS_OPEN_READ;
-            }
-            break;
-
-            case O_WRONLY:
-            {
-                openFlags = FS_OPEN_WRITE;
-            }
-            break;
-
-            case O_RDWR:
-            {
-                openFlags = FS_OPEN_READ | FS_OPEN_WRITE;
-            }
-            break;
-
-            default:
-            {
-                reent->_errno = EINVAL;
-                return -1;
-            }
-            break;
+            case O_RDONLY: openFlags = FS_OPEN_READ; break;
+            case O_WRONLY: openFlags = FS_OPEN_WRITE; break;
+            case O_RDWR: openFlags = FS_OPEN_READ | FS_OPEN_WRITE; break;
+            default: return -1;
         }
 
-        // The first condition is a precaution.
-        if (flags & O_APPEND && !fslib::fileExists(path))
-        {
-            openFlags |= FS_OPEN_CREATE;
-        }
-        else if (flags & O_APPEND)
-        {
-            openFlags |= FS_OPEN_APPEND;
-        }
-        else if (flags & O_CREAT)
-        {
-            openFlags |= FS_OPEN_CREATE;
-        }
-        // Get and increment file id
-        int newFileID = currentFileID++;
-        // Set the pointer to it.
-        *reinterpret_cast<int *>(fileID) = newFileID;
+        const bool exists       = fslib::file_exists(path);
+        const bool append       = flags & O_APPEND;
+        const bool appendCreate = append && !exists;
+        const bool create       = flags & O_CREAT;
 
-        // Open file in map.
-        s_fileMap[newFileID].open(path, openFlags);
-        if (!s_fileMap[newFileID].isOpen())
+        if (appendCreate) { openFlags |= FS_OPEN_CREATE }
+        else if (append) { openFlags |= FS_OPEN_APPEND; }
+        else if (create) { openFlags |= FS_OPEN_CREATE; }
+
+        const int newID                  = currentID++;
+        *reinterpret_cast<int *>(fileID) = newID;
+
+        fslib::File &newFile = s_fileMap[newID];
+        newFile.open(path, openFlags);
+        if (!newFile.is_open())
         {
-            // Erase so map continues to work as intended.
-            s_fileMap.erase(newFileID);
+            s_fileMap.erase(newID);
             return -1;
         }
         // Should be fine.
         return 0;
     }
 
-    int fslibDevClose(struct _reent *reent, void *fileID)
+    int fslib_dev_close(struct _reent *reent, void *fileID)
     {
-        // Cast and dereference pointer.
-        int id = *reinterpret_cast<int *>(fileID);
-        // Check to make sure we don't try to free and erase a non-existant file.
-        if (!fileIsValid(id))
+        const int id = *reinterpret_cast<int *>(fileID);
+        if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
         }
-        // Just erasing from the map will cause the destructor to be called and the handle closed.
+
         s_fileMap.erase(id);
         return 0;
     }
 
-    ssize_t fslibDevWrite(struct _reent *reent, void *fileID, const char *buffer, size_t bufferSize)
+    ssize_t fslib_dev_write(struct _reent *reent, void *fileID, const char *buffer, size_t bufferSize)
     {
-        int id = *reinterpret_cast<int *>(fileID);
-        if (!fileIsValid(id))
+        const int id = *reinterpret_cast<int *>(fileID);
+        if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
         }
-        return s_fileMap[id].write(buffer, bufferSize);
+
+        fslib::File &file = s_fileMap.at(id);
+        return file.write(buffer, bufferSize);
     }
 
-    ssize_t fslibDevRead(struct _reent *reent, void *fileID, char *buffer, size_t bufferSize)
+    ssize_t fslib_dev_read(struct _reent *reent, void *fileID, char *buffer, size_t bufferSize)
     {
-        int id = *reinterpret_cast<int *>(fileID);
-        if (!fileIsValid(id))
+        const int id = *reinterpret_cast<int *>(fileID);
+        if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
         }
-        return s_fileMap[id].read(buffer, bufferSize);
+
+        fslib::File &file = s_fileMap.at(id);
+        return file.read(buffer, bufferSize);
     }
 
-    off_t fslibDevSeek(struct _reent *reent, void *fileID, off_t offset, int origin)
+    off_t fslib_dev_seek(struct _reent *reent, void *fileID, off_t offset, int origin)
     {
-        int id = *reinterpret_cast<int *>(fileID);
-        if (!fileIsValid(id))
+        const int id = *reinterpret_cast<int *>(fileID);
+        if (!file_is_valid(id))
         {
             reent->_errno = EBADF;
             return -1;
         }
 
+        fslib::File &file = s_fileMap.at(id);
         switch (origin)
         {
-            case SEEK_SET:
-            {
-                s_fileMap[id].seek(offset, s_fileMap[id].beginning);
-            }
-            break;
-
-            case SEEK_CUR:
-            {
-                s_fileMap[id].seek(offset, s_fileMap[id].current);
-            }
-            break;
-
-            case SEEK_END:
-            {
-                s_fileMap[id].seek(offset, s_fileMap[id].end);
-            }
-            break;
+            case SEEK_SET: file.seek(offset, file.BEGINNING); break;
+            case SEEK_CUR: file.seek(offset, file.CURRENT); break;
+            case SEEK_END: file.seek(offset, file.END); break;
         }
-        return s_fileMap[id].tell();
+        return file.tell();
     }
 }

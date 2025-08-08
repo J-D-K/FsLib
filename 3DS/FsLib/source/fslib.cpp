@@ -1,132 +1,85 @@
 #include "fslib.hpp"
+
 #include "string.hpp"
+
 #include <3ds.h>
+#include <string_view>
 #include <unordered_map>
 
 namespace
 {
     // 3DS can use UTF-16 paths so that's what we're using.
     std::unordered_map<std::u16string_view, FS_Archive> s_deviceMap;
-    // This only works because the string is so short.
+
+    /// @brief This is reserved.
     constexpr std::u16string_view SDMC_DEVICE_NAME = u"sdmc";
 } // namespace
 
-// Globally shared error string.
-std::string g_fslibErrorString = "No errors encountered.";
-
 // Checks if device is already in map.
-static inline bool deviceNameIsInUse(std::u16string_view deviceName)
-{
-    return s_deviceMap.find(deviceName) != s_deviceMap.end();
-}
+static inline bool device_is_in_use(std::u16string_view deviceName);
 
 bool fslib::initialize()
 {
-    // Try to init FS just in case;
-    Result fsError = fsInit();
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error initializing FS service: 0x%08X.", fsError);
-        return false;
-    }
-    // Open sdmc
-    fsError = FSUSER_OpenArchive(&s_deviceMap[SDMC_DEVICE_NAME], ARCHIVE_SDMC, {PATH_EMPTY, 0x00, NULL});
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening SDMC archive: 0x%08X.", fsError);
-    }
+    static constexpr FS_Path EMPTY_PATH = {PATH_EMPTY, 0x00, nullptr};
+
+    const bool fsError = error::libctru(fsInit());
+    if (fsError) { return false; }
+
+    FS_Archive &sdmc     = s_deviceMap[SDMC_DEVICE_NAME];
+    const bool sdmcError = error::libctru(FSUSER_OpenArchive(&sdmc, ARCHIVE_SDMC, EMPTY_PATH));
+    if (sdmcError) { return false; }
+
     return true;
 }
 
 void fslib::exit()
 {
-    for (auto &[deviceName, archive] : s_deviceMap)
-    {
-        FSUSER_CloseArchive(archive);
-    }
+    for (auto &[deviceName, archive] : s_deviceMap) { FSUSER_CloseArchive(archive); }
     fsExit();
 }
 
-const char *fslib::getErrorString()
+bool fslib::map_archive(std::u16string_view deviceName, FS_Archive archive)
 {
-    return g_fslibErrorString.c_str();
-}
+    const bool sdGuard = deviceName == SDMC_DEVICE_NAME;
+    if (sdGuard) { return false; }
 
-bool fslib::mapArchiveToDevice(std::u16string_view deviceName, FS_Archive archive)
-{
-    // Guard against overwriting sdmc
-    if (deviceName == u"sdmc")
-    {
-        g_fslibErrorString = "Error mapping device: sdmc is reserved device name.";
-        return false;
-    }
+    const bool isInUse = device_is_in_use(deviceName);
+    if (isInUse) { fslib::close_device(deviceName); }
 
-    // Close it so we don't leave an archive dangling.
-    if (deviceNameIsInUse(deviceName))
-    {
-        fslib::closeDevice(deviceName);
-    }
-    // This is just a uint64_t, so I'm not going to bother memcpying like on Switch.
     s_deviceMap[deviceName] = archive;
-
     return true;
 }
 
-bool fslib::getArchiveByDeviceName(std::u16string_view deviceName, FS_Archive *archiveOut)
+bool fslib::get_archive_by_device_name(std::u16string_view deviceName, FS_Archive &archiveOut)
 {
-    if (!deviceNameIsInUse(deviceName))
-    {
-        return false;
-    }
-    *archiveOut = s_deviceMap[deviceName];
+    if (!device_is_in_use(deviceName)) { return false; }
+    archiveOut = s_deviceMap[deviceName];
+}
 
+bool fslib::control_device(std::u16string_view deviceName)
+{
+    if (!device_is_in_use(deviceName)) { return false; }
+
+    FS_Archive archive = s_deviceMap[deviceName];
+    const bool controlError =
+        error::libctru(FSUSER_ControlArchive(archive, ARCHIVE_ACTION_COMMIT_SAVE_DATA, nullptr, 0, nullptr, 0));
+    if (controlError) { return false; }
     return true;
 }
 
-bool fslib::processDeviceAndPath(const fslib::Path &path, FS_Archive *archiveOut)
+bool fslib::close_device(std::u16string_view deviceName)
 {
-    if (!path.isValid() || !deviceNameIsInUse(path.getDevice()))
-    {
-        g_fslibErrorString = "Error fetching device: Invalid path supplied or device not found.";
-        return false;
-    }
-    *archiveOut = s_deviceMap[path.getDevice()];
+    if (!device_is_in_use(deviceName)) { return false; }
 
-    return true;
-}
+    FS_Archive archive    = s_deviceMap[deviceName];
+    const bool closeError = error::libctru(FSUSER_CloseArchive(archive));
+    if (closeError) { return false; }
 
-bool fslib::controlDevice(std::u16string_view deviceName)
-{
-    if (!deviceNameIsInUse(deviceName))
-    {
-        return false;
-    }
-
-    Result fsError = FSUSER_ControlArchive(s_deviceMap[deviceName], ARCHIVE_ACTION_COMMIT_SAVE_DATA, NULL, 0, NULL, 0);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error committing save data to device: 0x%08X.", fsError);
-        return false;
-    }
-
-    return true;
-}
-
-bool fslib::closeDevice(std::u16string_view deviceName)
-{
-    if (!deviceNameIsInUse(deviceName))
-    {
-        return false;
-    }
-
-    Result fsError = FSUSER_CloseArchive(s_deviceMap[deviceName]);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error closeing archive: 0x%08X.", fsError);
-        return false;
-    }
-    // Erase the device from map so deviceNameIsInUse works correctly.
     s_deviceMap.erase(deviceName);
-
     return true;
+}
+
+static inline bool device_is_in_use(std::u16string_view deviceName)
+{
+    return s_deviceMap.find(deviceName) != s_deviceMap.end();
 }
