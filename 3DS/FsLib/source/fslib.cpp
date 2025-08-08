@@ -1,5 +1,6 @@
 #include "fslib.hpp"
 
+#include "EmptyPath.hpp"
 #include "string.hpp"
 
 #include <3ds.h>
@@ -20,8 +21,6 @@ static inline bool device_is_in_use(std::u16string_view deviceName);
 
 bool fslib::initialize()
 {
-    static constexpr FS_Path EMPTY_PATH = {PATH_EMPTY, 0x00, nullptr};
-
     const bool fsError = error::libctru(fsInit());
     if (fsError) { return false; }
 
@@ -54,6 +53,7 @@ bool fslib::get_archive_by_device_name(std::u16string_view deviceName, FS_Archiv
 {
     if (!device_is_in_use(deviceName)) { return false; }
     archiveOut = s_deviceMap[deviceName];
+    return true;
 }
 
 bool fslib::control_device(std::u16string_view deviceName)

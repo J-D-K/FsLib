@@ -11,7 +11,7 @@ bool fslib::directory_exists(const fslib::Path &directoryPath)
     if (!found) { return false; }
 
     Handle dirHandle{};
-    const bool openError = error::libctru(FSUSER_OpenDirectory(&dirHandle, archive, directoryPath.get_path()));
+    const bool openError = error::libctru(FSUSER_OpenDirectory(&dirHandle, archive, directoryPath.get_fs_path()));
     if (openError) { return false; }
 
     // Gonna record this cause it could be important. VERY IMPORTANT!
@@ -25,7 +25,7 @@ bool fslib::create_directory(const fslib::Path &directoryPath)
     const bool found = fslib::get_archive_by_device_name(directoryPath.get_device(), archive);
     if (!found) { return false; }
 
-    const bool createError = error::libctru(FSUSER_CreateDirectory(archive, directoryPath.get_path(), 0));
+    const bool createError = error::libctru(FSUSER_CreateDirectory(archive, directoryPath.get_fs_path(), 0));
     if (createError) { return false; }
     return true;
 }
@@ -58,7 +58,8 @@ bool fslib::rename_directory(const fslib::Path &oldPath, const fslib::Path &newP
     const bool archivesMatch  = archiveAExists && archiveBExists && archiveA == archiveB;
     if (!archiveAExists || !archiveBExists || !archivesMatch) { return false; }
 
-    const bool renameError = error::libctru(FSUSER_RenameDirectory(archiveA, oldPath.get_path(), archiveB, newPath.get_path()));
+    const bool renameError =
+        error::libctru(FSUSER_RenameDirectory(archiveA, oldPath.get_fs_path(), archiveB, newPath.get_fs_path()));
     if (renameError) { return false; }
     return true;
 }
@@ -69,7 +70,7 @@ bool fslib::delete_directory(const fslib::Path &directoryPath)
     const bool found = fslib::get_archive_by_device_name(directoryPath.get_device(), archive);
     if (!found) { return false; }
 
-    const bool deleteError = error::libctru(FSUSER_DeleteDirectory(archive, directoryPath.get_path()));
+    const bool deleteError = error::libctru(FSUSER_DeleteDirectory(archive, directoryPath.get_fs_path()));
     if (deleteError) { return false; }
     return true;
 }

@@ -40,7 +40,7 @@ namespace
 static inline bool file_is_valid(int fileID) { return s_fileMap.find(fileID) != s_fileMap.end(); }
 
 // This "installs" the SDMC_DEVOPTAB in place of archive_dev's
-bool fslib::dev::initializeSDMC()
+bool fslib::dev::initialize_sdmc()
 {
     if (AddDevice(&SDMC_DEVOPTAB) < 0) { return false; }
     return true;
@@ -58,8 +58,8 @@ extern "C"
         {
             std::array<uint16_t, fslib::MAX_PATH> pathBuffer = {0};
             const uint8_t *pathData                          = reinterpret_cast<const uint8_t *>(filePath);
-            const ssize_t unitCount                          = utf8_to_utf16(pathBuffer.data(), pathData, fslib::MAX_PATH);
-            path                                             = pathBuffer.data();
+            utf8_to_utf16(pathBuffer.data(), pathData, fslib::MAX_PATH);
+            path = pathBuffer.data();
         }
 
         if (!path.is_valid())
@@ -82,7 +82,7 @@ extern "C"
         const bool appendCreate = append && !exists;
         const bool create       = flags & O_CREAT;
 
-        if (appendCreate) { openFlags |= FS_OPEN_CREATE }
+        if (appendCreate) { openFlags |= FS_OPEN_CREATE; }
         else if (append) { openFlags |= FS_OPEN_APPEND; }
         else if (create) { openFlags |= FS_OPEN_CREATE; }
 

@@ -20,12 +20,12 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
     const bool found = fslib::get_archive_by_device_name(directoryPath.get_device(), archive);
     if (!found) { return; }
 
-    const bool openError = error::libctru(FSUSER_OpenDirectory(&m_handle, archive, directoryPath.get_path()));
+    const bool openError = error::libctru(FSUSER_OpenDirectory(&m_handle, archive, directoryPath.get_fs_path()));
     if (openError) { return; }
 
     uint32_t entriesRead{};
     FS_DirectoryEntry entry{};
-    while (R_SUCCEEDED(FSDIR_Read(&m_handle, &entriesRead, 1, &entry)) && entriesRead == 1) { m_list.push_back(entry); }
+    while (R_SUCCEEDED(FSDIR_Read(m_handle, &entriesRead, 1, &entry)) && entriesRead == 1) { m_list.push_back(entry); }
     Directory::close();
 
     if (sortEntries) { std::sort(m_list.begin(), m_list.end(), compare_entries); }

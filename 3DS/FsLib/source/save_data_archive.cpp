@@ -1,175 +1,97 @@
+#include "EmptyPath.hpp"
 #include "fslib.hpp"
 #include "string.hpp"
 
-extern std::string g_fslibErrorString;
+#include <array>
 
-bool fslib::openSaveData(std::u16string_view deviceName)
+bool fslib::open_save_data(std::u16string_view deviceName)
 {
-    FS_Archive archive;
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_SAVEDATA, {PATH_EMPTY, 0x00, NULL});
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error open save data archive: 0x%08X.", fsError);
-        return false;
-    }
+    FS_Archive archive{};
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_SAVEDATA, EMPTY_PATH));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-bool fslib::openExtData(std::u16string_view deviceName, uint32_t extDataID)
+bool fslib::open_extra_data(std::u16string_view deviceName, uint32_t extraDataID)
 {
-    FS_Archive archive;
-    uint32_t binaryData[] = {MEDIATYPE_SD, extDataID, 0x00000000};
-    FS_Path path = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData};
+    FS_Archive archive{};
+    const std::array<uint32_t, 3> binaryData = {MEDIATYPE_SD, extraDataID, 0x00000000};
+    const FS_Path path                       = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData.data()};
 
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_EXTDATA, path);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening extdata archive: 0x%08X.", fsError);
-        return false;
-    }
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_EXTDATA, path));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-bool fslib::openSharedExtData(std::u16string_view deviceName, uint32_t sharedExtDataID)
+bool fslib::open_shared_extra_data(std::u16string_view deviceName, uint32_t extraDataID)
 {
-    FS_Archive archive;
-    uint32_t binaryData[] = {MEDIATYPE_NAND, sharedExtDataID, 0x00480000};
-    FS_Path path = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData};
+    FS_Archive archive{};
+    const std::array<uint32_t, 3> binaryData = {MEDIATYPE_NAND, extraDataID, 0x0048000};
+    const FS_Path path                       = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData.data()};
 
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_SHARED_EXTDATA, path);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening shared extdata: 0x%08X.", fsError);
-        return false;
-    }
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_SHARED_EXTDATA, path));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-// This is basically identical to OpenExtData, but the archive ID is different.
-bool fslib::openBossExtData(std::u16string_view deviceName, uint32_t extDataID)
+bool fslib::open_boss_extra_data(std::u16string_view deviceName, uint32_t extraDataID)
 {
-    FS_Archive archive;
-    uint32_t binaryData[] = {MEDIATYPE_SD, extDataID, 0x00000000};
-    FS_Path path = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData};
+    FS_Archive archive{};
+    const std::array<uint32_t, 3> binaryData = {MEDIATYPE_SD, extraDataID, 0x00000000};
+    const FS_Path path                       = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData.data()};
 
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_BOSS_EXTDATA, path);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening BOSS extdata: 0x%08X.", fsError);
-        return false;
-    }
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_BOSS_EXTDATA, path));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-bool fslib::openSystemSaveData(std::u16string_view deviceName, uint32_t uniqueID)
+bool fslib::open_system_save_data(std::u16string_view deviceName, uint32_t uniqueID)
 {
-    FS_Archive archive;
-    uint32_t binaryData[] = {MEDIATYPE_NAND, 0x00020000 | uniqueID};
-    FS_Path path = {.type = PATH_BINARY, .size = 0x08, .data = binaryData};
+    FS_Archive archive{};
+    const std::array<uint32_t, 2> binaryData = {MEDIATYPE_NAND, 0x00020000 | uniqueID};
+    const FS_Path path                       = {.type = PATH_BINARY, .size = 0x08, .data = binaryData.data()};
 
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_SYSTEM_SAVEDATA, path);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening system save data: 0x%08X.", fsError);
-        return false;
-    }
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_SYSTEM_SAVEDATA, path));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-bool fslib::openSystemModuleSaveData(std::u16string_view deviceName, uint32_t uniqueID)
+bool fslib::open_system_module_save_data(std::u16string_view deviceName, uint32_t uniqueID)
 {
-    FS_Archive archive;
-    uint32_t binaryData[] = {MEDIATYPE_NAND, 0x00010000 | uniqueID};
-    FS_Path path = {.type = PATH_BINARY, .size = 0x08, .data = binaryData};
+    FS_Archive archive{};
+    const std::array<uint32_t, 2> binaryData = {MEDIATYPE_NAND, 0x00010000 | uniqueID};
+    const FS_Path path                       = {.type = PATH_BINARY, .size = 0x08, .data = binaryData.data()};
 
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_SYSTEM_SAVEDATA, path);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening system module save data: 0x%08X.", uniqueID);
-        return false;
-    }
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_SYSTEM_SAVEDATA, path));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-
-bool fslib::openGameCardSaveData(std::u16string_view deviceName)
+bool fslib::open_gamecard_save_data(std::u16string_view deviceName)
 {
-    FS_Archive archive;
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_GAMECARD_SAVEDATA, {PATH_EMPTY, 0x00, NULL});
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error open game card save data: 0x%08X.", fsError);
-        return false;
-    }
+    FS_Archive archive{};
+    const bool openError = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_GAMECARD_SAVEDATA, EMPTY_PATH));
+    if (openError) { return false; }
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
-
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }
 
-bool fslib::openUserSaveData(std::u16string_view deviceName, FS_MediaType mediaType, uint32_t lowerID, uint32_t upperID)
+bool fslib::open_user_save_data(std::u16string_view deviceName, FS_MediaType mediaType, uint64_t titleID)
 {
-    FS_Archive archive;
-    uint32_t binaryData[] = {mediaType, lowerID, upperID};
-    FS_Path path = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData};
-    Result fsError = FSUSER_OpenArchive(&archive, ARCHIVE_USER_SAVEDATA, path);
-    if (R_FAILED(fsError))
-    {
-        g_fslibErrorString = string::getFormattedString("Error opening user save data: 0x%08X.", fsError);
-        return false;
-    }
+    const uint32_t upperID = titleID >> 32 & 0xFFFFFFFF;
+    const uint32_t lowerID = titleID & 0xFFFFFFFF;
 
-    if (!fslib::mapArchiveToDevice(deviceName, archive))
-    {
-        FSUSER_CloseArchive(archive);
-        return false;
-    }
+    FS_Archive archive{};
+    const std::array<uint32_t, 3> binaryData = {mediaType, lowerID, upperID};
+    const FS_Path path                       = {.type = PATH_BINARY, .size = 0x0C, .data = binaryData.data()};
+    const bool openError                     = error::libctru(FSUSER_OpenArchive(&archive, ARCHIVE_USER_SAVEDATA, path));
+    if (openError) { return false; }
 
-    return true;
+    return fslib::map_archive(deviceName, archive);
 }

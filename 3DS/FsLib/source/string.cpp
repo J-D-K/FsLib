@@ -1,4 +1,6 @@
 #include "string.hpp"
+
+#include <array>
 #include <cstdarg>
 
 namespace
@@ -7,14 +9,14 @@ namespace
     constexpr int VA_BUFFER_SIZE = 0x1000;
 } // namespace
 
-std::string string::getFormattedString(const char *format, ...)
+std::string string::get_formatted(const char *format, ...)
 {
-    char vaBuffer[VA_BUFFER_SIZE] = {0};
+    std::array<char, VA_BUFFER_SIZE> vaBuffer{0};
 
-    std::va_list vaList;
+    std::va_list vaList{};
     va_start(vaList, format);
-    vsnprintf(vaBuffer, VA_BUFFER_SIZE, format, vaList);
+    std::vsnprintf(vaBuffer.data(), VA_BUFFER_SIZE, format, vaList);
     va_end(vaList);
 
-    return std::string(vaBuffer);
+    return std::string(vaBuffer.data());
 }

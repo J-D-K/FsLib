@@ -33,14 +33,15 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, uint64_t
     if (!created) { return; }
 
     // Save openFlags without FS_OPEN_CREATE if it's there so extdata works correctly.
-    m_flags = (openFlags & ~FS_OPEN_CREATE);
+    m_openFlags = (openFlags & ~FS_OPEN_CREATE);
 
-    const bool openError = error::libctru(FSUSER_OpenFile(&m_handle, archive, filePath.get_path(), m_flags, 0));
-    const bool sizeError = !openError && error::libctru(FSFILE_GetSize(m_handle, &m_size));
+    uint64_t *size       = reinterpret_cast<uint64_t *>(&m_size);
+    const bool openError = error::libctru(FSUSER_OpenFile(&m_handle, archive, filePath.get_fs_path(), m_openFlags, 0));
+    const bool sizeError = !openError && error::libctru(FSFILE_GetSize(m_handle, size));
     if (openError || sizeError) { return; }
 
     // I added FS_OPEN_APPEND to FsLib. This isn't normally part of ctrulib/3DS.
-    m_offset = m_flags & FS_OPEN_APPEND ? m_size : 0;
+    m_offset = m_openFlags & FS_OPEN_APPEND ? m_size : 0;
     m_isOpen = true;
 }
 
@@ -62,7 +63,7 @@ void fslib::File::seek(int64_t offset, uint8_t origin)
     switch (origin)
     {
         case File::BEGINNING: m_offset = offset; break;
-        case File::CURRENT: m_offset = m_offset += offset; break;
+        case File::CURRENT: m_offset += offset; break;
         case File::END: m_offset = m_size + offset; break;
     }
     File::ensure_offset_is_valid();
@@ -119,7 +120,7 @@ signed char fslib::File::get_byte()
 
     char byteRead{};
     uint32_t bytesRead{};
-    const bool readError = error::libctru(FSFILE_Read(m_handle, &byteRead, m_offset, &byteRead, 1));
+    const bool readError = error::libctru(FSFILE_Read(m_handle, &bytesRead, m_offset, &byteRead, 1));
     if (readError) { return -1; }
     return byteRead;
 }
