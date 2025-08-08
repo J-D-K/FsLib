@@ -21,6 +21,16 @@ namespace fslib
             /// done by default.
             Directory(const fslib::Path &directoryPath, bool sortEntries = true);
 
+            /// @brief Move constructor.
+            Directory(Directory &&directory);
+
+            /// @brief Move operator.
+            Directory &operator=(Directory &&directory);
+
+            // We don't like these kinds round dese parts.
+            Directory(const Directory &)            = delete;
+            Directory &operator=(const Directory &) = delete;
+
             /// @brief Opens the directory at DirectoryPath and gets a listing. IsOpen can be checked to see if this was
             /// successful.
             /// @param directoryPath Path to directory as either FsLib::Path or UTF-16 formatted string. Ex: u"sdmc:/"

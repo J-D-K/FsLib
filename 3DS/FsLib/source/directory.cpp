@@ -11,6 +11,21 @@ static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryE
 
 fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortEntries) { Directory::open(directoryPath, sortEntries); }
 
+fslib::Directory::Directory(fslib::Directory &&directory) { *this = std::move(directory); }
+
+fslib::Directory &fslib::Directory::operator=(fslib::Directory &&directory)
+{
+    m_handle    = directory.m_handle;
+    m_wasOpened = directory.m_wasOpened;
+    m_list      = std::move(directory.m_list);
+
+    directory.m_handle    = 0;
+    directory.m_wasOpened = false;
+    directory.m_list.clear(); // Not sure if this is really needed, but w/e
+
+    return *this;
+}
+
 void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
 {
     m_wasOpened = false;

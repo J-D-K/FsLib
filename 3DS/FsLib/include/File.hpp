@@ -27,6 +27,18 @@ namespace fslib
              */
             File(const fslib::Path &filePath, uint32_t openFlags, uint64_t fileSize = 0);
 
+            /// @brief Move constructor.
+            /// @param file File to move.
+            File(File &&file);
+
+            /// @brief Move operator.
+            /// @param file File to move
+            File &operator=(File &&file);
+
+            // None of this nonsense round these parts.
+            File(const File &)            = delete;
+            File &operator=(const File &) = delete;
+
             /// @brief Automatically closes handle when freed or goes out of scope.
             ~File();
 

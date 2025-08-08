@@ -14,6 +14,25 @@ fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, uint64_t file
     File::open(filePath, openFlags, fileSize);
 }
 
+fslib::File::File(fslib::File &&file) { *this = std::move(file); }
+
+fslib::File &fslib::File::operator=(fslib::File &&file)
+{
+    m_handle    = file.m_handle;
+    m_isOpen    = file.m_isOpen;
+    m_openFlags = file.m_openFlags;
+    m_offset    = file.m_offset;
+    m_size      = file.m_size;
+
+    file.m_handle    = 0;
+    file.m_isOpen    = false;
+    file.m_openFlags = 0;
+    file.m_offset    = 0;
+    file.m_size      = 0;
+
+    return *this;
+}
+
 fslib::File::~File() { File::close(); }
 
 void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, uint64_t fileSize)
