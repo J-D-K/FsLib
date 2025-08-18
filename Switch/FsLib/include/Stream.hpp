@@ -9,6 +9,14 @@ namespace fslib
     class Stream
     {
         public:
+            /// @brief Seeking origins.
+            enum class Origin
+            {
+                BEGINNING,
+                CURRENT,
+                END
+            };
+
             /// @brief Default Stream constructor.
             Stream() = default;
 
@@ -34,21 +42,20 @@ namespace fslib
              * @param offset Offset to seek to.
              * @param origin Origin from whence to seek.
              * @note Origin can be one of the following:
-             *      1. FsLib::SeekOrigin::Beginning
-             *      2. FsLib::SeekOrigin::Current
-             *      3. FsLib::SeekOrigin::End
+             *      1. fslib::Stream::Origin::BEGINNING
+             *      2. fslib::Stream::Origin::CURRENT
+             *      3. fslib::Stream::Origin::END
              */
-            void seek(int64_t offset, uint8_t origin);
+            virtual void seek(int64_t offset, Stream::Origin origin);
 
             /// @brief Operator that can be used like isOpen().
             operator bool() const;
 
-            /// @brief Used to seek from the beginning of the stream.
-            static constexpr uint8_t BEGINNING = 0;
-            /// @brief Used to seek from the current offset of the stream.
-            static constexpr uint8_t CURRENT = 1;
-            /// @brief Used to seek from the end of the stream.
-            static constexpr uint8_t END = 2;
+            /// @brief These serve as shortcuts.
+            static constexpr Stream::Origin BEGINNING = Origin::BEGINNING;
+            static constexpr Stream::Origin CURRENT   = Origin::CURRENT;
+            static constexpr Stream::Origin END       = Origin::END;
+
             /// @brief Used to check if and error has occurred reading or writing from a stream.
             static constexpr ssize_t ERROR = -1;
 

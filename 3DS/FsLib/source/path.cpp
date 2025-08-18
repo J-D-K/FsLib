@@ -77,7 +77,7 @@ std::u16string_view fslib::Path::get_device() const
 {
     size_t deviceEnd = m_path.find_first_of(CHAR16_COLON);
     if (deviceEnd == m_path.npos) { return std::u16string_view(u""); }
-    return std::u16string_view{m_path.c_str(), deviceEnd};
+    return std::u16string_view{m_path.c_str(), deviceEnd - 1};
 }
 
 const char16_t *fslib::Path::get_filename() const
@@ -101,7 +101,7 @@ FS_Path fslib::Path::get_fs_path() const
 
     ++deviceEnd;
     const uint32_t length = std::char_traits<char16_t>::length(deviceEnd);
-    return {PATH_UTF16, length, deviceEnd};
+    return {PATH_UTF16, length * sizeof(char16_t), deviceEnd + 1};
 }
 
 size_t fslib::Path::get_length() const { return m_path.length(); }

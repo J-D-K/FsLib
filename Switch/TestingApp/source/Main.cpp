@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 
 using byte = unsigned char;
@@ -36,60 +37,6 @@ void print(const char *format, ...)
     }
 }
 
-void copyDirectoryTo(const fslib::Path &source, const fslib::Path &dest)
-{
-    fslib::Directory sourceDir{source};
-    if (!sourceDir)
-    {
-        printf("%s\n", fslib::error::get_string());
-        return;
-    }
-
-    const int64_t count = sourceDir.get_count();
-    for (int64_t i = 0; i < count; i++)
-    {
-        const fslib::Path fullSource{source / sourceDir[i]};
-        const fslib::Path fullDest{dest / sourceDir[i]};
-
-        if (sourceDir.is_directory(i))
-        {
-            const bool dirCreated = fslib::create_directory(fullDest);
-            if (!dirCreated) { continue; }
-            copyDirectoryTo(fullSource, fullDest);
-        }
-        else
-        {
-            fslib::File sourceFile{fullSource, FsOpenMode_Read};
-            fslib::File destFile{fullDest, FsOpenMode_Create | FsOpenMode_Write, sourceFile.get_size()};
-            if (!sourceFile || !destFile) { continue; }
-
-            print("Copying %s to %s... ", fullSource.full_path(), fullDest.full_path());
-
-            auto buffer            = std::make_unique<byte[]>(0x100000);
-            const int64_t fileSize = sourceFile.get_size();
-
-            for (int64_t i = 0; i < fileSize;)
-            {
-                ssize_t read = sourceFile.read(buffer.get(), 0x100000);
-                if (read == -1)
-                {
-                    print("Read Error: %s\n", fslib::error::get_string());
-                    break;
-                }
-
-                ssize_t write = destFile.write(buffer.get(), read);
-                if (write == -1)
-                {
-                    print("Write Error: %s\n", fslib::error::get_string());
-                    break;
-                }
-                i += read;
-            }
-            print("Done!\n");
-        }
-    }
-}
-
 int main()
 {
     static const char *SNAP_DIR = "sdmc:/snapTest";
@@ -107,31 +54,29 @@ int main()
     // should use fslib.
     if (!fslib::dev::initialize_sdmc()) { return -3; }
 
-    // I should error check this but screw it.
-    AccountUid user{};
-    accountInitialize(AccountServiceType_Application);
-    accountGetPreselectedUser(&user);
+    consoleInit(nullptr);
 
-    consoleInit(NULL);
+    FILE *test = fopen("sdmc:/test.txt", "w");
+    if (!test) { return -1; }
 
-    PadState gamePad = {0};
+    fseek(test, 128, SEEK_SET);
+    fputs("First message.", test);
+    print("%s\n", fslib::error::get_string());
+    fseek(test, -32, SEEK_SET);
+    fputs("Second message.", test);
+    print("%s\n", fslib::error::get_string());
+    fclose(test);
+
+    PadState padState{};
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
-    padInitializeDefault(&gamePad);
-
-    print("fslib::TestingApp\n\n");
-
-    const bool openSnap   = fslib::open_account_save_file_system("snap", TITLEID_NEW_SNAP, user);
-    const bool snapExists = fslib::directory_exists(SNAP_DIR);
-    const bool snapCreate = !snapExists && fslib::create_directory(SNAP_DIR);
-    if (!openSnap || (!snapExists && !snapCreate)) { print("Error: %s", fslib::error::get_string()); }
-    else { copyDirectoryTo("snap:/", SNAP_DIR); }
+    padInitializeDefault(&padState);
 
     print("\nPress + to exit.\n");
 
     while (appletMainLoop())
     {
-        padUpdate(&gamePad);
-        if (padGetButtonsDown(&gamePad) & HidNpadButton_Plus) { break; }
+        padUpdate(&padState);
+        if (padGetButtonsDown(&padState) & HidNpadButton_Plus) { break; }
         consoleUpdate(NULL);
     }
 

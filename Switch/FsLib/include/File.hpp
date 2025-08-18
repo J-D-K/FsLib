@@ -57,7 +57,7 @@ namespace fslib
             /// @param buffer Buffer to write into.
             /// @param readSize Buffer's capacity.
             /// @return Number of bytes read.
-            ssize_t read(void *buffer, uint64_t bufferSize);
+            ssize_t read(void *buffer, uint64_t readSize);
 
             /// @brief Attempts to read a line from file until `\n` or `\r` is reached.
             /// @param lineOut Buffer to read line into.
@@ -95,6 +95,11 @@ namespace fslib
             /// @param string String to write.
             File &operator<<(const std::string &string);
 
+            /// @brief Seeks to the given position in a file.
+            /// @param offset Offset to seek to.
+            /// @param origin Origin to seek from.
+            void seek(int64_t offset, Stream::Origin origin) override;
+
             /// @brief Flushes file.
             bool flush();
 
@@ -107,7 +112,7 @@ namespace fslib
 
             /// @brief Private: Resizes file if Buffer is too large to fit in remaining space.
             /// @param bufferSize Size of buffer.
-            bool resize_if_needed(size_t bufferSize);
+            bool resize_if_needed(int64_t bufferSize);
 
             /// @brief Private: Returns if file has flag set to read.
             inline bool is_open_for_reading() const

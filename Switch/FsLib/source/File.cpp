@@ -14,6 +14,8 @@ namespace
     constexpr size_t VA_BUFFER_SIZE = 0x1000;
 } // namespace
 
+extern void print(const char *format, ...);
+
 fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize)
 {
     File::open(filePath, openFlags, fileSize);
@@ -93,7 +95,7 @@ void fslib::File::close()
 
 bool fslib::File::is_open() const { return m_isOpen; }
 
-ssize_t fslib::File::read(void *buffer, size_t bufferSize)
+ssize_t fslib::File::read(void *buffer, uint64_t bufferSize)
 {
     if (!File::is_open_for_reading()) { return -1; }
 
@@ -156,12 +158,11 @@ signed char fslib::File::get_byte()
     return byte;
 }
 
-ssize_t fslib::File::write(const void *buffer, size_t bufferSize)
+ssize_t fslib::File::write(const void *buffer, uint64_t bufferSize)
 {
     const bool openForWrite = File::is_open_for_writing();
-    const bool resized      = openForWrite && File::resize_if_needed(bufferSize);
+    const bool resized      = File::resize_if_needed(bufferSize);
     if (!openForWrite || !resized) { return -1; }
-    // print("Write check");
 
     const bool writeError = error::occurred(fsFileWrite(&m_fileHandle, m_offset, buffer, bufferSize, 0));
     if (writeError) { return -1; }
@@ -206,6 +207,19 @@ fslib::File &fslib::File::operator<<(const std::string &string)
     return *this;
 }
 
+void fslib::File::seek(int64_t offset, Stream::Origin origin)
+{
+    switch (origin)
+    {
+        case Stream::Origin::BEGINNING: m_offset = offset; break;
+        case Stream::Origin::CURRENT: m_offset += offset; break;
+        case Stream::Origin::END: m_offset = m_streamSize + offset; break;
+    }
+
+    if (m_offset < 0) { m_offset = 0; }
+    File::resize_if_needed(0);
+}
+
 bool fslib::File::flush()
 {
     if (!File::is_open_for_writing()) { return false; }
@@ -215,14 +229,20 @@ bool fslib::File::flush()
     return true;
 }
 
-bool fslib::File::resize_if_needed(size_t bufferSize)
+bool fslib::File::resize_if_needed(int64_t bufferSize)
 {
-    const size_t spaceRemaining = m_streamSize - m_offset;
-    const int64_t newFileSize   = m_offset + bufferSize; // We may or may not use this.
-    if (bufferSize <= spaceRemaining) { return true; }
+    if (!File::is_open_for_writing()) { return false; }
 
-    const bool setSizeError = error::occurred(fsFileSetSize(&m_fileHandle, newFileSize));
-    if (setSizeError) { return false; }
+    const bool offsetOOB      = m_offset > m_streamSize;
+    const bool bufferTooLarge = m_offset + bufferSize > m_streamSize;
+    if (!offsetOOB && !bufferTooLarge) { return true; }
+
+    int64_t newFileSize{};
+    if (offsetOOB) { newFileSize = m_offset; }
+    else if (bufferTooLarge) { newFileSize = m_offset + bufferSize; }
+
+    const bool resizeError = error::occurred(fsFileSetSize(&m_fileHandle, newFileSize));
+    if (resizeError) { return false; }
 
     m_streamSize = newFileSize;
     return true;
