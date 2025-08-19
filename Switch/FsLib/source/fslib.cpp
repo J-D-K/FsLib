@@ -9,8 +9,9 @@ namespace
 {
     // This is always what the sd card is mounted to.
     constexpr std::string_view SD_CARD_DEVICE = "sdmc";
+
     // FsFileSystems paired with their mount point.
-    std::map<std::string_view, FsFileSystem> s_deviceMap;
+    std::map<std::string, FsFileSystem, std::less<>> s_deviceMap;
 } // namespace
 
 // This is for opening functions to search and make sure there are no duplicate uses of the same device name.
@@ -26,17 +27,15 @@ bool fslib::initialize()
     const bool sdError = error::occurred(fsOpenSdCardFileSystem(&sdmc));
     if (sdError) { return false; }
 
-    s_deviceMap[SD_CARD_DEVICE] = sdmc;
+    const std::string sdmcDevice{SD_CARD_DEVICE};
+    s_deviceMap[sdmcDevice] = sdmc;
     return true;
 }
 
 void fslib::exit()
 {
-    for (auto &[deviceName, filesystem] : s_deviceMap)
-    {
-        // This is called directly instead of closeFileSystem because that guards against closing the SD.
-        fsFsClose(&filesystem);
-    }
+    // This calls fsFsClose directly since close_filesystem guards against SD closure.
+    for (auto &[deviceName, filesystem] : s_deviceMap) { fsFsClose(&filesystem); }
 }
 
 bool fslib::map_file_system(std::string_view deviceName, FsFileSystem *filesystem)
@@ -48,7 +47,9 @@ bool fslib::map_file_system(std::string_view deviceName, FsFileSystem *filesyste
         error::occurred(error::codes::DEVICE_NAME_IN_USE);
         return false;
     }
-    s_deviceMap[deviceName] = *filesystem;
+
+    const std::string device{deviceName};
+    s_deviceMap[device] = *filesystem;
     return true;
 }
 
@@ -59,15 +60,19 @@ bool fslib::get_file_system_by_device_name(std::string_view deviceName, FsFileSy
         error::occurred(error::codes::DEVICE_NOT_FOUND);
         return false;
     }
-    *filesystemOut = &s_deviceMap[deviceName];
+
+    const std::string device{deviceName};
+    *filesystemOut = &s_deviceMap[device];
     return true;
 }
 
 bool fslib::commit_data_to_file_system(std::string_view deviceName)
 {
+    const std::string device{deviceName};
     const bool deviceInUse = device_name_is_in_use(deviceName);
-    const bool commitError = deviceInUse && error::occurred(fsFsCommit(&s_deviceMap[deviceName]));
+    const bool commitError = deviceInUse && error::occurred(fsFsCommit(&s_deviceMap[device]));
     if (!deviceInUse || commitError) { return false; }
+
     return true;
 }
 
@@ -76,10 +81,10 @@ int64_t fslib::get_device_free_space(const fslib::Path &deviceRoot)
     if (!deviceRoot.is_valid()) { return -1; }
 
     int64_t freeSpace{};
-    const std::string_view device = deviceRoot.get_device_name();
-    const char *path              = deviceRoot.get_path();
-    const bool deviceInUse        = device_name_is_in_use(device);
-    const bool spaceError         = deviceInUse && error::occurred(fsFsGetFreeSpace(&s_deviceMap[device], path, &freeSpace));
+    const std::string device{deviceRoot.get_device_name()};
+    const char *path       = deviceRoot.get_path();
+    const bool deviceInUse = device_name_is_in_use(device);
+    const bool spaceError  = deviceInUse && error::occurred(fsFsGetFreeSpace(&s_deviceMap[device], path, &freeSpace));
     if (!deviceInUse || spaceError) { return -1; }
 
     return freeSpace;
@@ -90,10 +95,10 @@ int64_t fslib::get_device_total_space(const fslib::Path &deviceRoot)
     if (!deviceRoot.is_valid()) { return -1; }
 
     int64_t totalSpace{};
-    const std::string_view device = deviceRoot.get_device_name();
-    const char *path              = deviceRoot.get_path();
-    const bool deviceInUse        = device_name_is_in_use(device);
-    const bool spaceError         = deviceInUse && error::occurred(fsFsGetTotalSpace(&s_deviceMap[device], path, &totalSpace));
+    const std::string device{deviceRoot.get_device_name()};
+    const char *path       = deviceRoot.get_path();
+    const bool deviceInUse = device_name_is_in_use(device);
+    const bool spaceError  = deviceInUse && error::occurred(fsFsGetTotalSpace(&s_deviceMap[device], path, &totalSpace));
     if (!deviceInUse || spaceError) { return -1; }
 
     return totalSpace;
@@ -105,7 +110,9 @@ bool fslib::close_file_system(std::string_view deviceName)
     const bool isSD  = deviceName == SD_CARD_DEVICE;
     const bool inUse = device_name_is_in_use(deviceName);
     if (isSD || !inUse) { return false; }
-    fsFsClose(&s_deviceMap[deviceName]);
-    s_deviceMap.erase(deviceName);
+
+    const std::string device{deviceName};
+    fsFsClose(&s_deviceMap[device]);
+    s_deviceMap.erase(device);
     return true;
 }

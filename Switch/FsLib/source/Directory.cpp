@@ -8,9 +8,6 @@
 #include <string>
 
 /// @brief Function used to sort by directories->alphabetically.
-/// @param entryA
-/// @param entryB
-/// @return
 static bool compare_entries(const FsDirectoryEntry &entryA, const FsDirectoryEntry &entryB);
 
 fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortedListing)

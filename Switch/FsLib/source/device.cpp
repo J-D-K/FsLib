@@ -4,7 +4,7 @@
 namespace
 {
     // I think you only really need one of these?
-    FsDeviceOperator s_deviceOperator;
+    FsDeviceOperator s_deviceOperator{};
 } // namespace
 
 bool fslib::device::initialize()

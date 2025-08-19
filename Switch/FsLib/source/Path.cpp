@@ -8,7 +8,7 @@
 
 namespace
 {
-    const char *FORBIDDEN_PATH_CHARACTERS = "<>:\"|?*";
+    constexpr const char *FORBIDDEN_PATH_CHARACTERS = "<>:\"|?*";
 } // namespace
 
 fslib::Path::Path(const fslib::Path &path) { *this = path; }
