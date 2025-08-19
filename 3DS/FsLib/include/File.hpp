@@ -146,7 +146,7 @@ namespace fslib
             bool m_isOpen{};
 
             /// @brief Stores flags passed to open.
-            uint32_t m_openFlags{};
+            uint32_t m_flags{};
 
             /// @brief Store the current offset in the file and the size of the file.
             int64_t m_offset{}, m_size{};
@@ -158,10 +158,10 @@ namespace fslib
 
             /// @brief Returns whether or not the file is open for reading by checking m_Flags.
             /// @return True if it is. False if it isn't.
-            inline bool is_open_for_reading() const { return m_openFlags & FS_OPEN_READ; }
+            inline bool is_open_for_reading() const { return m_flags & FS_OPEN_READ; }
 
             /// @brief Returns whether or not the file is open for writing by checking m_Flags.
             /// @return True if it is. False if it isn't.
-            inline bool is_open_for_writing() const { return m_openFlags & FS_OPEN_WRITE; }
+            inline bool is_open_for_writing() const { return m_flags & FS_OPEN_WRITE; }
     };
 } // namespace fslib

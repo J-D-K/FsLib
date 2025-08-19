@@ -103,6 +103,14 @@ int main()
     if (!createDir) { printf_typed("Test dir failed: %s.\n", fslib::error::get_string()); }
     else { printf_typed("Created test_dir!\n"); }
 
+    const bool renameDir = fslib::rename_directory(u"sdmc:/test_dir", u"sdmc:/useless_dir");
+    if (!renameDir) { print_fslib_error(); }
+    else { printf_typed("Renamed that dir to let it know it's useless.\n"); }
+
+    const bool deleteDir = fslib::delete_directory(u"sdmc:/useless_dir");
+    if (!deleteDir) { print_fslib_error(); }
+    else { printf_typed("Nuked the test dir!\n"); }
+
     const bool createDirs = fslib::create_directory_recursively(PATH_REALLY_LONG);
     if (!createDirs) { print_fslib_error(); }
     else { printf_typed("Created long ass chain of folders!\n"); }
@@ -110,6 +118,29 @@ int main()
     const bool nukeDirs = fslib::delete_directory_recursively(u"sdmc:/really");
     if (!nukeDirs) { print_fslib_error(); }
     else { printf_typed("Nuked that same long ass chain of folders!\n"); }
+
+    const bool createFile = fslib::create_file(u"sdmc:/TestFile.txt", 128);
+    if (!createFile) { print_fslib_error(); }
+    else { printf_typed("Created useless 128 byte file on the SDMC.\n"); }
+
+    const bool deleteFile = fslib::delete_file(u"sdmc:/TestFile.txt");
+    if (!deleteFile) { print_fslib_error(); }
+    else { printf_typed("Deleted the useless file from the SD card!\n"); }
+
+    uint64_t bootSize{};
+    const bool bootExists = fslib::file_exists(u"sdmc:/boot.3dsx");
+    const bool getSize    = fslib::get_file_size(u"sdmc:/boot.3dsx", bootSize);
+    if (!bootExists || !getSize) { print_fslib_error(); }
+    else { printf_typed("boot.3dsx found! It's dis big: %llu.\n", bootSize); }
+
+    {
+        printf_typed("\nNow I'm going to open it and print it byte by byte for you so YOU CAN SEE THE BYTES!\n\n");
+        auto bootBuffer = std::make_unique<unsigned char[]>(bootSize);
+        fslib::File bootFile{u"sdmc:/boot.3dsx", FS_OPEN_READ};
+        bootFile.read(bootBuffer.get(), bootSize);
+
+        for (uint64_t i = 0; i < bootSize; i++) { printf_typed("%02X", bootBuffer[i]); }
+    }
 
     printf_typed("Press Start to exit.");
     while (aptMainLoop())

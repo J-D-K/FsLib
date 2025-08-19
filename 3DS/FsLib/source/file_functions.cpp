@@ -54,9 +54,8 @@ bool fslib::rename_file(const fslib::Path &oldPath, const fslib::Path &newPath)
     const bool foundB = fslib::get_archive_by_device_name(newPath.get_device(), archiveB);
     if (!foundA || !foundB || archiveA != archiveB) { return false; }
 
-    const bool renameError =
-        error::libctru(FSUSER_RenameFile(archiveA, oldPath.get_fs_path(), archiveB, newPath.get_fs_path()));
-    if (renameError) { return false; }
+    const bool error = error::libctru(FSUSER_RenameFile(archiveA, oldPath.get_fs_path(), archiveB, newPath.get_fs_path()));
+    if (error) { return false; }
     return true;
 }
 

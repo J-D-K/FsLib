@@ -33,14 +33,14 @@ fslib::File &fslib::File::operator=(fslib::File &&file)
     m_offset     = file.m_offset;
     m_streamSize = file.m_streamSize;
     m_isOpen     = file.m_isOpen;
-    m_openFlags  = file.m_openFlags;
-    std::memcpy(&m_fileHandle, &file.m_fileHandle, sizeof(FsFile));
+    m_flags      = file.m_flags;
+    std::memcpy(&m_handle, &file.m_handle, sizeof(FsFile));
 
     file.m_offset     = 0;
     file.m_streamSize = 0;
     file.m_isOpen     = false;
-    file.m_openFlags  = 0;
-    std::memset(&file.m_fileHandle, 0x00, sizeof(FsFile));
+    file.m_flags      = 0;
+    std::memset(&file.m_handle, 0x00, sizeof(FsFile));
     return *this;
 }
 
@@ -76,12 +76,12 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     // it.
     openFlags &= ~FsOpenMode_Create;
 
-    const bool openError = error::occurred(fsFsOpenFile(filesystem, path, openFlags, &m_fileHandle));
-    const bool sizeError = !openError && error::occurred(fsFileGetSize(&m_fileHandle, &m_streamSize));
+    const bool openError = error::occurred(fsFsOpenFile(filesystem, path, openFlags, &m_handle));
+    const bool sizeError = !openError && error::occurred(fsFileGetSize(&m_handle, &m_streamSize));
     if (openError || sizeError) { return; }
 
-    m_openFlags = openFlags;
-    m_offset    = openAppend ? m_streamSize : 0;
+    m_flags  = openFlags;
+    m_offset = openAppend ? m_streamSize : 0;
 
     m_isOpen = true;
 }
@@ -89,7 +89,7 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
 void fslib::File::close()
 {
     if (!m_isOpen) { return; }
-    fsFileClose(&m_fileHandle);
+    fsFileClose(&m_handle);
     m_isOpen = false;
 }
 
@@ -100,7 +100,7 @@ ssize_t fslib::File::read(void *buffer, uint64_t bufferSize)
     if (!File::is_open_for_reading()) { return -1; }
 
     uint64_t bytesRead{};
-    const bool readError     = error::occurred(fsFileRead(&m_fileHandle, m_offset, buffer, bufferSize, 0, &bytesRead));
+    const bool readError     = error::occurred(fsFileRead(&m_handle, m_offset, buffer, bufferSize, 0, &bytesRead));
     const bool readSizeCheck = bytesRead <= bufferSize; // This check is in place from the 3DS.
     if (readError || !readSizeCheck)
     {
@@ -153,7 +153,7 @@ signed char fslib::File::get_byte()
     char byte{};
     uint64_t bytesRead{};
     const bool streamEnd = Stream::end_of_stream();
-    const bool readError = !streamEnd && error::occurred(fsFileRead(&m_fileHandle, m_offset++, &byte, 1, 0, &bytesRead));
+    const bool readError = !streamEnd && error::occurred(fsFileRead(&m_handle, m_offset++, &byte, 1, 0, &bytesRead));
     if (readError) { return -1; }
     return byte;
 }
@@ -164,7 +164,7 @@ ssize_t fslib::File::write(const void *buffer, uint64_t bufferSize)
     const bool resized      = File::resize_if_needed(bufferSize);
     if (!openForWrite || !resized) { return -1; }
 
-    const bool writeError = error::occurred(fsFileWrite(&m_fileHandle, m_offset, buffer, bufferSize, 0));
+    const bool writeError = error::occurred(fsFileWrite(&m_handle, m_offset, buffer, bufferSize, 0));
     if (writeError) { return -1; }
     // There's no real way to verify this was completely successful on Switch
     m_offset += bufferSize;
@@ -190,7 +190,7 @@ bool fslib::File::put_byte(char byte)
     if (!openForWrite || !resized) { return false; }
 
     // I'm not calling another function for 1 byte.
-    const bool writeError = error::occurred(fsFileWrite(&m_fileHandle, m_offset++, &byte, 1, 0));
+    const bool writeError = error::occurred(fsFileWrite(&m_handle, m_offset++, &byte, 1, 0));
     if (writeError) { return false; }
     return true;
 }
@@ -224,7 +224,7 @@ bool fslib::File::flush()
 {
     if (!File::is_open_for_writing()) { return false; }
 
-    const bool flushError = error::occurred(fsFileFlush(&m_fileHandle));
+    const bool flushError = error::occurred(fsFileFlush(&m_handle));
     if (flushError) { return false; }
     return true;
 }
@@ -241,7 +241,7 @@ bool fslib::File::resize_if_needed(int64_t bufferSize)
     if (offsetOOB) { newFileSize = m_offset; }
     else if (bufferTooLarge) { newFileSize = m_offset + bufferSize; }
 
-    const bool resizeError = error::occurred(fsFileSetSize(&m_fileHandle, newFileSize));
+    const bool resizeError = error::occurred(fsFileSetSize(&m_handle, newFileSize));
     if (resizeError) { return false; }
 
     m_streamSize = newFileSize;

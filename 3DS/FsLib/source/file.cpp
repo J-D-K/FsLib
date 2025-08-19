@@ -18,17 +18,17 @@ fslib::File::File(fslib::File &&file) { *this = std::move(file); }
 
 fslib::File &fslib::File::operator=(fslib::File &&file)
 {
-    m_handle    = file.m_handle;
-    m_isOpen    = file.m_isOpen;
-    m_openFlags = file.m_openFlags;
-    m_offset    = file.m_offset;
-    m_size      = file.m_size;
+    m_handle = file.m_handle;
+    m_isOpen = file.m_isOpen;
+    m_flags  = file.m_flags;
+    m_offset = file.m_offset;
+    m_size   = file.m_size;
 
-    file.m_handle    = 0;
-    file.m_isOpen    = false;
-    file.m_openFlags = 0;
-    file.m_offset    = 0;
-    file.m_size      = 0;
+    file.m_handle = 0;
+    file.m_isOpen = false;
+    file.m_flags  = 0;
+    file.m_offset = 0;
+    file.m_size   = 0;
 
     return *this;
 }
@@ -49,18 +49,18 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, uint64_t
     if (exists && create && !deleted) { return; }
 
     const bool created = create && fslib::create_file(filePath, fileSize);
-    if (!created) { return; }
+    if (create && !created) { return; }
 
     // Save openFlags without FS_OPEN_CREATE if it's there so extdata works correctly.
-    m_openFlags = (openFlags & ~FS_OPEN_CREATE);
+    m_flags = (openFlags & ~FS_OPEN_CREATE);
 
     uint64_t *size       = reinterpret_cast<uint64_t *>(&m_size);
-    const bool openError = error::libctru(FSUSER_OpenFile(&m_handle, archive, filePath.get_fs_path(), m_openFlags, 0));
+    const bool openError = error::libctru(FSUSER_OpenFile(&m_handle, archive, filePath.get_fs_path(), m_flags, 0));
     const bool sizeError = !openError && error::libctru(FSFILE_GetSize(m_handle, size));
     if (openError || sizeError) { return; }
 
     // I added FS_OPEN_APPEND to FsLib. This isn't normally part of ctrulib/3DS.
-    m_offset = m_openFlags & FS_OPEN_APPEND ? m_size : 0;
+    m_offset = m_flags & FS_OPEN_APPEND ? m_size : 0;
     m_isOpen = true;
 }
 
@@ -73,7 +73,7 @@ bool fslib::File::is_open() const { return m_isOpen; }
 
 uint64_t fslib::File::tell() const { return m_offset; }
 
-uint64_t fslib::File::get_size() const { return m_size; }
+uint64_t fslib::File::get_size() const { return static_cast<uint64_t>(m_size); }
 
 bool fslib::File::end_of_file() const { return m_offset >= m_size; }
 
