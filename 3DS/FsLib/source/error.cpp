@@ -6,7 +6,7 @@
 
 namespace
 {
-    std::string s_errorString{};
+    std::string s_errorString = "No errors encountered.";
 }
 
 // Defined at bottom.
@@ -20,10 +20,26 @@ bool fslib::error::libctru(Result code, const std::source_location &location)
 
     std::string_view filename{}, function{};
     prep_locations(location, filename, function);
-    s_errorString =
-        string::get_formatted("%s::%s::%u::%u:%08X", filename.data(), function.data(), location.line(), location.column());
+    s_errorString = string::get_formatted("%s::%s::%u::%u:%08X",
+                                          filename.data(),
+                                          function.data(),
+                                          location.line(),
+                                          location.column(),
+                                          code);
 
     return true;
+}
+
+void fslib::error::set_code(uint32_t code, const std::source_location &location)
+{
+    std::string_view filename{}, function{};
+    prep_locations(location, filename, function);
+    s_errorString = string::get_formatted("%s::%s::%u::%u:%08X",
+                                          filename.data(),
+                                          function.data(),
+                                          location.line(),
+                                          location.column(),
+                                          code);
 }
 
 static void prep_locations(const std::source_location &location, std::string_view &file, std::string_view &function)

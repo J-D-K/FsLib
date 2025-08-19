@@ -13,7 +13,7 @@ bool fslib::delete_extra_data(FS_MediaType mediaType, uint32_t extraDataID)
                                           .saveId    = extraDataID,
                                           .reserved2 = 0};
 
-    const bool deleteError = error::libctru(FSUSER_DeleteExtSaveData(extraInfo));
-    if (deleteError) { return false; }
+    const bool error = error::libctru(FSUSER_DeleteExtSaveData(extraInfo));
+    if (error) { return false; }
     return true;
 }

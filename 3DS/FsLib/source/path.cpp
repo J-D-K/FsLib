@@ -20,22 +20,6 @@ namespace
 // Definitions at bottom.
 static bool contains_forbidden_chars(std::u16string_view string);
 
-// This is an all in one version of what Switch does. Passing nullptr as PathBegin skips trimming the beginning.
-void getTrimmedPath(const char16_t *path, const char16_t **pathBegin, size_t &pathLengthOut)
-{
-    // This will trim extra beginning slashes.
-    if (pathBegin)
-    {
-        while (*path == '/') { ++path; }
-        *pathBegin = path;
-    }
-
-    for (pathLengthOut = std::char_traits<char16_t>::length(path); pathLengthOut > 0; pathLengthOut--)
-    {
-        if (path[pathLengthOut - 1] != u'/') { break; }
-    }
-}
-
 fslib::Path::Path(const fslib::Path &path) { *this = path; }
 
 fslib::Path::Path(fslib::Path &&path) { *this = std::move(path); }
@@ -51,25 +35,42 @@ fslib::Path::Path(const std::u16string_view path) { *this = path; }
 bool fslib::Path::is_valid() const
 {
     const char16_t *deviceEnd = std::char_traits<char16_t>::find(m_path.c_str(), m_path.length(), CHAR16_SLASH);
-    bool lengthCheck          = deviceEnd && std::char_traits<char16_t>::length(deviceEnd + 1) > 0;
+    const bool lengthCheck    = deviceEnd && std::char_traits<char16_t>::length(deviceEnd + 1) > 0;
     const bool hasForbidden   = lengthCheck && contains_forbidden_chars(m_path);
+
     return deviceEnd && lengthCheck && hasForbidden;
 }
 
 fslib::Path fslib::Path::sub_path(size_t length) const
 {
-    std::u16string_view subPath{m_path.c_str(), length};
+    const char16_t *cPath = m_path.c_str();
+    const std::u16string_view subPath{cPath, length};
     fslib::Path newPath{subPath};
+
     return newPath;
 }
 
 size_t fslib::Path::find_first_of(char16_t character) const { return m_path.find_first_of(character); }
 
-size_t fslib::Path::find_first_of(char16_t character, size_t begin) const { return m_path.find_first_of(character, begin); }
+size_t fslib::Path::find_first_of(char16_t character, size_t start) const { return m_path.find_first_of(character, start); }
+
+size_t fslib::Path::find_first_not_of(char16_t character) const { return m_path.find_first_not_of(character); }
+
+size_t fslib::Path::find_first_not_of(char16_t character, size_t start) const
+{
+    return m_path.find_first_not_of(character, start);
+}
 
 size_t fslib::Path::find_last_of(char16_t character) const { return m_path.find_last_of(character); }
 
-size_t fslib::Path::find_last_of(char16_t character, size_t begin) const { return m_path.find_last_of(character, begin); }
+size_t fslib::Path::find_last_of(char16_t character, size_t start) const { return m_path.find_last_of(character, start); }
+
+size_t fslib::Path::find_last_not_of(char16_t character) const { return m_path.find_last_not_of(character); }
+
+size_t fslib::Path::find_last_not_of(char16_t character, size_t start) const
+{
+    return m_path.find_last_not_of(character, start);
+}
 
 const char16_t *fslib::Path::full_path() const { return m_path.c_str(); }
 
@@ -77,13 +78,16 @@ std::u16string_view fslib::Path::get_device() const
 {
     size_t deviceEnd = m_path.find_first_of(CHAR16_COLON);
     if (deviceEnd == m_path.npos) { return std::u16string_view(u""); }
-    return std::u16string_view{m_path.c_str(), deviceEnd - 1};
+
+    const char16_t *cPath = m_path.c_str();
+    return std::u16string_view{cPath, deviceEnd};
 }
 
 const char16_t *fslib::Path::get_filename() const
 {
     const size_t nameBegin = m_path.find_last_of(CHAR16_SLASH);
     if (nameBegin == m_path.npos) { return nullptr; }
+
     return &m_path.c_str()[nameBegin + 1];
 }
 
@@ -96,12 +100,19 @@ const char16_t *fslib::Path::get_extension() const
 
 FS_Path fslib::Path::get_fs_path() const
 {
-    const char16_t *deviceEnd = std::char_traits<char16_t>::find(m_path.c_str(), m_path.length(), CHAR16_COLON);
-    if (!deviceEnd) { return EMPTY_PATH; }
+    static constexpr size_t SIZE_CHAR16 = sizeof(char16_t);
 
+    size_t deviceEnd = m_path.find_first_of(CHAR16_COLON);
+    if (deviceEnd == m_path.npos) { return EMPTY_PATH; }
     ++deviceEnd;
-    const uint32_t length = std::char_traits<char16_t>::length(deviceEnd);
-    return {PATH_UTF16, length * sizeof(char16_t), deviceEnd + 1};
+
+    const char16_t *pathString = m_path.c_str();
+    const std::u16string_view pathData{&pathString[deviceEnd]};
+
+    const uint32_t pathLength = pathData.length() * SIZE_CHAR16 + SIZE_CHAR16;
+    const FS_Path fsPath      = {.type = PATH_UTF16, .size = pathLength, .data = pathData.data()};
+
+    return fsPath;
 }
 
 size_t fslib::Path::get_length() const { return m_path.length(); }
@@ -157,8 +168,9 @@ fslib::Path &fslib::Path::operator/=(const std::u16string &path) { return *this 
 fslib::Path &fslib::Path::operator/=(std::u16string_view path)
 {
     const size_t pathBegin = path.find_first_not_of(CHAR16_SLASH);
-    const size_t pathEnd   = path.find_last_not_of(CHAR16_SLASH) + 1;
+    const size_t pathEnd   = path.find_last_not_of(CHAR16_SLASH);
     if (pathBegin == path.npos || pathEnd == path.npos) { return *this; }
+
     if (m_path.back() != CHAR16_SLASH) { m_path.append(u"/"); }
 
     m_path += path.substr(pathBegin, (pathEnd - pathBegin) + 1);

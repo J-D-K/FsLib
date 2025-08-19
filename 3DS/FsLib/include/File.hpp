@@ -13,6 +13,14 @@ namespace fslib
     class File
     {
         public:
+            /// @brief Seeking origin.
+            enum class Origin
+            {
+                BEGINNING,
+                CURRENT,
+                END
+            };
+
             /// @brief Default FsLib::File constructor.
             File() = default;
 
@@ -75,7 +83,7 @@ namespace fslib
             /// @brief Seeks to a position in file. Offsets are bounds checked.
             /// @param offset Offset to seek to.
             /// @param origin Position to seek from.
-            void seek(int64_t Offset, uint8_t Origin);
+            void seek(int64_t Offset, File::Origin origin);
 
             /// @brief Attempts to read from file. Certain read errors are corrected for.
             /// @param buffer Buffer to read into.
@@ -126,12 +134,9 @@ namespace fslib
             /// @return True on success. False on failure.
             bool flush();
 
-            /// @brief Used to seek from the beginning of the file.
-            static constexpr uint8_t BEGINNING = 0;
-            /// @brief Used to seek from the current offset of the file.
-            static constexpr uint8_t CURRENT = 1;
-            /// @brief Used to seek from the end of the file.
-            static constexpr uint8_t END = 2;
+            static constexpr File::Origin BEGINNING = File::Origin::BEGINNING;
+            static constexpr File::Origin CURRENT   = File::Origin::CURRENT;
+            static constexpr File::Origin END       = File::Origin::END;
 
         protected:
             /// @brief Handle to file.
@@ -145,9 +150,6 @@ namespace fslib
 
             /// @brief Store the current offset in the file and the size of the file.
             int64_t m_offset{}, m_size{};
-
-            /// @brief Private: Corrects if offset is out of bounds. Ex: m_Offset < 0 or m_Offset > m_FileSize
-            void ensure_offset_is_valid();
 
             /// @brief Attempts to resize a file if the buffer size is too large to fit in the remaining space.
             /// @param BufferSize Size of buffer to check.

@@ -34,8 +34,9 @@ bool fslib::create_directory_recursively(const fslib::Path &directoryPath)
 {
     static constexpr char16_t CHAR16_SLASH = u'/';
 
-    size_t slash = directoryPath.find_first_of(CHAR16_SLASH) + 1;
+    size_t slash = directoryPath.find_first_of(CHAR16_SLASH);
     if (slash == directoryPath.NOT_FOUND) { return false; }
+    ++slash;
 
     const size_t pathLength = directoryPath.get_length();
     do {
@@ -44,9 +45,12 @@ bool fslib::create_directory_recursively(const fslib::Path &directoryPath)
 
         const fslib::Path currentDir = directoryPath.sub_path(slash);
         const bool exists            = fslib::directory_exists(currentDir);
-        const bool createError       = !exists && fslib::create_directory(currentDir);
+        const bool createError       = !exists && !fslib::create_directory(currentDir);
         if (!exists && createError) { return false; }
+
+        ++slash;
     } while (slash < pathLength);
+
     return true;
 }
 
@@ -58,9 +62,8 @@ bool fslib::rename_directory(const fslib::Path &oldPath, const fslib::Path &newP
     const bool archivesMatch  = archiveAExists && archiveBExists && archiveA == archiveB;
     if (!archiveAExists || !archiveBExists || !archivesMatch) { return false; }
 
-    const bool renameError =
-        error::libctru(FSUSER_RenameDirectory(archiveA, oldPath.get_fs_path(), archiveB, newPath.get_fs_path()));
-    if (renameError) { return false; }
+    const bool error = error::libctru(FSUSER_RenameDirectory(archiveA, oldPath.get_fs_path(), archiveB, newPath.get_fs_path()));
+    if (error) { return false; }
     return true;
 }
 
@@ -70,8 +73,9 @@ bool fslib::delete_directory(const fslib::Path &directoryPath)
     const bool found = fslib::get_archive_by_device_name(directoryPath.get_device(), archive);
     if (!found) { return false; }
 
-    const bool deleteError = error::libctru(FSUSER_DeleteDirectory(archive, directoryPath.get_fs_path()));
-    if (deleteError) { return false; }
+    const bool error = error::libctru(FSUSER_DeleteDirectory(archive, directoryPath.get_fs_path()));
+    if (error) { return false; }
+
     return true;
 }
 
@@ -85,18 +89,20 @@ bool fslib::delete_directory_recursively(const fslib::Path &directoryPath)
     const int dirCount = target.get_count();
     for (int i = 0; i < dirCount; i++)
     {
-        const fslib::Path newTarget = directoryPath / target[i];
-        const bool isDir            = target.is_directory(i);
-        const bool deleteDir        = isDir && fslib::delete_directory_recursively(newTarget);
-        const bool deleteFile       = !isDir && fslib::delete_file(newTarget);
+        const fslib::Path newTarget{directoryPath / target[i]};
+
+        const bool isDir      = target.is_directory(i);
+        const bool deleteDir  = isDir && fslib::delete_directory_recursively(newTarget);
+        const bool deleteFile = !isDir && fslib::delete_file(newTarget);
         if (!deleteDir && !deleteFile) { return false; }
     }
 
     const char16_t *path      = directoryPath.full_path();
-    const int length          = directoryPath.get_length();
-    const char16_t *deviceEnd = std::char_traits<char16_t>::find(path, length, CHAR16_SLASH);
-    const bool notRoot        = std::char_traits<char16_t>::length(deviceEnd) > 1;
-    const bool deleteRoot     = notRoot && fslib::delete_directory(directoryPath);
+    const size_t length       = directoryPath.get_length();
+    const char16_t *pathBegin = std::char_traits<char16_t>::find(path, length, CHAR16_SLASH);
+
+    const bool notRoot    = std::char_traits<char16_t>::length(pathBegin) > 1;
+    const bool deleteRoot = notRoot && fslib::delete_directory(directoryPath);
     if (notRoot && !deleteRoot) { return false; }
 
     return true;

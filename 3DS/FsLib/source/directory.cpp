@@ -6,7 +6,7 @@
 #include <cstring>
 #include <string>
 
-// Definition at bottom.
+// Definition at bottom. Used to sort entries Dir->Alpha
 static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryEntry &entryB);
 
 fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortEntries) { Directory::open(directoryPath, sortEntries); }
@@ -37,6 +37,7 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
 
     const bool openError = error::libctru(FSUSER_OpenDirectory(&m_handle, archive, directoryPath.get_fs_path()));
     if (openError) { return; }
+    m_wasOpened = true;
 
     uint32_t entriesRead{};
     FS_DirectoryEntry entry{};
@@ -44,8 +45,6 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
     Directory::close();
 
     if (sortEntries) { std::sort(m_list.begin(), m_list.end(), compare_entries); }
-
-    m_wasOpened = true;
 }
 
 bool fslib::Directory::is_open() const { return m_wasOpened; }
@@ -54,15 +53,15 @@ size_t fslib::Directory::get_count() const { return m_list.size(); }
 
 bool fslib::Directory::is_directory(int index) const
 {
-    const bool indexValid = Directory::index_check(index);
-    if (!indexValid) { return false; }
+    if (!Directory::index_check(index)) { return false; }
+
     return m_list[index].attributes & FS_ATTRIBUTE_DIRECTORY;
 }
 
 const char16_t *fslib::Directory::get_entry(int index) const
 {
-    const bool indexValid = Directory::index_check(index);
-    if (!indexValid) { return nullptr; }
+    if (!Directory::index_check(index)) { return nullptr; }
+
     return reinterpret_cast<const char16_t *>(m_list[index].name);
 }
 
@@ -74,6 +73,7 @@ bool fslib::Directory::close()
 
     const bool closeError = error::libctru(FSDIR_Close(m_handle));
     if (closeError) { return false; }
+
     return true;
 }
 
@@ -94,5 +94,6 @@ static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryE
         const int charB = std::tolower(entryB.name[i]);
         if (charA != charB) { return charA < charB; }
     }
+
     return true;
 }

@@ -54,11 +54,23 @@ namespace fslib
             size_t find_first_of(char16_t character) const;
             size_t find_first_of(char16_t character, size_t begin) const;
 
+            /// @brief Searches for the first character in the path the doesn't match the char passed.
+            /// @param character Character to search.
+            /// @return Position of Character or Path::NotFound on failure.
+            size_t find_first_not_of(char16_t character) const;
+            size_t find_first_not_of(char16_t character, size_t start) const;
+
             /// @brief Searches backwards to find last occurrence of Character in string. Overload starts at begin.
             /// @param character Character to search for.
             /// @return Position of Character or Path::NotFound on failure.
             size_t find_last_of(char16_t character) const;
             size_t find_last_of(char16_t character, size_t begin) const;
+
+            /// @brief Finds the last character of the path that isn't the character passed.
+            /// @param character Character to search.
+            /// @return Position of Character or Path::NotFound on failure.
+            size_t find_last_not_of(char16_t character) const;
+            size_t find_last_not_of(char16_t character, size_t start) const;
 
             /// @brief Returns the entire path as a C const char16_t* String
             /// @return Pointer to path string buffer.

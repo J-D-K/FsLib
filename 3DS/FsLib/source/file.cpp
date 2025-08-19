@@ -77,7 +77,7 @@ uint64_t fslib::File::get_size() const { return m_size; }
 
 bool fslib::File::end_of_file() const { return m_offset >= m_size; }
 
-void fslib::File::seek(int64_t offset, uint8_t origin)
+void fslib::File::seek(int64_t offset, File::Origin origin)
 {
     switch (origin)
     {
@@ -85,7 +85,9 @@ void fslib::File::seek(int64_t offset, uint8_t origin)
         case File::CURRENT: m_offset += offset; break;
         case File::END: m_offset = m_size + offset; break;
     }
-    File::ensure_offset_is_valid();
+
+    if (m_offset < 0) { m_offset = 0; }
+    else { File::resize_if_needed(0); }
 }
 
 ssize_t fslib::File::read(void *buffer, size_t bufferSize)
@@ -115,6 +117,7 @@ bool fslib::File::read_line(char *buffer, size_t bufferSize)
 
         buffer[i] = nextByte;
     }
+
     return true;
 }
 
@@ -130,6 +133,7 @@ bool fslib::File::read_line(std::string &line)
         if (nextByte == '\n' || nextByte == '\r') { return true; }
         line += nextByte;
     }
+
     return false;
 }
 
@@ -141,6 +145,7 @@ signed char fslib::File::get_byte()
     uint32_t bytesRead{};
     const bool readError = error::libctru(FSFILE_Read(m_handle, &bytesRead, m_offset, &byteRead, 1));
     if (readError) { return -1; }
+
     return byteRead;
 }
 
@@ -173,12 +178,14 @@ fslib::File &fslib::File::operator<<(const char *string)
 {
     const int size = std::char_traits<char>::length(string);
     File::write(string, size);
+
     return *this;
 }
 
 fslib::File &fslib::File::operator<<(const std::string &string)
 {
     File::write(string.c_str(), string.length());
+
     return *this;
 }
 
@@ -199,23 +206,24 @@ bool fslib::File::flush()
 
     const bool flushError = error::libctru(FSFILE_Flush(m_handle));
     if (flushError) { return false; }
-    return true;
-}
 
-void fslib::File::ensure_offset_is_valid()
-{
-    if (m_offset < 0) { m_offset = 0; }
-    else if (m_offset > m_size) { m_offset = m_size; }
+    return true;
 }
 
 bool fslib::File::resize_if_needed(size_t bufferSize)
 {
-    const size_t spaceRemaining = m_size - m_offset;
-    if (spaceRemaining >= bufferSize) { return true; }
+    if (!File::is_open_for_writing()) { return false; }
 
-    const uint64_t newSize = m_offset + bufferSize;
-    const bool resizeError = error::libctru(FSFILE_SetSize(m_handle, newSize));
-    if (resizeError) { return false; }
+    const bool offsetOOB      = m_offset > m_size;
+    const bool bufferTooLarge = m_offset + bufferSize > m_size;
+    if (!offsetOOB && !bufferTooLarge) { return true; }
+
+    uint64_t newSize{};
+    if (offsetOOB) { newSize = m_offset; }
+    else { newSize = m_offset + bufferSize; };
+
+    const bool error = error::libctru(FSFILE_SetSize(m_handle, newSize));
+    if (error) { return false; }
 
     m_size = newSize;
     return true;

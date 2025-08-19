@@ -65,11 +65,11 @@ namespace fslib
             Handle m_handle{};
 
             /// @brief Whether or not Directory::Open was successful.
-            bool m_wasOpened = false;
+            bool m_wasOpened{};
 
             /// @brief Vector of 3DS FS_DirectoryEntry's. 3DS has no way of retrieving a count first or this wouldn't be a
             /// vector.
-            std::vector<FS_DirectoryEntry> m_list;
+            std::vector<FS_DirectoryEntry> m_list{};
 
             /// @brief Closes directory handle. The directory is read in its entirety when open is called. Public access is not
             /// needed.
@@ -78,7 +78,7 @@ namespace fslib
             inline bool index_check(int index) const
             {
                 const int listSize = m_list.size();
-                return index < 0 || index >= listSize;
+                return index >= 0 && index < listSize;
             }
     };
 } // namespace fslib
