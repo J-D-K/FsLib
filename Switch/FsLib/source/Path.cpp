@@ -224,6 +224,11 @@ fslib::Path &fslib::Path::operator/=(std::string_view path)
 
 fslib::Path &fslib::Path::operator/=(const std::filesystem::path &path) { return *this /= std::string_view(path.string()); }
 
+fslib::Path &fslib::Path::operator/=(const fslib::DirectoryEntry &path)
+{
+    return *this /= std::string_view(path.get_filename());
+}
+
 fslib::Path &fslib::Path::operator+=(const char *path) { return *this += std::string_view(path); }
 
 fslib::Path &fslib::Path::operator+=(const std::string &path) { return *this += std::string_view(path); }
@@ -243,58 +248,77 @@ fslib::Path &fslib::Path::operator+=(std::string_view path)
 
 fslib::Path &fslib::Path::operator+=(const std::filesystem::path &path) { return *this += std::string_view(path.string()); }
 
+fslib::Path &fslib::Path::operator+=(const fslib::DirectoryEntry &path)
+{
+    return *this += std::string_view(path.get_filename());
+}
+
 fslib::Path fslib::operator/(const fslib::Path &pathA, const char *pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
     newPath /= pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator/(const fslib::Path &pathA, const std::string &pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
     newPath /= pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator/(const fslib::Path &pathA, std::string_view pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
     newPath /= pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator/(const fslib::Path &pathA, const std::filesystem::path &pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
+    newPath /= pathB;
+    return newPath;
+}
+
+fslib::Path fslib::operator/(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB)
+{
+    fslib::Path newPath{pathA};
     newPath /= pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator+(const fslib::Path &pathA, const char *pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
     newPath += pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator+(const fslib::Path &pathA, const std::string &pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
     newPath += pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator+(const fslib::Path &pathA, std::string_view pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
     newPath += pathB;
     return newPath;
 }
 
 fslib::Path fslib::operator+(const fslib::Path &pathA, const std::filesystem::path &pathB)
 {
-    fslib::Path newPath = pathA;
+    fslib::Path newPath{pathA};
+    newPath += pathB;
+    return newPath;
+}
+
+fslib::Path fslib::operator+(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB)
+{
+    fslib::Path newPath{pathA};
     newPath += pathB;
     return newPath;
 }

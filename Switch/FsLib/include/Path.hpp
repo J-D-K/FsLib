@@ -1,4 +1,6 @@
 #pragma once
+#include "DirectoryEntry.hpp"
+
 #include <array>
 #include <filesystem>
 #include <string>
@@ -134,6 +136,10 @@ namespace fslib
             /// @param path String to append.
             Path &operator/=(const std::filesystem::path &path);
 
+            /// @brief Appends the name of a directory entry to the path.
+            /// @param path Directory entry to append to the path.
+            Path &operator/=(const fslib::DirectoryEntry &path);
+
             /// @brief Appends path to Path. Unchecked.
             /// @param path String to append.
             Path &operator+=(const char *path);
@@ -149,6 +155,10 @@ namespace fslib
             /// @brief Appends path to Path. Unchecked.
             /// @param path String to append.
             Path &operator+=(const std::filesystem::path &path);
+
+            /// @brief Appends the directory entry passed to the path.
+            /// @param path Entry to append to the path.
+            Path &operator+=(const fslib::DirectoryEntry &path);
 
             /**
              * @brief Value returned by Find[X]Of functions if the search fails.
@@ -195,6 +205,11 @@ namespace fslib
     /// @param pathB Path to concatenate to Path1.
     fslib::Path operator/(const fslib::Path &pathA, const std::filesystem::path &pathB);
 
+    /// @brief Concatenates two paths. Adds a / if needed.
+    /// @param pathA Base path.
+    /// @param pathB Path to concatenate to Path1.
+    fslib::Path operator/(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB);
+
     /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1
@@ -210,8 +225,13 @@ namespace fslib
     /// @param pathB Path to concatenate to Path1
     fslib::Path operator+(const fslib::Path &pathA, std::string_view pathB);
 
-    /// @brief Concatenates two paths. Adds a / if needed.
+    /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1.
     fslib::Path operator+(const fslib::Path &pathA, const std::filesystem::path &pathB);
+
+    /// @brief Unchecked concatenation operator. Doesn't perform checks or add / if needed.
+    /// @param pathA Base path.
+    /// @param pathB Path to concatenate to Path1
+    fslib::Path operator+(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB);
 } // namespace fslib
