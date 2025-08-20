@@ -8,7 +8,7 @@
 #include <string>
 
 /// @brief Function used to sort by directories->alphabetically.
-static bool compare_entries(const FsDirectoryEntry &entryA, const FsDirectoryEntry &entryB);
+static bool compare_entries(const fslib::DirectoryEntry &entryA, const fslib::DirectoryEntry &entryB);
 
 fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortedListing)
 {
@@ -26,9 +26,9 @@ fslib::Directory &fslib::Directory::operator=(Directory &&directory)
     m_wasRead         = directory.m_wasRead;
 
     directory.m_directoryHandle = {0};
-    m_directoryList             = nullptr; // Not really sure if this is needed after std::move, but jic.
-    m_entryCount                = 0;
-    m_wasRead                   = 0;
+    m_directoryList.clear(); // Not really sure if this is needed after std::move, but jic.
+    m_entryCount = 0;
+    m_wasRead    = 0;
 
     return *this;
 }
@@ -52,15 +52,17 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     if (dirError || countError) { return; }
 
     // Reallocating this should free a previous array if there is one.
-    m_directoryList = std::make_unique<FsDirectoryEntry[]>(m_entryCount);
+    auto entryBuffer = std::make_unique<FsDirectoryEntry[]>(m_entryCount);
 
     // This is how many entries the function says are read.
     int64_t totalEntries{};
-    const bool readError = error::occurred(fsDirRead(&m_directoryHandle, &totalEntries, m_entryCount, m_directoryList.get()));
+    const bool readError    = error::occurred(fsDirRead(&m_directoryHandle, &totalEntries, m_entryCount, entryBuffer.get()));
     const bool entriesMatch = totalEntries == m_entryCount;
     if (readError || !entriesMatch) { return; }
 
-    if (sortedListing) { std::sort(m_directoryList.get(), m_directoryList.get() + m_entryCount, compare_entries); }
+    for (int64_t i = 0; i < m_entryCount; i++) { m_directoryList.emplace_back(entryBuffer[i]); }
+
+    if (sortedListing) { std::sort(m_directoryList.begin(), m_directoryList.end(), compare_entries); }
     Directory::close();
     m_wasRead = true;
 }
@@ -69,43 +71,49 @@ bool fslib::Directory::is_open() const { return m_wasRead; }
 
 int64_t fslib::Directory::get_count() const { return m_entryCount; }
 
-int64_t fslib::Directory::get_entry_size(int index) const
+const fslib::DirectoryEntry &fslib::Directory::get_entry(int index) const { return m_directoryList[index]; }
+
+const fslib::DirectoryEntry &fslib::Directory::operator[](int index) const { return m_directoryList[index]; }
+
+fslib::Directory::iterator fslib::Directory::begin()
 {
-    if (!Directory::index_check(index)) { return 0; }
-    return m_directoryList[index].file_size;
+    m_iterIndex = 0;
+    return m_directoryList.begin();
 }
 
-const char *fslib::Directory::get_entry(int index) const
+fslib::Directory::iterator fslib::Directory::end() const { return m_directoryList.end(); }
+
+fslib::DirectoryEntry &fslib::Directory::operator*() { return m_directoryList[m_iterIndex]; }
+
+fslib::DirectoryEntry *fslib::Directory::operator->() { return &m_directoryList[m_iterIndex]; }
+
+fslib::Directory &fslib::Directory::operator++()
 {
-    if (!Directory::index_check(index)) { return nullptr; }
-    return m_directoryList[index].name;
+    m_iterIndex++;
+    return *this;
 }
 
-bool fslib::Directory::is_directory(int index) const
-{
-    if (!Directory::index_check(index)) { return false; }
-    return m_directoryList[index].type == FsDirEntryType_Dir;
-}
-
-fslib::Directory::operator bool() const { return m_wasRead; }
-
-const char *fslib::Directory::operator[](int index) const { return m_directoryList[index].name; }
+bool fslib::Directory::operator!=(const fslib::Directory &iter) { return iter.m_iterIndex != m_iterIndex; }
 
 bool fslib::Directory::index_check(int index) const { return index >= 0 && index < m_entryCount; }
 
 void fslib::Directory::close() { fsDirClose(&m_directoryHandle); }
 
-static bool compare_entries(const FsDirectoryEntry &entryA, const FsDirectoryEntry &entryB)
+static bool compare_entries(const fslib::DirectoryEntry &entryA, const fslib::DirectoryEntry &entryB)
 {
-    if (entryA.type != entryB.type) { return entryA.type == FsDirEntryType_Dir; }
+    const bool isDirA = entryA.is_directory();
+    const bool isDirB = entryB.is_directory();
+    if (isDirA != isDirB) { return isDirA; }
 
-    const size_t entryALength  = std::char_traits<char>::length(entryA.name);
-    const size_t entryBLength  = std::char_traits<char>::length(entryB.name);
+    const char *nameA          = entryA.get_filename();
+    const char *nameB          = entryB.get_filename();
+    const size_t entryALength  = std::char_traits<char>::length(nameA);
+    const size_t entryBLength  = std::char_traits<char>::length(nameB);
     const size_t shortestEntry = entryALength < entryBLength ? entryALength : entryBLength;
     for (size_t i = 0; i < shortestEntry;)
     {
-        const int charA = std::tolower(entryA.name[i]);
-        const int charB = std::tolower(entryB.name[i]);
+        const int charA = std::tolower(nameA[i]);
+        const int charB = std::tolower(nameB[i]);
         if (charA != charB) { return charA < charB; }
     }
     return false;

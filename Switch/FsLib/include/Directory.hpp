@@ -1,8 +1,9 @@
 #pragma once
+#include "DirectoryEntry.hpp"
 #include "Path.hpp"
 
-#include <memory>
 #include <switch.h>
+#include <vector>
 
 namespace fslib
 {
@@ -10,6 +11,8 @@ namespace fslib
     class Directory
     {
         public:
+            using iterator = std::vector<fslib::DirectoryEntry>::const_iterator;
+
             /// @brief Default constructor for Directory.
             Directory() = default;
 
@@ -44,31 +47,33 @@ namespace fslib
             /// @return Total numbers of entries read from directory.
             int64_t get_count() const;
 
-            /// @brief Returns the size of the entry at Index.
-            /// @param Index Index of entry.
-            /// @return Size of entry. 0 if Index is out of bounds.
-            int64_t get_entry_size(int index) const;
-
             /// @brief Returns the name of the entry at Index.
             /// @param Index Index of entry.
             /// @return Name of the entry. nullptr if Index is out of bounds.
-            const char *get_entry(int index) const;
-
-            /// @brief Returns whether or not the entry at Index is a directory.
-            /// @param Index Index of entry.
-            /// @return True if the item is a directory. False if it is not or out of bounds.
-            bool is_directory(int index) const;
-
-            /// @brief This can be used like is_open().
-            operator bool() const;
+            const fslib::DirectoryEntry &get_entry(int index) const;
 
             /// @brief Returns entry name at Index.
             /// @param Index Index of entry.
             /// @return Entry's name. If out of bounds, nullptr.
-            const char *operator[](int index) const;
+            const fslib::DirectoryEntry &operator[](int index) const;
 
-            /// @brief This allows the DirectoryIterator class to access the array of this one.
-            friend class DirectoryIterator;
+            /// @brief For range based for loops and iterators.
+            fslib::Directory::iterator begin();
+
+            /// @brief For range based for loops and iterators.
+            fslib::Directory::iterator end() const;
+
+            /// @brief Operator for range based for loops.
+            fslib::DirectoryEntry &operator*();
+
+            /// @brief Operator for range based for loops.
+            fslib::DirectoryEntry *operator->();
+
+            /// @brief Operator for range based for loops.
+            fslib::Directory &operator++();
+
+            /// @brief Operator for range based for loops.
+            bool operator!=(const fslib::Directory &iter);
 
         private:
             /// @brief Saves whether or not the directory was successfully opened and read.
@@ -80,8 +85,11 @@ namespace fslib
             /// @brief Total number of entries read from the directory.
             int64_t m_entryCount{};
 
-            /// @brief Entry array.
-            std::unique_ptr<FsDirectoryEntry[]> m_directoryList{};
+            /// @brief Current index for iterating through a directory using a range loop.
+            int m_iterIndex{};
+
+            /// @brief Entry vector.
+            std::vector<fslib::DirectoryEntry> m_directoryList{};
 
             /// @brief Checks and returns whether or not the index is within bounds.
             /// @param index Index to check.

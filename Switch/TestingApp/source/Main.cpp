@@ -60,8 +60,11 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    for (const FsDirectoryEntry &entry : fslib::DirectoryIterator("sdmc:/switch")) { print("%s\n", entry.name); }
-    print("\nPress + to exit.\n");
+    fslib::Directory switchDir{"sdmc:/switch"};
+    if (!switchDir.is_open()) { return -1; }
+
+    for (const fslib::DirectoryEntry &entry : switchDir) { print("%s\n", entry.get_filename()); }
+    for (const fslib::DirectoryEntry &entry : switchDir) { print("%s\n", entry.get_filename()); }
 
     while (appletMainLoop())
     {
