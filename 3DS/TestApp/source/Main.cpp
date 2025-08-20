@@ -81,12 +81,21 @@ int main()
     const bool fslibDevInit = fslib::dev::initialize_sdmc();
     if (!fslibDevInit) { print_fslib_error(); }
 
-    for (const FS_DirectoryEntry &entry : fslib::DirectoryIterator(u"sdmc:/3ds"))
+    fslib::Directory threeDeeEssDir{u"sdmc:/3ds"};
+    if (!threeDeeEssDir.is_open()) { printf_typed("Error opening ThreeDeeEsss directory!\n"); }
+    else
     {
-        const char16_t *castPointer = reinterpret_cast<const char16_t *>(entry.name);
-        const std::string entryUTF8 = utf16_to_utf8(castPointer);
+        for (const fslib::DirectoryEntry &entry : threeDeeEssDir)
+        {
+            const std::string utf8Name = utf16_to_utf8(entry.get_filename());
+            printf_typed("%s\n", utf8Name.c_str());
+        }
 
-        printf_typed("%s\n", entryUTF8.c_str());
+        for (const fslib::DirectoryEntry &entry : threeDeeEssDir)
+        {
+            const std::string utf8Name = utf16_to_utf8(entry.get_filename());
+            printf_typed("%s\n", utf8Name.c_str());
+        }
     }
 
     printf_typed("Press Start to exit.");

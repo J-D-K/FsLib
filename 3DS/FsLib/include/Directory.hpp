@@ -1,4 +1,5 @@
 #pragma once
+#include "DirectoryEntry.hpp"
 #include "Path.hpp"
 
 #include <3ds.h>
@@ -11,6 +12,9 @@ namespace fslib
     class Directory
     {
         public:
+            /// @brief This makes stuff slightly easier to type.
+            using iterator = std::vector<fslib::DirectoryEntry>::const_iterator;
+
             /// @brief Default initializer for FsLib::Directory.
             Directory() = default;
 
@@ -45,23 +49,33 @@ namespace fslib
             /// @return Number of entries read from directory.
             size_t get_count() const;
 
-            /// @brief Returns whether or not the entry at Index in directory listing is a directory or not.
-            /// @param index Index of entry to check.
-            /// @return True if the entry is a directory. False if not or Index is out of bounds.
-            bool is_directory(int index) const;
-
             /// @brief Returns Entry at index as a UTF-16 AKA u16_string view.
             /// @param index Index of entry to retrieve.
             /// @return Entry at index or empty if out of bounds.
-            const char16_t *get_entry(int index) const;
+            const fslib::DirectoryEntry &get_entry(int index) const;
 
             /// @brief Operator to return the name of the entry at index.
             /// @param Index Index of entry to get.
             /// @return Name of entry. If out of bounds, nullptr.
-            const char16_t *operator[](int index) const;
+            const fslib::DirectoryEntry &operator[](int index) const;
 
-            /// @brief This allows the iterator to use this one. It's basically a container.
-            friend class DirectoryIterator;
+            /// @brief Begin for range based for loops.
+            Directory::iterator begin();
+
+            /// @brief End for range based for loops.
+            Directory::iterator end() const;
+
+            /// @brief Operator for range based for loops.
+            const fslib::DirectoryEntry &operator*() const;
+
+            /// @brief Operator for range based for loops.
+            const fslib::DirectoryEntry *operator->() const;
+
+            /// @brief Operator for range based for loops. Increments the internal index.
+            Directory &operator++();
+
+            /// @brief Compares the iter passed.
+            bool operator!=(const fslib::Directory &iter) const;
 
         private:
             /// @brief Directory handle.
@@ -72,7 +86,10 @@ namespace fslib
 
             /// @brief Vector of 3DS FS_DirectoryEntry's. 3DS has no way of retrieving a count first or this wouldn't be a
             /// vector.
-            std::vector<FS_DirectoryEntry> m_list{};
+            std::vector<fslib::DirectoryEntry> m_list{};
+
+            /// @brief This keeps track of the internals for range loops.
+            int m_iterIndex{};
 
             /// @brief Closes directory handle. The directory is read in its entirety when open is called. Public access is not
             /// needed.

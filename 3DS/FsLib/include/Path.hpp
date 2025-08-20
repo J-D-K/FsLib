@@ -1,4 +1,6 @@
 #pragma once
+#include "DirectoryEntry.hpp"
+
 #include <3ds.h>
 #include <cstdint>
 #include <string>
@@ -145,6 +147,11 @@ namespace fslib
             /// @return Reference to current Path
             Path &operator/=(std::u16string_view path);
 
+            /// @brief Preferred appending operator. Adds / if needed between paths. Also trims slashes from input.
+            /// @param path UTF-16 string to append.
+            /// @return Reference to current Path
+            Path &operator/=(const fslib::DirectoryEntry &path);
+
             /// @brief Unchecked appending operator. Input is not checked for validity of string appended.
             /// @param path UTF-16 string to append.
             /// @return Reference to current Path.
@@ -164,6 +171,11 @@ namespace fslib
             /// @param path UTF-16 string to append.
             /// @return Reference to current Path.
             Path &operator+=(std::u16string_view path);
+
+            /// @brief Unchecked appending operator. Input is not checked for validity of string appended.
+            /// @param path UTF-16 string to append.
+            /// @return Reference to current Path.
+            Path &operator+=(const fslib::DirectoryEntry &path);
 
             /// @brief This is the value that is returned when find[X]Of can't find the character.
             static constexpr size_t NOT_FOUND = std::u16string::npos;
@@ -197,6 +209,12 @@ namespace fslib
     /// @return New path containing concatenated paths.
     fslib::Path operator/(const fslib::Path &pathA, std::u16string_view pathB);
 
+    /// @brief Concatenates a path to a string and returns a new one. Checks are performed and / is added if needed.
+    /// @param pathA BasePath
+    /// @param pathB Path to concatenate to pathB
+    /// @return New path containing concatenated paths.
+    fslib::Path operator/(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB);
+
     /// @brief Concatenates a path to a string and returns a new one. No checks are performed and pathB is appended as-is.
     /// @param pathA BasePath
     /// @param pathB Path to concatenate to pathA
@@ -220,4 +238,10 @@ namespace fslib
     /// @param pathB Path to concatenate to pathA
     /// @return New path containing concatenated paths.
     fslib::Path operator+(const fslib::Path &pathA, std::u16string_view pathB);
+
+    /// @brief Concatenates a path to a string and returns a new one. No checks are performed and pathB is appended as-is.
+    /// @param pathA BasePath
+    /// @param pathB Path to concatenate to pathA
+    /// @return New path containing concatenated paths.
+    fslib::Path operator+(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB);
 } // namespace fslib

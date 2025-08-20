@@ -7,7 +7,7 @@
 #include <string>
 
 // Definition at bottom. Used to sort entries Dir->Alpha
-static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryEntry &entryB);
+static bool compare_entries(const fslib::DirectoryEntry &entryA, const fslib::DirectoryEntry &entryB);
 
 fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortEntries) { Directory::open(directoryPath, sortEntries); }
 
@@ -41,7 +41,7 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortEntries)
 
     uint32_t entriesRead{};
     FS_DirectoryEntry entry{};
-    while (R_SUCCEEDED(FSDIR_Read(m_handle, &entriesRead, 1, &entry)) && entriesRead == 1) { m_list.push_back(entry); }
+    while (R_SUCCEEDED(FSDIR_Read(m_handle, &entriesRead, 1, &entry)) && entriesRead == 1) { m_list.emplace_back(entry); }
     Directory::close();
 
     if (sortEntries) { std::sort(m_list.begin(), m_list.end(), compare_entries); }
@@ -51,21 +51,29 @@ bool fslib::Directory::is_open() const { return m_wasOpened; }
 
 size_t fslib::Directory::get_count() const { return m_list.size(); }
 
-bool fslib::Directory::is_directory(int index) const
-{
-    if (!Directory::index_check(index)) { return false; }
+const fslib::DirectoryEntry &fslib::Directory::get_entry(int index) const { return m_list[index]; }
 
-    return m_list[index].attributes & FS_ATTRIBUTE_DIRECTORY;
+const fslib::DirectoryEntry &fslib::Directory::operator[](int index) const { return m_list[index]; }
+
+fslib::Directory::iterator fslib::Directory::begin()
+{
+    m_iterIndex = 0;
+    return m_list.begin();
 }
 
-const char16_t *fslib::Directory::get_entry(int index) const
-{
-    if (!Directory::index_check(index)) { return nullptr; }
+fslib::Directory::iterator fslib::Directory::end() const { return m_list.end(); }
 
-    return reinterpret_cast<const char16_t *>(m_list[index].name);
+const fslib::DirectoryEntry &fslib::Directory::operator*() const { return m_list[m_iterIndex]; }
+
+const fslib::DirectoryEntry *fslib::Directory::operator->() const { return &m_list[m_iterIndex]; }
+
+fslib::Directory &fslib::Directory::operator++()
+{
+    m_iterIndex++;
+    return *this;
 }
 
-const char16_t *fslib::Directory::operator[](int index) const { return reinterpret_cast<const char16_t *>(m_list[index].name); }
+bool fslib::Directory::operator!=(const fslib::Directory &iter) const { return iter.m_iterIndex != m_iterIndex; }
 
 bool fslib::Directory::close()
 {
@@ -77,23 +85,22 @@ bool fslib::Directory::close()
     return true;
 }
 
-static bool compare_entries(const FS_DirectoryEntry &entryA, const FS_DirectoryEntry &entryB)
+static bool compare_entries(const fslib::DirectoryEntry &entryA, const fslib::DirectoryEntry &entryB)
 {
-    {
-        const uint32_t attributesA = entryA.attributes;
-        const uint32_t attributesB = entryB.attributes;
-        if (attributesA != attributesB) { return attributesA & FS_ATTRIBUTE_DIRECTORY; }
-    }
+    const bool aIsDir = entryA.is_directory();
+    const bool bIsDir = entryB.is_directory();
+    if (aIsDir != bIsDir) { return aIsDir; }
 
-    const int lengthA  = std::char_traits<uint16_t>::length(entryA.name);
-    const int lengthB  = std::char_traits<uint16_t>::length(entryB.name);
-    const int shortest = lengthA < lengthB ? lengthA : lengthB;
+    const char16_t *nameA = entryA.get_filename();
+    const char16_t *nameB = entryB.get_filename();
+    const int lengthA     = std::char_traits<char16_t>::length(nameA);
+    const int lengthB     = std::char_traits<char16_t>::length(nameB);
+    const int shortest    = lengthA < lengthB ? lengthA : lengthB;
     for (int i = 0; i < shortest; i++)
     {
-        const int charA = std::tolower(entryA.name[i]);
-        const int charB = std::tolower(entryB.name[i]);
+        const int charA = std::tolower(nameA[i]);
+        const int charB = std::tolower(nameB[i]);
         if (charA != charB) { return charA < charB; }
     }
-
     return true;
 }
