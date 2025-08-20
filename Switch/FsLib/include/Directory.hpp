@@ -67,6 +67,9 @@ namespace fslib
             /// @return Entry's name. If out of bounds, nullptr.
             const char *operator[](int index) const;
 
+            /// @brief This allows the DirectoryIterator class to access the array of this one.
+            friend class DirectoryIterator;
+
         private:
             /// @brief Saves whether or not the directory was successfully opened and read.
             bool m_wasRead{};

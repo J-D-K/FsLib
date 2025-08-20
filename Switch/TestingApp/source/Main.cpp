@@ -56,21 +56,11 @@ int main()
 
     consoleInit(nullptr);
 
-    FILE *test = fopen("sdmc:/test.txt", "w");
-    if (!test) { return -1; }
-
-    fseek(test, 128, SEEK_SET);
-    fputs("First message.", test);
-    print("%s\n", fslib::error::get_string());
-    fseek(test, -32, SEEK_SET);
-    fputs("Second message.", test);
-    print("%s\n", fslib::error::get_string());
-    fclose(test);
-
     PadState padState{};
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
+    for (const FsDirectoryEntry &entry : fslib::DirectoryIterator("sdmc:/switch")) { print("%s\n", entry.name); }
     print("\nPress + to exit.\n");
 
     while (appletMainLoop())
