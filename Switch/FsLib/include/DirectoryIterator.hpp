@@ -15,10 +15,10 @@ namespace fslib
             DirectoryIterator(const fslib::Path &path);
 
             /// @brief Returns the beginning of the array
-            FsDirectoryEntry *begin() const;
+            const FsDirectoryEntry *begin() const;
 
             /// @brief Returns the end of the array.
-            FsDirectoryEntry *end() const;
+            const FsDirectoryEntry *end() const;
 
             /// @brief Required for this to work.
             FsDirectoryEntry &operator*();

@@ -1,5 +1,6 @@
 #pragma once
 #include "Directory.hpp"
+#include "DirectoryIterator.hpp"
 #include "File.hpp"
 #include "Path.hpp"
 #include "dev.hpp"

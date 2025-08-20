@@ -3,9 +3,9 @@
 fslib::DirectoryIterator::DirectoryIterator(const fslib::Path &path)
     : m_directory(path) {};
 
-FsDirectoryEntry *fslib::DirectoryIterator::begin() const { return &m_directory.m_directoryList[0]; }
+const FsDirectoryEntry *fslib::DirectoryIterator::begin() const { return &m_directory.m_directoryList[0]; }
 
-FsDirectoryEntry *fslib::DirectoryIterator::end() const { return &m_directory.m_directoryList[m_directory.m_entryCount]; }
+const FsDirectoryEntry *fslib::DirectoryIterator::end() const { return &m_directory.m_directoryList[m_directory.m_entryCount]; }
 
 FsDirectoryEntry &fslib::DirectoryIterator::operator*() { return m_directory.m_directoryList[m_index]; }
 

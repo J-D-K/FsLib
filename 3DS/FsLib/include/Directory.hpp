@@ -60,6 +60,9 @@ namespace fslib
             /// @return Name of entry. If out of bounds, nullptr.
             const char16_t *operator[](int index) const;
 
+            /// @brief This allows the iterator to use this one. It's basically a container.
+            friend class DirectoryIterator;
+
         private:
             /// @brief Directory handle.
             Handle m_handle{};
