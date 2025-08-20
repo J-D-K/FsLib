@@ -37,6 +37,9 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
 {
     static constexpr uint32_t FLAGS_DIR_OPEN = FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles;
 
+    // Oops. Need this too!
+    m_directoryList.clear();
+
     // This so directories can be reused.
     m_wasRead = false;
     if (!directoryPath.is_valid()) { return; }
