@@ -85,13 +85,13 @@ int main()
     if (!threeDeeEssDir.is_open()) { printf_typed("Error opening ThreeDeeEsss directory!\n"); }
     else
     {
-        for (const fslib::DirectoryEntry &entry : threeDeeEssDir)
+        for (const fslib::DirectoryEntry &entry : threeDeeEssDir.list())
         {
             const std::string utf8Name = utf16_to_utf8(entry.get_filename());
             printf_typed("%s\n", utf8Name.c_str());
         }
 
-        for (const fslib::DirectoryEntry &entry : threeDeeEssDir)
+        for (const fslib::DirectoryEntry &entry : threeDeeEssDir.list())
         {
             const std::string utf8Name = utf16_to_utf8(entry.get_filename());
             printf_typed("%s\n", utf8Name.c_str());

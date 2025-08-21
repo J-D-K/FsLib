@@ -8,6 +8,8 @@
 
 namespace fslib
 {
+    class DirectoryIterator;
+
     /// @brief Opens and reads directories.
     class Directory
     {
@@ -59,23 +61,11 @@ namespace fslib
             /// @return Name of entry. If out of bounds, nullptr.
             const fslib::DirectoryEntry &operator[](int index) const;
 
-            /// @brief Begin for range based for loops.
-            Directory::iterator begin();
+            /// @brief Returns a DirectoryIterator for range based for loops.
+            fslib::DirectoryIterator list();
 
-            /// @brief End for range based for loops.
-            Directory::iterator end() const;
-
-            /// @brief Operator for range based for loops.
-            const fslib::DirectoryEntry &operator*() const;
-
-            /// @brief Operator for range based for loops.
-            const fslib::DirectoryEntry *operator->() const;
-
-            /// @brief Operator for range based for loops. Increments the internal index.
-            Directory &operator++();
-
-            /// @brief Compares the iter passed.
-            bool operator!=(const fslib::Directory &iter) const;
+            /// @brief Allows the iterator class to touch this one's precious internals~
+            friend class fslib::DirectoryIterator;
 
         private:
             /// @brief Directory handle.
@@ -87,9 +77,6 @@ namespace fslib
             /// @brief Vector of 3DS FS_DirectoryEntry's. 3DS has no way of retrieving a count first or this wouldn't be a
             /// vector.
             std::vector<fslib::DirectoryEntry> m_list{};
-
-            /// @brief This keeps track of the internals for range loops.
-            int m_iterIndex{};
 
             /// @brief Closes directory handle. The directory is read in its entirety when open is called. Public access is not
             /// needed.

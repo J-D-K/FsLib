@@ -55,14 +55,12 @@ bool fslib::delete_directory_recursively(const fslib::Path &directoryPath)
     fslib::Directory targetDirectory{directoryPath};
     if (!targetDirectory.is_open()) { return false; }
 
-    const int64_t count = targetDirectory.get_count();
-    for (int64_t i = 0; i < count; i++)
+    for (const fslib::DirectoryEntry &entry : targetDirectory.list())
     {
-        const fslib::DirectoryEntry &target = targetDirectory[i];
-        const fslib::Path targetPath        = directoryPath / target.get_filename();
-        const bool isDirectory              = target.is_directory();
-        const bool dirDeleted               = isDirectory && fslib::delete_directory_recursively(targetPath);
-        const bool fileDeleted              = !isDirectory && fslib::delete_file(targetPath);
+        const fslib::Path targetPath{directoryPath / entry};
+        const bool isDirectory = entry.is_directory();
+        const bool dirDeleted  = isDirectory && fslib::delete_directory_recursively(targetPath);
+        const bool fileDeleted = !isDirectory && fslib::delete_file(targetPath);
         if (!dirDeleted && !fileDeleted) { return false; }
     }
 

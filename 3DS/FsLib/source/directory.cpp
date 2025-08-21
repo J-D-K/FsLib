@@ -55,25 +55,7 @@ const fslib::DirectoryEntry &fslib::Directory::get_entry(int index) const { retu
 
 const fslib::DirectoryEntry &fslib::Directory::operator[](int index) const { return m_list[index]; }
 
-fslib::Directory::iterator fslib::Directory::begin()
-{
-    m_iterIndex = 0;
-    return m_list.begin();
-}
-
-fslib::Directory::iterator fslib::Directory::end() const { return m_list.end(); }
-
-const fslib::DirectoryEntry &fslib::Directory::operator*() const { return m_list[m_iterIndex]; }
-
-const fslib::DirectoryEntry *fslib::Directory::operator->() const { return &m_list[m_iterIndex]; }
-
-fslib::Directory &fslib::Directory::operator++()
-{
-    m_iterIndex++;
-    return *this;
-}
-
-bool fslib::Directory::operator!=(const fslib::Directory &iter) const { return iter.m_iterIndex != m_iterIndex; }
+fslib::DirectoryIterator fslib::Directory::list() { return fslib::DirectoryIterator(this); }
 
 bool fslib::Directory::close()
 {

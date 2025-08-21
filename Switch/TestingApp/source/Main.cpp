@@ -63,8 +63,8 @@ int main()
     fslib::Directory switchDir{"sdmc:/switch"};
     if (!switchDir.is_open()) { return -1; }
 
-    for (const fslib::DirectoryEntry &entry : switchDir) { print("%s\n", entry.get_filename()); }
-    for (const fslib::DirectoryEntry &entry : switchDir) { print("%s\n", entry.get_filename()); }
+    for (const fslib::DirectoryEntry &entry : switchDir.list()) { print("%s\n", entry.get_filename()); }
+    for (const fslib::DirectoryEntry &entry : switchDir.list()) { print("%s\n", entry.get_filename()); }
 
     while (appletMainLoop())
     {

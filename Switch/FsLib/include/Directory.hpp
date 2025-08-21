@@ -7,12 +7,13 @@
 
 namespace fslib
 {
+    /// @brief Forward declaration to avoid clashes.
+    class DirectoryIterator;
+
     /// @brief Class for opening and reading entries from directories.
     class Directory
     {
         public:
-            using iterator = std::vector<fslib::DirectoryEntry>::const_iterator;
-
             /// @brief Default constructor for Directory.
             Directory() = default;
 
@@ -57,23 +58,11 @@ namespace fslib
             /// @return Entry's name. If out of bounds, nullptr.
             const fslib::DirectoryEntry &operator[](int index) const;
 
-            /// @brief For range based for loops and iterators.
-            fslib::Directory::iterator begin();
+            /// @brief Returns a Directory iterator for use with range based for loops.
+            fslib::DirectoryIterator list();
 
-            /// @brief For range based for loops and iterators.
-            fslib::Directory::iterator end() const;
-
-            /// @brief Operator for range based for loops.
-            fslib::DirectoryEntry &operator*();
-
-            /// @brief Operator for range based for loops.
-            fslib::DirectoryEntry *operator->();
-
-            /// @brief Operator for range based for loops.
-            fslib::Directory &operator++();
-
-            /// @brief Operator for range based for loops.
-            bool operator!=(const fslib::Directory &iter);
+            /// @brief This is so the DirectoryIterator class can access the private members here.
+            friend class fslib::DirectoryIterator;
 
         private:
             /// @brief Saves whether or not the directory was successfully opened and read.
@@ -84,9 +73,6 @@ namespace fslib
 
             /// @brief Total number of entries read from the directory.
             int64_t m_entryCount{};
-
-            /// @brief Current index for iterating through a directory using a range loop.
-            int m_iterIndex{};
 
             /// @brief Entry vector.
             std::vector<fslib::DirectoryEntry> m_directoryList{};
