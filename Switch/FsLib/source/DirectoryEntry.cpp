@@ -3,7 +3,7 @@
 #include <string>
 
 fslib::DirectoryEntry::DirectoryEntry(const FsDirectoryEntry &entry)
-    : m_isDirectory(entry.type & FsDirEntryType_Dir)
+    : m_isDirectory(entry.type == FsDirEntryType_Dir)
     , m_filename(entry.name)
     , m_size(entry.file_size) {};
 
