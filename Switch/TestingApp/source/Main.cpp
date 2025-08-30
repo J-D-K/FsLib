@@ -60,12 +60,22 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    fslib::Directory switchDir{"sdmc:/switch"};
-    if (!switchDir.is_open()) { return -1; }
+    fslib::Path sdmc{"sdmc:/"};
+    sdmc /= "atmosphere";
 
-    for (const fslib::DirectoryEntry &entry : switchDir.list()) { print("%s\n", entry.get_filename()); }
-    for (const fslib::DirectoryEntry &entry : switchDir.list()) { print("%s\n", entry.get_filename()); }
+    fslib::Path atmosphere = std::move(sdmc);
+    sdmc                   = "sdmc:/";
 
+    const std::string pathPrint = atmosphere.full_path();
+    print("%s\n", pathPrint.c_str());
+
+    fslib::Directory dir{sdmc};
+    for (const auto &entry : dir.list()) { print("%s\n", entry.get_filename()); }
+
+    dir.open(atmosphere);
+    for (const auto &entry : dir.list()) { print("%s\n", entry.get_filename()); }
+
+    print("\nPress + to Exit");
     while (appletMainLoop())
     {
         padUpdate(&padState);

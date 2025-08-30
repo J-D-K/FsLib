@@ -11,95 +11,114 @@ namespace
     constexpr const char *FORBIDDEN_PATH_CHARACTERS = "<>:\"|?*";
 } // namespace
 
-fslib::Path::Path(const fslib::Path &path) { *this = path; }
+fslib::Path::Path() { m_path = std::make_unique<char[]>(FS_MAX_PATH); }
+
+fslib::Path::Path(const fslib::Path &path)
+    : Path()
+{
+    *this = path;
+}
 
 fslib::Path::Path(Path &&path) { *this = std::move(path); }
 
-fslib::Path::Path(const char *path) { *this = path; }
+fslib::Path::Path(const char *path)
+    : Path()
+{
+    *this = path;
+}
 
-fslib::Path::Path(const std::string &path) { *this = path; }
+fslib::Path::Path(const std::string &path)
+    : Path()
+{
+    *this = path;
+}
 
-fslib::Path::Path(std::string_view pathData) { *this = pathData; }
+fslib::Path::Path(std::string_view pathData)
+    : Path()
+{
+    *this = pathData;
+}
 
-fslib::Path::Path(const std::filesystem::path &path) { *this = path; }
+fslib::Path::Path(const std::filesystem::path &path)
+    : Path()
+{
+    *this = path;
+}
 
 bool fslib::Path::is_valid() const
 {
-    const bool validPointers     = m_path && m_deviceEnd;
-    const bool validLength       = std::char_traits<char>::length(m_deviceEnd + 1) > 0;
-    const bool containsForbidden = std::strpbrk(m_deviceEnd + 1, FORBIDDEN_PATH_CHARACTERS) != NULL;
-    if (!validPointers || !validLength || containsForbidden)
+    const bool validLength       = m_offset >= 1;
+    const bool containsForbidden = std::strpbrk(m_path.get(), FORBIDDEN_PATH_CHARACTERS) != NULL;
+    if (!validLength || containsForbidden)
     {
         error::occurred(error::codes::INVALID_PATH);
         return false;
     }
+
     return true;
 }
 
 fslib::Path fslib::Path::sub_path(size_t pathLength) const
 {
-    if (pathLength > m_pathLength) { pathLength = m_pathLength; }
+    if (pathLength > FS_MAX_PATH) { pathLength = FS_MAX_PATH; }
 
-    fslib::Path newPath;
-    newPath.m_path = std::make_unique<char[]>(m_pathSize);
-
+    fslib::Path newPath{};
+    newPath.m_device = m_device;
+    newPath.m_offset = pathLength;
     std::memcpy(newPath.m_path.get(), m_path.get(), pathLength);
-    newPath.m_pathSize   = m_pathSize;
-    newPath.m_pathLength = std::char_traits<char>::length(newPath.m_path.get());
-    newPath.m_deviceEnd  = std::char_traits<char>::find(newPath.m_path.get(), newPath.m_pathLength, ':');
-    // Safety because sometimes it seems like the memset doesn't always work?
-    newPath.m_path[pathLength] = '\0';
 
     return newPath;
 }
 
 size_t fslib::Path::find_first_of(char character) const
 {
-    for (size_t i = 0; i < m_pathLength; i++)
+    for (size_t i = 0; i < m_offset; i++)
     {
         if (m_path[i] == character) { return i; }
     }
+
     return Path::NOT_FOUND;
 }
 
 size_t fslib::Path::find_first_of(char character, size_t begin) const
 {
-    if (begin >= m_pathLength) { return Path::NOT_FOUND; }
+    if (begin >= m_offset) { return Path::NOT_FOUND; }
 
-    for (size_t i = begin; i < m_pathLength; i++)
+    for (size_t i = begin; i < m_offset; i++)
     {
         if (m_path[i] == character) { return i; }
     }
+
     return Path::NOT_FOUND;
 }
 
 size_t fslib::Path::find_last_of(char character) const
 {
-    for (size_t i = m_pathLength; i > 0; i--)
+    for (size_t i = m_offset; i > 0; i--)
     {
         if (m_path[i] == character) { return i; }
     }
+
     return Path::NOT_FOUND;
 }
 
 size_t fslib::Path::find_last_of(char character, size_t begin) const
 {
-    if (begin > m_pathLength) { begin = m_pathLength; }
+    if (begin > m_offset) { begin = m_offset; }
 
     for (size_t i = begin; i > 0; i--)
     {
         if (m_path[i] == character) { return i; }
     }
+
     return Path::NOT_FOUND;
 }
 
-const char *fslib::Path::full_path() const { return m_path.get(); }
+std::string fslib::Path::full_path() const { return m_device + ":" + m_path.get(); }
 
-std::string_view fslib::Path::get_device_name() const
-{
-    const int deviceLength = m_deviceEnd - m_path.get();
-    return std::string_view(m_path.get(), deviceLength);
-}
+std::string_view fslib::Path::get_device_name() const { return m_device; }
+
+const char *fslib::Path::get_path() const { return m_path.get(); }
 
 const char *fslib::Path::get_filename() const
 {
@@ -109,13 +128,6 @@ const char *fslib::Path::get_filename() const
     return &m_path[lastSlash + 1];
 }
 
-const char *fslib::Path::get_path() const
-{
-    size_t deviceEnd = Path::find_first_of(':');
-    if (deviceEnd == Path::NOT_FOUND) { return nullptr; }
-    return &m_path[deviceEnd + 1];
-}
-
 const char *fslib::Path::get_extension() const
 {
     size_t extensionBegin = Path::find_last_of('.');
@@ -123,33 +135,27 @@ const char *fslib::Path::get_extension() const
     return &m_path[extensionBegin + 1];
 }
 
-size_t fslib::Path::get_length() const { return m_pathLength; }
+size_t fslib::Path::get_length() const { return m_offset; }
 
 fslib::Path &fslib::Path::operator=(const fslib::Path &path)
 {
-    m_path = std::make_unique<char[]>(path.m_pathSize);
-    if (!m_path) { return *this; }
-
-    std::memcpy(m_path.get(), path.m_path.get(), path.m_pathSize);
-    m_pathSize           = path.m_pathSize;
-    m_pathLength         = path.m_pathLength;
-    m_deviceEnd          = std::strchr(m_path.get(), ':');
-    m_path[m_pathLength] = '\0';
+    m_device = path.m_device;
+    m_offset = path.m_offset;
+    std::memcpy(m_path.get(), path.m_path.get(), FS_MAX_PATH);
 
     return *this;
 }
 
 fslib::Path &fslib::Path::operator=(fslib::Path &&path)
 {
-    m_path       = std::move(path.m_path);
-    m_deviceEnd  = path.m_deviceEnd;
-    m_pathSize   = path.m_pathSize;
-    m_pathLength = path.m_pathLength;
+    m_device = std::move(path.m_device);
+    m_path   = std::move(path.m_path);
+    m_offset = path.m_offset;
 
-    path.m_path       = nullptr; // This might already be done by std::move.
-    path.m_deviceEnd  = nullptr;
-    path.m_pathSize   = 0;
-    path.m_pathLength = 0;
+    // Just in case.
+    path.m_device.clear();
+    path.m_path   = std::make_unique<char[]>(FS_MAX_PATH);
+    path.m_offset = 0;
 
     return *this;
 }
@@ -163,31 +169,20 @@ fslib::Path &fslib::Path::operator=(std::string_view path)
     const size_t deviceEnd = path.find_first_of(':');
     if (deviceEnd == path.npos) { return *this; }
 
-    // This *should* be good enough.
-    m_pathSize = FS_MAX_PATH + deviceEnd + 1;
-    m_path     = std::make_unique<char[]>(m_pathSize); // Error checking this might actually be pointless on Switch.
+    m_offset                = 0;
+    m_path[m_offset++]      = '/'; // Ensure this starts with a slash.
+    m_device                = path.substr(0, deviceEnd);
+    std::string_view fsPath = path.substr(deviceEnd + 1);
 
-    // Locate where the first slash is after the device.
-    const size_t pathBegin = path.find_first_not_of('/', deviceEnd + 1);
-    const size_t pathEnd   = path.find_last_not_of('/');
+    const size_t pathBegin = fsPath.find_first_not_of('/');
+    const size_t pathEnd   = fsPath.find_last_not_of('/');
+    if (pathBegin == fsPath.npos || pathEnd == fsPath.npos) { return *this; }
 
-    // Copy the device over.
-    std::memcpy(m_path.get(), path.data(), deviceEnd + 2);
-
-    // To do: Revise from here down.
-    if (pathBegin != path.npos)
-    {
-        // Readability.
-        const size_t length          = std::char_traits<char>::length(m_path.get());
-        const std::string_view slice = path.substr(pathBegin);
-        const size_t copyLength      = (pathEnd - pathBegin) + 1;
-
-        std::memcpy(&m_path[length], slice.data(), copyLength);
-    }
-
-    m_pathLength         = std::char_traits<char>::length(m_path.get());
-    m_deviceEnd          = std::char_traits<char>::find(m_path.get(), m_pathLength, ':');
-    m_path[m_pathLength] = '\0'; // Safety
+    const size_t fsPathLength = (pathEnd - pathBegin) + 1;
+    fsPath                    = fsPath.substr(pathBegin);
+    std::memcpy(&m_path[m_offset], fsPath.data(), fsPathLength);
+    m_offset += fsPathLength;
+    Path::null_terminate();
 
     return *this;
 }
@@ -206,18 +201,16 @@ fslib::Path &fslib::Path::operator/=(std::string_view path)
 
     // This makes things easier.
     const size_t length = (pathEnd - pathBegin) + 1;
-    if (length + 1 >= m_pathSize) { return *this; }
+    if (length + 1 >= FS_MAX_PATH) { return *this; }
 
     // Needed to avoid doubling up slashes directly appending to a device root.
-    if (m_path[m_pathLength - 1] != '/') { m_path[m_pathLength++] = '/'; }
+    if (m_path[m_offset - 1] != '/') { m_path[m_offset++] = '/'; }
 
     // This looks really dangerous for some reason. I like it though.
     const std::string_view slice = path.substr(pathBegin);
-    std::memcpy(&m_path[m_pathLength], slice.data(), length);
-
-    m_pathLength += length;
-
-    m_path[m_pathLength] = '\0';
+    std::memcpy(&m_path[m_offset], slice.data(), length);
+    m_offset += length;
+    Path::null_terminate();
 
     return *this;
 }
@@ -236,12 +229,11 @@ fslib::Path &fslib::Path::operator+=(const std::string &path) { return *this += 
 fslib::Path &fslib::Path::operator+=(std::string_view path)
 {
     const size_t length = path.length();
-    if (m_pathLength + length >= m_pathSize) { return *this; }
+    if (m_offset + length >= FS_MAX_PATH) { return *this; }
 
-    std::memcpy(&m_path[m_pathLength], path.data(), length);
-
-    m_pathLength += length;
-    m_path[m_pathLength] = '\0';
+    std::memcpy(&m_path[m_offset], path.data(), length);
+    m_offset += length;
+    Path::null_terminate();
 
     return *this;
 }
@@ -252,6 +244,8 @@ fslib::Path &fslib::Path::operator+=(const fslib::DirectoryEntry &path)
 {
     return *this += std::string_view(path.get_filename());
 }
+
+void fslib::Path::null_terminate() { m_path[m_offset] = '\0'; }
 
 fslib::Path fslib::operator/(const fslib::Path &pathA, const char *pathB)
 {

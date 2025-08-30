@@ -12,7 +12,7 @@ namespace fslib
     {
         public:
             /// @brief Default constructor for Path
-            Path() = default;
+            Path();
 
             /// @brief Constructor for Path. Takes most standard C/C++ string types.
             /// @param path Path to assign.
@@ -78,17 +78,17 @@ namespace fslib
             size_t find_last_of(char character, size_t begin) const;
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
-            const char *full_path() const;
+            std::string full_path() const;
 
             /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions.
             /// @note Trying to use .data() with this will just result in the entire path being returned.
             std::string_view get_device_name() const;
 
-            /// @brief Returns the file name in the path starting at the final '/' found.
-            const char *get_filename() const;
-
             /// @brief Returns the path after the device for use with Switch's FS functions. Ex: /Path/To/File.txt
             const char *get_path() const;
+
+            /// @brief Returns the file name in the path starting at the final '/' found.
+            const char *get_filename() const;
 
             /// @brief Returns the extension. After the '.'
             const char *get_extension() const;
@@ -169,20 +169,20 @@ namespace fslib
             static constexpr uint16_t NOT_FOUND = -1;
 
         private:
+            /// @brief String containing the device string.
+            std::string m_device{};
+
             /// @brief Path buffer.
             /** @note The Switch seems to only really like buffers 0x301 in length? Using STL containers with short
              * paths can seemingly cause random errors for no reason?
              */
             std::unique_ptr<char[]> m_path{};
 
-            /// @brief This is the position where the device ends.
-            const char *m_deviceEnd{};
+            /// @brief Current offset in the path.
+            uint16_t m_offset{};
 
-            /// @brief This is the actual length of the path buffer
-            uint16_t m_pathSize{};
-
-            /// @brief The current length of the path.
-            uint16_t m_pathLength{};
+            /// @brief Makes sure the path is null terminated.
+            void null_terminate();
     };
 
     /// @brief Concatenates two paths. Adds a / if needed.
