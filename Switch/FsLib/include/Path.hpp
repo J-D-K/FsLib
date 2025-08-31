@@ -78,7 +78,7 @@ namespace fslib
             size_t find_last_of(char character, size_t begin) const;
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
-            std::string full_path() const;
+            std::string string() const;
 
             /// @brief Returns the device at the beginning of the path for use with FsLib's internal functions.
             /// @note Trying to use .data() with this will just result in the entire path being returned.

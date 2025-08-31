@@ -66,7 +66,7 @@ int main()
     fslib::Path atmosphere = std::move(sdmc);
     sdmc                   = "sdmc:/";
 
-    const std::string pathPrint = atmosphere.full_path();
+    const std::string pathPrint = atmosphere.string();
     print("%s\n", pathPrint.c_str());
 
     fslib::Directory dir{sdmc};

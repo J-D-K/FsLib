@@ -114,7 +114,7 @@ size_t fslib::Path::find_last_of(char character, size_t begin) const
     return Path::NOT_FOUND;
 }
 
-std::string fslib::Path::full_path() const { return m_device + ":" + m_path.get(); }
+std::string fslib::Path::string() const { return m_device + ":" + m_path.get(); }
 
 std::string_view fslib::Path::get_device_name() const { return m_device; }
 
