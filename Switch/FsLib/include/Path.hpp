@@ -66,6 +66,17 @@ namespace fslib
             /// @return Position of character in path. Path::NOT_FOUND if the character wasn't found.
             size_t find_first_of(char character, size_t begin) const;
 
+            /// @brief Returns the first occurrence of a character that doesn't match the character passed.
+            /// @param character Character to search against.
+            /// @return Position of the first character found. Path::NOT_FOUND on failure.
+            size_t find_first_not_of(char character) const;
+
+            /// @brief Returns the first occurrence of a character that doesn't match the character passed.
+            /// @param character Character to search against.
+            /// @param begin Beginning index to start from.
+            /// @return Position of the first character found. Path::NOT_FOUND on failure.
+            size_t find_first_not_of(char character, size_t begin) const;
+
             /// @brief Searches backwards through path to find last occurrence of character in path.
             /// @param character Character to search for.
             /// @return Position of character in path. Path::NOT_FOUND if the character wasn't found in path.
@@ -76,6 +87,17 @@ namespace fslib
             /// @param begin Position to "begin" at.
             /// @return Position of character in path. Path::NOT_FOUND if the character isn't found.
             size_t find_last_of(char character, size_t begin) const;
+
+            /// @brief Searches backwards for the first occurrence of a character that doesn't match the char passed.
+            /// @param character Char to search for.
+            /// @return Index if found. Path::NOT_FOUND on failure.
+            size_t find_last_not_of(char character) const;
+
+            /// @brief Searches backwards for the first occurrence of a character that doesn't match the char passed.
+            /// @param character Character to search for.
+            /// @param begin Position to "begin" at.
+            /// @return Index if found. Path::NOT_FOUND on failure.
+            size_t find_last_not_of(char character, size_t begin) const;
 
             /// @brief Returns the entire path. Ex: sdmc:/Path/To/File.txt
             std::string string() const;

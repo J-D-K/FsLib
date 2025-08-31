@@ -63,9 +63,11 @@ fslib::Path fslib::Path::sub_path(size_t pathLength) const
 {
     if (pathLength > FS_MAX_PATH) { pathLength = FS_MAX_PATH; }
 
+    // To do: This needs to ensure a starting slash.
     fslib::Path newPath{};
     newPath.m_device = m_device;
     newPath.m_offset = pathLength;
+
     std::memcpy(newPath.m_path.get(), m_path.get(), pathLength);
 
     return newPath;
@@ -93,9 +95,31 @@ size_t fslib::Path::find_first_of(char character, size_t begin) const
     return Path::NOT_FOUND;
 }
 
+size_t fslib::Path::find_first_not_of(char character) const
+{
+    for (size_t i = 0; i < m_offset; i++)
+    {
+        if (m_path[i] != character) { return i; }
+    }
+
+    return Path::NOT_FOUND;
+}
+
+size_t fslib::Path::find_first_not_of(char character, size_t begin) const
+{
+    if (begin >= m_offset) { return Path::NOT_FOUND; }
+
+    for (size_t i = begin; i < m_offset; i++)
+    {
+        if (m_path[i] != character) { return i; }
+    }
+
+    return Path::NOT_FOUND;
+}
+
 size_t fslib::Path::find_last_of(char character) const
 {
-    for (size_t i = m_offset; i > 0; i--)
+    for (size_t i = m_offset; i-- > 0;)
     {
         if (m_path[i] == character) { return i; }
     }
@@ -107,9 +131,31 @@ size_t fslib::Path::find_last_of(char character, size_t begin) const
 {
     if (begin > m_offset) { begin = m_offset; }
 
-    for (size_t i = begin; i > 0; i--)
+    for (size_t i = begin; i-- > 0;)
     {
         if (m_path[i] == character) { return i; }
+    }
+
+    return Path::NOT_FOUND;
+}
+
+size_t fslib::Path::find_last_not_of(char character) const
+{
+    for (size_t i = m_offset; i-- > 0;)
+    {
+        if (m_path[i] != character) { return i; }
+    }
+
+    return Path::NOT_FOUND;
+}
+
+size_t fslib::Path::find_last_not_of(char character, size_t begin) const
+{
+    if (begin >= m_offset) { begin = m_offset; }
+
+    for (size_t i = m_offset; i-- > 0;)
+    {
+        if (m_path[i] != character) { return i; }
     }
 
     return Path::NOT_FOUND;
@@ -133,6 +179,7 @@ const char *fslib::Path::get_extension() const
 {
     size_t extensionBegin = Path::find_last_of('.');
     if (extensionBegin == Path::NOT_FOUND) { return nullptr; }
+    // To do: This is not safe.
     return &m_path[extensionBegin + 1];
 }
 
@@ -180,7 +227,9 @@ fslib::Path &fslib::Path::operator=(std::string_view path)
     if (pathBegin == fsPath.npos || pathEnd == fsPath.npos) { return *this; }
 
     const size_t fsPathLength = (pathEnd - pathBegin) + 1;
-    fsPath                    = fsPath.substr(pathBegin);
+    if (fsPathLength + 1 >= FS_MAX_PATH) { return *this; }
+
+    fsPath = fsPath.substr(pathBegin);
     std::memcpy(&m_path[m_offset], fsPath.data(), fsPathLength);
     m_offset += fsPathLength;
     Path::null_terminate();
@@ -202,7 +251,7 @@ fslib::Path &fslib::Path::operator/=(std::string_view path)
 
     // This makes things easier.
     const size_t length = (pathEnd - pathBegin) + 1;
-    if (length + 1 >= FS_MAX_PATH) { return *this; }
+    if (m_offset + length + 1 >= FS_MAX_PATH) { return *this; }
 
     // Needed to avoid doubling up slashes directly appending to a device root.
     if (m_path[m_offset - 1] != '/') { m_path[m_offset++] = '/'; }
