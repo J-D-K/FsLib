@@ -60,20 +60,15 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    fslib::Path sdmc{"sdmc:/"};
-    sdmc /= "atmosphere";
+    const fslib::Path pathA{"sdmc:/pathA"};
+    const fslib::Path pathB{"sdmc:/pathB"};
+    const fslib::Path pathC{"sdmc:/pathA"};
 
-    fslib::Path atmosphere = std::move(sdmc);
-    sdmc                   = "sdmc:/";
+    if (pathA == pathB) { print("pathA matches pathB?\n"); }
+    else { print("pathA doesn't match pathB!\n"); }
 
-    const std::string pathPrint = atmosphere.string();
-    print("%s\n", pathPrint.c_str());
-
-    fslib::Directory dir{sdmc};
-    for (const auto &entry : dir.list()) { print("%s\n", entry.get_filename()); }
-
-    dir.open(atmosphere);
-    for (const auto &entry : dir.list()) { print("%s\n", entry.get_filename()); }
+    if (pathA == pathC) { print("pathA matches pathC!\n"); }
+    else { print("pathA doesn't match pathC!"); }
 
     print("\nPress + to Exit");
     while (appletMainLoop())

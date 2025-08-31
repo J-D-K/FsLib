@@ -47,9 +47,10 @@ fslib::Path::Path(const std::filesystem::path &path)
 
 bool fslib::Path::is_valid() const
 {
+    const bool validDevice       = !m_device.empty();
     const bool validLength       = m_offset >= 1;
     const bool containsForbidden = std::strpbrk(m_path.get(), FORBIDDEN_PATH_CHARACTERS) != NULL;
-    if (!validLength || containsForbidden)
+    if (!validDevice || !validLength || containsForbidden)
     {
         error::occurred(error::codes::INVALID_PATH);
         return false;
@@ -315,4 +316,17 @@ fslib::Path fslib::operator+(const fslib::Path &pathA, const fslib::DirectoryEnt
     fslib::Path newPath{pathA};
     newPath += pathB;
     return newPath;
+}
+
+bool fslib::operator==(const fslib::Path &pathA, const fslib::Path &pathB)
+{
+    if (pathA.get_device_name() != pathB.get_device_name()) { return false; }
+
+    const size_t lengthA = std::char_traits<char>::length(pathA.get_path());
+    const size_t lengthB = std::char_traits<char>::length(pathB.get_path());
+    if (lengthA != lengthB) { return false; }
+
+    const char *fsPathA = pathA.get_path();
+    const char *fsPathB = pathB.get_path();
+    return std::strcmp(fsPathA, fsPathB) == 0;
 }

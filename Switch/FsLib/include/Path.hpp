@@ -234,4 +234,10 @@ namespace fslib
     /// @param pathA Base path.
     /// @param pathB Path to concatenate to Path1
     fslib::Path operator+(const fslib::Path &pathA, const fslib::DirectoryEntry &pathB);
+
+    /// @brief Operator to compared two paths.
+    /// @param pathA First path to compare.
+    /// @param pathB Second path to compare.
+    /// @return True if the paths match. False if they don't.
+    bool operator==(const fslib::Path &pathA, const fslib::Path &pathB);
 } // namespace fslib
