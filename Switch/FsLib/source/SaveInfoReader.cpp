@@ -117,6 +117,8 @@ FsSaveDataInfo &fslib::SaveInfoReader::at(int index)
 
 FsSaveDataInfo &fslib::SaveInfoReader::operator[](int index) { return m_saveInfoBuffer[index]; }
 
+fslib::SaveInfoIterator fslib::SaveInfoReader::list() const { return fslib::SaveInfoIterator(this); }
+
 void fslib::SaveInfoReader::allocate_save_info_array(size_t bufferCount)
 {
     // Record this.

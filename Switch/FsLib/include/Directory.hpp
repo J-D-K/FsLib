@@ -11,7 +11,7 @@ namespace fslib
     class DirectoryIterator;
 
     /// @brief Class for opening and reading entries from directories.
-    class Directory
+    class Directory final
     {
         public:
             /// @brief Default constructor for Directory.
@@ -42,11 +42,11 @@ namespace fslib
 
             /// @brief Returns if directory was successfully opened.
             /// @return True if it was. False if it wasn't.
-            bool is_open() const;
+            bool is_open() const noexcept;
 
             /// @brief Returns total number of entries read from directory.
             /// @return Total numbers of entries read from directory.
-            int64_t get_count() const;
+            int64_t get_count() const noexcept;
 
             /// @brief Returns the name of the entry at Index.
             /// @param Index Index of entry.
@@ -69,7 +69,7 @@ namespace fslib
             bool m_wasRead{};
 
             /// @brief Handle to the directory.
-            FsDir m_directoryHandle{};
+            FsDir m_handle{};
 
             /// @brief Total number of entries read from the directory.
             int64_t m_entryCount{};
@@ -77,11 +77,7 @@ namespace fslib
             /// @brief Entry vector.
             std::vector<fslib::DirectoryEntry> m_directoryList{};
 
-            /// @brief Checks and returns whether or not the index is within bounds.
-            /// @param index Index to check.
-            bool index_check(int index) const;
-
             /// @brief Closes directory handle. Directory is never kept open. Not needed outside of class.
-            void close();
+            void close() noexcept;
     };
 } // namespace fslib

@@ -24,15 +24,15 @@ namespace fslib
              * @param openFlags Flags from LibNX to use to open the file with.
              * @param fileSize Optional. Creates the file with a starting size defined.
              */
-            File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0);
+            File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0) noexcept;
 
             /// @brief Move constructor.
             /// @param file File to eviscerate.
-            File(File &&file);
+            File(File &&file) noexcept;
 
             /// @brief Move assignment operator.
             /// @param file File to eviscerate.
-            File &operator=(File &&file);
+            File &operator=(File &&file) noexcept;
 
             // None of this nonsense around here!
             File(const File &)            = delete;
@@ -45,55 +45,55 @@ namespace fslib
             /// @param filePath Path to file.
             /// @param openFlags Flags from LibNX to use to open the file with.
             /// @param fileSize Optional. Creates the file with a starting size defined.
-            void open(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0);
+            void open(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize = 0) noexcept;
 
             /// @brief Closes file handle if needed. Destructor takes care of this for you normally.
-            void close();
+            void close() noexcept;
 
             /// @brief Returns if file was successfully opened.
-            bool is_open() const;
+            bool is_open() const noexcept;
 
             /// @brief Attempts to read ReadSize bytes into Buffer from file.
             /// @param buffer Buffer to write into.
             /// @param readSize Buffer's capacity.
             /// @return Number of bytes read.
-            ssize_t read(void *buffer, uint64_t readSize);
+            ssize_t read(void *buffer, uint64_t readSize) noexcept;
 
             /// @brief Attempts to read a line from file until `\n` or `\r` is reached.
             /// @param lineOut Buffer to read line into.
             /// @param lineLength Size of line buffer.
-            bool read_line(char *lineOut, size_t lineLength);
+            bool read_line(char *lineOut, size_t lineLength) noexcept;
 
             /// @brief Attempts to read a line from file until '\n' is reached.
             /// @param lineOut C++ string to write the line data to.
-            bool read_line(std::string &lineOut);
+            bool read_line(std::string &lineOut) noexcept;
 
             /// @brief Attempts to read a single character or byte from file.
             /// @return Byte read.
-            signed char get_byte();
+            signed char get_byte() noexcept;
 
             /// @brief Attempts to write Buffer of BufferSize bytes to file.
             /// @param buffer Buffer containing data.
             /// @param bufferSize Size of Buffer.
             /// @return Number of bytes (assumed to be) written to file. -1 on error.
-            ssize_t write(const void *buffer, uint64_t bufferSize);
+            ssize_t write(const void *buffer, uint64_t bufferSize) noexcept;
 
             /// @brief Attempts to write a formatted string to file.
             /// @param format Format of string.
             /// @param arguments Arguments.
-            bool writef(const char *format, ...);
+            bool writef(const char *format, ...) noexcept;
 
             /// @brief Writes a single byte to file.
             /// @param byte Byte to write.
-            bool put_byte(char byte);
+            bool put_byte(char byte) noexcept;
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
-            File &operator<<(const char *string);
+            File &operator<<(const char *string) noexcept;
 
             /// @brief Operator for quick string writing.
             /// @param string String to write.
-            File &operator<<(const std::string &string);
+            File &operator<<(const std::string &string) noexcept;
 
             /// @brief Seeks to the given position in a file.
             /// @param offset Offset to seek to.
@@ -101,7 +101,7 @@ namespace fslib
             void seek(int64_t offset, Stream::Origin origin) override;
 
             /// @brief Flushes file.
-            bool flush();
+            bool flush() noexcept;
 
         private:
             /// @brief File handle.

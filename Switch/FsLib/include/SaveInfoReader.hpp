@@ -1,11 +1,12 @@
 #pragma once
+#include <SaveInfoIterator.hpp>
 #include <memory>
 #include <switch.h>
 
 namespace fslib
 {
     /// @brief Wrapper around FsSaveDataInfo reader.
-    class SaveInfoReader
+    class SaveInfoReader final
     {
         public:
             /// @brief Default constructor for save data info reader.
@@ -67,6 +68,11 @@ namespace fslib
             /// @param index Index of the FsSaveDataInfo struct to get.
             /// @return Reference to the FsSaveDataInfo struct at index.
             FsSaveDataInfo &operator[](int index);
+
+            /// @brief Returns an iterator instance for range based for loops.
+            SaveInfoIterator list() const;
+
+            friend class SaveInfoIterator;
 
         private:
             /// @brief Underlying FsSaveDataInfoReader.

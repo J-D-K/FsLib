@@ -45,7 +45,7 @@ fslib::Path::Path(const std::filesystem::path &path)
     *this = path;
 }
 
-bool fslib::Path::is_valid() const
+bool fslib::Path::is_valid() const noexcept
 {
     const bool validDevice       = !m_device.empty();
     const bool validLength       = m_offset >= 1;
@@ -73,7 +73,7 @@ fslib::Path fslib::Path::sub_path(size_t pathLength) const
     return newPath;
 }
 
-size_t fslib::Path::find_first_of(char character) const
+size_t fslib::Path::find_first_of(char character) const noexcept
 {
     for (size_t i = 0; i < m_offset; i++)
     {
@@ -83,7 +83,7 @@ size_t fslib::Path::find_first_of(char character) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_first_of(char character, size_t begin) const
+size_t fslib::Path::find_first_of(char character, size_t begin) const noexcept
 {
     if (begin >= m_offset) { return Path::NOT_FOUND; }
 
@@ -95,7 +95,7 @@ size_t fslib::Path::find_first_of(char character, size_t begin) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_first_not_of(char character) const
+size_t fslib::Path::find_first_not_of(char character) const noexcept
 {
     for (size_t i = 0; i < m_offset; i++)
     {
@@ -105,7 +105,7 @@ size_t fslib::Path::find_first_not_of(char character) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_first_not_of(char character, size_t begin) const
+size_t fslib::Path::find_first_not_of(char character, size_t begin) const noexcept
 {
     if (begin >= m_offset) { return Path::NOT_FOUND; }
 
@@ -117,7 +117,7 @@ size_t fslib::Path::find_first_not_of(char character, size_t begin) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_last_of(char character) const
+size_t fslib::Path::find_last_of(char character) const noexcept
 {
     for (size_t i = m_offset; i-- > 0;)
     {
@@ -127,7 +127,7 @@ size_t fslib::Path::find_last_of(char character) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_last_of(char character, size_t begin) const
+size_t fslib::Path::find_last_of(char character, size_t begin) const noexcept
 {
     if (begin > m_offset) { begin = m_offset; }
 
@@ -139,7 +139,7 @@ size_t fslib::Path::find_last_of(char character, size_t begin) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_last_not_of(char character) const
+size_t fslib::Path::find_last_not_of(char character) const noexcept
 {
     for (size_t i = m_offset; i-- > 0;)
     {
@@ -149,7 +149,7 @@ size_t fslib::Path::find_last_not_of(char character) const
     return Path::NOT_FOUND;
 }
 
-size_t fslib::Path::find_last_not_of(char character, size_t begin) const
+size_t fslib::Path::find_last_not_of(char character, size_t begin) const noexcept
 {
     if (begin >= m_offset) { begin = m_offset; }
 
@@ -163,11 +163,11 @@ size_t fslib::Path::find_last_not_of(char character, size_t begin) const
 
 std::string fslib::Path::string() const { return m_device + ":" + m_path.get(); }
 
-std::string_view fslib::Path::get_device_name() const { return m_device; }
+std::string_view fslib::Path::get_device_name() const noexcept { return m_device; }
 
 const char *fslib::Path::get_path() const { return m_path.get(); }
 
-const char *fslib::Path::get_filename() const
+const char *fslib::Path::get_filename() const noexcept
 {
     size_t lastSlash = Path::find_last_of('/');
     if (lastSlash == Path::NOT_FOUND) { return nullptr; }
@@ -175,7 +175,7 @@ const char *fslib::Path::get_filename() const
     return &m_path[lastSlash + 1];
 }
 
-const char *fslib::Path::get_extension() const
+const char *fslib::Path::get_extension() const noexcept
 {
     size_t extensionBegin = Path::find_last_of('.');
     if (extensionBegin == Path::NOT_FOUND) { return nullptr; }
@@ -183,9 +183,9 @@ const char *fslib::Path::get_extension() const
     return &m_path[extensionBegin + 1];
 }
 
-size_t fslib::Path::get_length() const { return m_offset; }
+size_t fslib::Path::get_length() const noexcept { return m_offset; }
 
-fslib::Path &fslib::Path::operator=(const fslib::Path &path)
+fslib::Path &fslib::Path::operator=(const fslib::Path &path) noexcept
 {
     m_device = path.m_device;
     m_offset = path.m_offset;
@@ -194,7 +194,7 @@ fslib::Path &fslib::Path::operator=(const fslib::Path &path)
     return *this;
 }
 
-fslib::Path &fslib::Path::operator=(fslib::Path &&path)
+fslib::Path &fslib::Path::operator=(fslib::Path &&path) noexcept
 {
     m_device = std::move(path.m_device);
     m_path   = std::move(path.m_path);
@@ -208,11 +208,11 @@ fslib::Path &fslib::Path::operator=(fslib::Path &&path)
     return *this;
 }
 
-fslib::Path &fslib::Path::operator=(const char *path) { return *this = std::string_view(path); }
+fslib::Path &fslib::Path::operator=(const char *path) noexcept { return *this = std::string_view(path); }
 
-fslib::Path &fslib::Path::operator=(const std::string &path) { return *this = std::string_view(path); }
+fslib::Path &fslib::Path::operator=(const std::string &path) noexcept { return *this = std::string_view(path); }
 
-fslib::Path &fslib::Path::operator=(std::string_view path)
+fslib::Path &fslib::Path::operator=(std::string_view path) noexcept
 {
     const size_t deviceEnd = path.find_first_of(':');
     if (deviceEnd == path.npos) { return *this; }
@@ -237,13 +237,16 @@ fslib::Path &fslib::Path::operator=(std::string_view path)
     return *this;
 }
 
-fslib::Path &fslib::Path::operator=(const std::filesystem::path &path) { return *this = std::string_view(path.string()); }
+fslib::Path &fslib::Path::operator=(const std::filesystem::path &path) noexcept
+{
+    return *this = std::string_view(path.string());
+}
 
-fslib::Path &fslib::Path::operator/=(const char *path) { return *this /= std::string_view(path); }
+fslib::Path &fslib::Path::operator/=(const char *path) noexcept { return *this /= std::string_view(path); }
 
-fslib::Path &fslib::Path::operator/=(const std::string &path) { return *this /= std::string_view(path); }
+fslib::Path &fslib::Path::operator/=(const std::string &path) noexcept { return *this /= std::string_view(path); }
 
-fslib::Path &fslib::Path::operator/=(std::string_view path)
+fslib::Path &fslib::Path::operator/=(std::string_view path) noexcept
 {
     const size_t pathBegin = path.find_first_not_of('/');
     const size_t pathEnd   = path.find_last_not_of('/');
@@ -265,18 +268,21 @@ fslib::Path &fslib::Path::operator/=(std::string_view path)
     return *this;
 }
 
-fslib::Path &fslib::Path::operator/=(const std::filesystem::path &path) { return *this /= std::string_view(path.string()); }
+fslib::Path &fslib::Path::operator/=(const std::filesystem::path &path) noexcept
+{
+    return *this /= std::string_view(path.string());
+}
 
-fslib::Path &fslib::Path::operator/=(const fslib::DirectoryEntry &path)
+fslib::Path &fslib::Path::operator/=(const fslib::DirectoryEntry &path) noexcept
 {
     return *this /= std::string_view(path.get_filename());
 }
 
-fslib::Path &fslib::Path::operator+=(const char *path) { return *this += std::string_view(path); }
+fslib::Path &fslib::Path::operator+=(const char *path) noexcept { return *this += std::string_view(path); }
 
-fslib::Path &fslib::Path::operator+=(const std::string &path) { return *this += std::string_view(path); }
+fslib::Path &fslib::Path::operator+=(const std::string &path) noexcept { return *this += std::string_view(path); }
 
-fslib::Path &fslib::Path::operator+=(std::string_view path)
+fslib::Path &fslib::Path::operator+=(std::string_view path) noexcept
 {
     const size_t length = path.length();
     if (m_offset + length >= FS_MAX_PATH) { return *this; }
@@ -288,14 +294,17 @@ fslib::Path &fslib::Path::operator+=(std::string_view path)
     return *this;
 }
 
-fslib::Path &fslib::Path::operator+=(const std::filesystem::path &path) { return *this += std::string_view(path.string()); }
+fslib::Path &fslib::Path::operator+=(const std::filesystem::path &path) noexcept
+{
+    return *this += std::string_view(path.string());
+}
 
-fslib::Path &fslib::Path::operator+=(const fslib::DirectoryEntry &path)
+fslib::Path &fslib::Path::operator+=(const fslib::DirectoryEntry &path) noexcept
 {
     return *this += std::string_view(path.get_filename());
 }
 
-void fslib::Path::null_terminate() { m_path[m_offset] = '\0'; }
+void fslib::Path::null_terminate() noexcept { m_path[m_offset] = '\0'; }
 
 fslib::Path fslib::operator/(const fslib::Path &pathA, const char *pathB)
 {
@@ -367,7 +376,7 @@ fslib::Path fslib::operator+(const fslib::Path &pathA, const fslib::DirectoryEnt
     return newPath;
 }
 
-bool fslib::operator==(const fslib::Path &pathA, const fslib::Path &pathB)
+bool fslib::operator==(const fslib::Path &pathA, const fslib::Path &pathB) noexcept
 {
     if (pathA.get_device_name() != pathB.get_device_name()) { return false; }
 

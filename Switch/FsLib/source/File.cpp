@@ -16,7 +16,7 @@ namespace
 
 extern void print(const char *format, ...);
 
-fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize)
+fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize) noexcept
 {
     File::open(filePath, openFlags, fileSize);
 }
@@ -27,26 +27,28 @@ fslib::File::File(fslib::File &&file)
     *this = std::move(file);
 }
 
-fslib::File &fslib::File::operator=(fslib::File &&file)
+fslib::File &fslib::File::operator=(fslib::File &&file) noexcept
 {
+    static constexpr size_t FSFILE_SIZE = sizeof(FsFile);
+
     // Steal the parent stuff.
     m_offset     = file.m_offset;
     m_streamSize = file.m_streamSize;
     m_isOpen     = file.m_isOpen;
     m_flags      = file.m_flags;
-    std::memcpy(&m_handle, &file.m_handle, sizeof(FsFile));
+    std::memcpy(&m_handle, &file.m_handle, FSFILE_SIZE);
 
     file.m_offset     = 0;
     file.m_streamSize = 0;
     file.m_isOpen     = false;
     file.m_flags      = 0;
-    std::memset(&file.m_handle, 0x00, sizeof(FsFile));
+    std::memset(&file.m_handle, 0x00, FSFILE_SIZE);
     return *this;
 }
 
-fslib::File::~File() { File::close(); }
+fslib::File::~File() noexcept { File::close(); }
 
-void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize)
+void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t fileSize) noexcept
 {
     File::close();
 
@@ -86,16 +88,16 @@ void fslib::File::open(const fslib::Path &filePath, uint32_t openFlags, int64_t 
     m_isOpen = true;
 }
 
-void fslib::File::close()
+void fslib::File::close() noexcept
 {
     if (!m_isOpen) { return; }
     fsFileClose(&m_handle);
     m_isOpen = false;
 }
 
-bool fslib::File::is_open() const { return m_isOpen; }
+bool fslib::File::is_open() const noexcept { return m_isOpen; }
 
-ssize_t fslib::File::read(void *buffer, uint64_t bufferSize)
+ssize_t fslib::File::read(void *buffer, uint64_t bufferSize) noexcept
 {
     if (!File::is_open_for_reading()) { return -1; }
 
@@ -111,7 +113,7 @@ ssize_t fslib::File::read(void *buffer, uint64_t bufferSize)
     return bytesRead;
 }
 
-bool fslib::File::read_line(char *lineOut, size_t lineLength)
+bool fslib::File::read_line(char *lineOut, size_t lineLength) noexcept
 {
     if (!File::is_open_for_reading()) { return false; }
 
@@ -127,7 +129,7 @@ bool fslib::File::read_line(char *lineOut, size_t lineLength)
     return false;
 }
 
-bool fslib::File::read_line(std::string &lineOut)
+bool fslib::File::read_line(std::string &lineOut) noexcept
 {
     if (!File::is_open_for_reading()) { return false; }
 
@@ -146,7 +148,7 @@ bool fslib::File::read_line(std::string &lineOut)
     return false;
 }
 
-signed char fslib::File::get_byte()
+signed char fslib::File::get_byte() noexcept
 {
     if (!File::is_open_for_reading()) { return -1; }
 
@@ -158,7 +160,7 @@ signed char fslib::File::get_byte()
     return byte;
 }
 
-ssize_t fslib::File::write(const void *buffer, uint64_t bufferSize)
+ssize_t fslib::File::write(const void *buffer, uint64_t bufferSize) noexcept
 {
     const bool openForWrite = File::is_open_for_writing();
     const bool resized      = File::resize_if_needed(bufferSize);
@@ -171,7 +173,7 @@ ssize_t fslib::File::write(const void *buffer, uint64_t bufferSize)
     return bufferSize;
 }
 
-bool fslib::File::writef(const char *format, ...)
+bool fslib::File::writef(const char *format, ...) noexcept
 {
     char vaBuffer[VA_BUFFER_SIZE] = {0};
 
@@ -183,7 +185,7 @@ bool fslib::File::writef(const char *format, ...)
     return File::write(vaBuffer, std::char_traits<char>::length(vaBuffer)) != -1;
 }
 
-bool fslib::File::put_byte(char byte)
+bool fslib::File::put_byte(char byte) noexcept
 {
     const bool openForWrite = File::is_open_for_writing();
     const bool resized      = File::resize_if_needed(1); // This is funny.
@@ -195,13 +197,13 @@ bool fslib::File::put_byte(char byte)
     return true;
 }
 
-fslib::File &fslib::File::operator<<(const char *string)
+fslib::File &fslib::File::operator<<(const char *string) noexcept
 {
     File::write(string, std::char_traits<char>::length(string));
     return *this;
 }
 
-fslib::File &fslib::File::operator<<(const std::string &string)
+fslib::File &fslib::File::operator<<(const std::string &string) noexcept
 {
     File::write(string.c_str(), string.length());
     return *this;
@@ -220,7 +222,7 @@ void fslib::File::seek(int64_t offset, Stream::Origin origin)
     File::resize_if_needed(0);
 }
 
-bool fslib::File::flush()
+bool fslib::File::flush() noexcept
 {
     if (!File::is_open_for_writing()) { return false; }
 

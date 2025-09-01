@@ -21,12 +21,12 @@ fslib::Directory::Directory(Directory &&directory) { *this = std::move(directory
 fslib::Directory &fslib::Directory::operator=(Directory &&directory)
 {
     // Start by copying this to make sure we have EVERYTHING~
-    m_directoryHandle = directory.m_directoryHandle;
-    m_directoryList   = std::move(directory.m_directoryList);
-    m_entryCount      = directory.m_entryCount;
-    m_wasRead         = directory.m_wasRead;
+    m_handle        = directory.m_handle;
+    m_directoryList = std::move(directory.m_directoryList);
+    m_entryCount    = directory.m_entryCount;
+    m_wasRead       = directory.m_wasRead;
 
-    directory.m_directoryHandle = {0};
+    directory.m_handle = {0};
     m_directoryList.clear(); // Not really sure if this is needed after std::move, but jic.
     m_entryCount = 0;
     m_wasRead    = 0;
@@ -51,16 +51,15 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     const bool deviceFound        = fslib::get_file_system_by_device_name(device, &filesystem);
     if (!deviceFound) { return; }
 
-    const bool dirError   = error::occurred(fsFsOpenDirectory(filesystem, path, FLAGS_DIR_OPEN, &m_directoryHandle));
-    const bool countError = !dirError && error::occurred(fsDirGetEntryCount(&m_directoryHandle, &m_entryCount));
+    const bool dirError   = error::occurred(fsFsOpenDirectory(filesystem, path, FLAGS_DIR_OPEN, &m_handle));
+    const bool countError = !dirError && error::occurred(fsDirGetEntryCount(&m_handle, &m_entryCount));
     if (dirError || countError) { return; }
 
-    // Reallocating this should free a previous array if there is one.
     auto entryBuffer = std::make_unique<FsDirectoryEntry[]>(m_entryCount);
 
     // This is how many entries the function says are read.
     int64_t totalEntries{};
-    const bool readError    = error::occurred(fsDirRead(&m_directoryHandle, &totalEntries, m_entryCount, entryBuffer.get()));
+    const bool readError    = error::occurred(fsDirRead(&m_handle, &totalEntries, m_entryCount, entryBuffer.get()));
     const bool entriesMatch = totalEntries == m_entryCount;
     if (readError || !entriesMatch) { return; }
 
@@ -71,9 +70,9 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     m_wasRead = true;
 }
 
-bool fslib::Directory::is_open() const { return m_wasRead; }
+bool fslib::Directory::is_open() const noexcept { return m_wasRead; }
 
-int64_t fslib::Directory::get_count() const { return m_entryCount; }
+int64_t fslib::Directory::get_count() const noexcept { return m_entryCount; }
 
 const fslib::DirectoryEntry &fslib::Directory::get_entry(int index) const { return m_directoryList[index]; }
 
@@ -81,7 +80,7 @@ const fslib::DirectoryEntry &fslib::Directory::operator[](int index) const { ret
 
 fslib::DirectoryIterator fslib::Directory::list() { return fslib::DirectoryIterator(this); }
 
-void fslib::Directory::close() { fsDirClose(&m_directoryHandle); }
+void fslib::Directory::close() { fsDirClose(&m_handle); }
 
 static bool compare_entries(const fslib::DirectoryEntry &entryA, const fslib::DirectoryEntry &entryB)
 {

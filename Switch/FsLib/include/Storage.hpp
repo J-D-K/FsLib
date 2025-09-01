@@ -10,7 +10,7 @@ namespace fslib
      * @note This still needs a lot of work for the different storage types. This class is <b>read only</b> for a reason.
      * Even with that, it can still <b>read the most sensitive data</b> on the Switch.
      */
-    class Storage : public fslib::Stream
+    class Storage final : public fslib::Stream
     {
         public:
             /// @brief  Default storage constructor.

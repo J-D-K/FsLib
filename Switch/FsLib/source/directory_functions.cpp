@@ -6,16 +6,20 @@
 #include <string_view>
 #include <switch.h>
 
+namespace
+{
+    constexpr uint32_t OPEN_DIR_FLAGS = FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles;
+}
+
 bool fslib::create_directory(const fslib::Path &directoryPath)
 {
-    if (!directoryPath.is_valid()) { return false; }
-
     FsFileSystem *filesystem{};
-    const std::string_view device = directoryPath.get_device_name();
-    const char *path              = directoryPath.get_path();
-    const bool deviceFound        = fslib::get_file_system_by_device_name(device, &filesystem);
-    const bool dirError           = deviceFound && error::occurred(fsFsCreateDirectory(filesystem, path));
-    if (!deviceFound || dirError) { return false; }
+    const bool isValid = directoryPath.is_valid();
+    const bool found   = isValid && fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem);
+    if (!isValid || !found) { return false; }
+
+    const bool dirError = error::occurred(fsFsCreateDirectory(filesystem, directoryPath.get_path()));
+    if (dirError) { return false; }
 
     return true;
 }
@@ -39,14 +43,13 @@ bool fslib::create_directories_recursively(const fslib::Path &directoryPath)
 
 bool fslib::delete_directory(const fslib::Path &directoryPath)
 {
-    if (!directoryPath.is_valid()) { return false; }
-
     FsFileSystem *filesystem{};
-    const std::string_view device = directoryPath.get_device_name();
-    const char *path              = directoryPath.get_path();
-    const bool deviceFound        = fslib::get_file_system_by_device_name(device, &filesystem);
-    const bool deleteError        = deviceFound && error::occurred(fsFsDeleteDirectory(filesystem, path));
-    if (!deviceFound || deleteError) { return false; }
+    const bool isValid = directoryPath.is_valid();
+    const bool found   = isValid && fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem);
+    if (!isValid || !found) { return false; }
+
+    const bool deleteError = error::occurred(fsFsDeleteDirectory(filesystem, directoryPath.get_path()));
+    if (deleteError) { return false; }
     return true;
 }
 
@@ -64,43 +67,59 @@ bool fslib::delete_directory_recursively(const fslib::Path &directoryPath)
         if (!dirDeleted && !fileDeleted) { return false; }
     }
 
-    // This is to prevent failure from trying to delete the root. I think Nintendo's own implementation doesn't do this?
+    // This is to prevent failure from trying to delete the root.
     const size_t pathLength  = std::char_traits<char>::length(directoryPath.get_path());
     const bool attemptDelete = pathLength > 1;
     const bool deleteFailed  = attemptDelete && !fslib::delete_directory(directoryPath);
     if (attemptDelete && deleteFailed) { return false; }
+
     return true;
 }
 
 bool fslib::directory_exists(const fslib::Path &directoryPath)
 {
-    static constexpr uint32_t FLAGS_DIR_OPEN = FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles;
-
-    if (!directoryPath.is_valid()) { return false; }
-
     FsFileSystem *filesystem{};
+    const bool isValid = directoryPath.is_valid();
+    const bool found   = isValid && fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem);
+    if (!isValid || !found) { return false; }
+
     FsDir handle{};
-    const std::string_view device = directoryPath.get_device_name();
-    const char *path              = directoryPath.get_path();
-    const bool deviceFound        = fslib::get_file_system_by_device_name(device, &filesystem);
-    const bool dirError = deviceFound && error::occurred(fsFsOpenDirectory(filesystem, path, FLAGS_DIR_OPEN, &handle));
-    if (!deviceFound || dirError) { return false; }
+    const bool dirError = error::occurred(fsFsOpenDirectory(filesystem, directoryPath.get_path(), OPEN_DIR_FLAGS, &handle));
+    if (dirError) { return false; }
+
     fsDirClose(&handle);
     return true;
 }
 
 bool fslib::rename_directory(const fslib::Path &oldPath, const fslib::Path &newPath)
 {
-    const bool pathsValid = oldPath.is_valid() && newPath.is_valid();
-    const bool sameDevice = oldPath.get_device_name() == newPath.get_device_name();
-    if (!pathsValid || !sameDevice) { return false; }
-
     FsFileSystem *filesystem{};
-    const std::string_view device = oldPath.get_device_name();
-    const char *pathA             = oldPath.get_path();
-    const char *pathB             = newPath.get_path();
-    const bool deviceFound        = fslib::get_file_system_by_device_name(device, &filesystem);
-    const bool renameError        = deviceFound && error::occurred(fsFsRenameDirectory(filesystem, pathA, pathB));
-    if (!deviceFound || renameError) { return false; }
+    const bool pathsValid = oldPath.is_valid() && newPath.is_valid();
+    const bool sameDevice = pathsValid && oldPath.get_device_name() == newPath.get_device_name();
+    const bool found      = sameDevice && fslib::get_file_system_by_device_name(oldPath.get_device_name(), &filesystem);
+    if (!pathsValid || !sameDevice || !found) { return false; }
+
+    const bool renameError = error::occurred(fsFsRenameDirectory(filesystem, oldPath.get_path(), newPath.get_path()));
+    if (renameError) { return false; }
+    return true;
+}
+
+bool fslib::get_directory_entry_count(const fslib::Path &directoryPath, int64_t &countOut)
+{
+    FsFileSystem *filesystem{};
+    const bool pathValid = directoryPath.is_valid();
+    const bool found     = fslib::get_file_system_by_device_name(directoryPath.get_device_name(), &filesystem);
+    if (!pathValid || !found) { return false; }
+
+    FsDir handle{};
+    const bool openError  = error::occurred(fsFsOpenDirectory(filesystem, directoryPath.get_path(), OPEN_DIR_FLAGS, &handle));
+    const bool countError = !openError && error::occurred(fsDirGetEntryCount(&handle, &countOut));
+    if (openError || countError)
+    {
+        fsDirClose(&handle);
+        return false;
+    }
+
+    fsDirClose(&handle);
     return true;
 }

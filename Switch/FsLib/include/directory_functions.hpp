@@ -38,4 +38,10 @@ namespace fslib
     /// @param newPath New path to target directory.
     /// @return True on success. False on failure.
     bool rename_directory(const fslib::Path &oldPath, const fslib::Path &newPath);
+
+    /// @brief Attempts to get a count for the number of entries in a directory.
+    /// @param directoryPath Path of the directory to get the entry count for.
+    /// @param countOut Int64_t to write the count to.
+    /// @return True on success. False on failure.
+    bool get_directory_entry_count(const fslib::Path &directoryPath, int64_t &countOut);
 } // namespace fslib

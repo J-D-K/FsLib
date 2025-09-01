@@ -11,31 +11,16 @@ namespace fslib
             using iterator = std::vector<fslib::DirectoryEntry>::const_iterator;
 
             /// @brief Constructor. Takes a pointer to the Directory that instantiated it.
-            DirectoryIterator(fslib::Directory *directory);
+            DirectoryIterator(fslib::Directory *directory) noexcept;
 
             /// @brief Returns an iterator to the Directory's begin.
-            fslib::DirectoryIterator::iterator begin() const;
+            fslib::DirectoryIterator::iterator begin() const noexcept;
 
             /// @brief Returns an iterator to the Directory;s end;
-            fslib::DirectoryIterator::iterator end() const;
-
-            /// @brief Operator needed for range based loops.
-            fslib::DirectoryEntry &operator&() const;
-
-            /// @brief Operator needed for range based loops.
-            fslib::DirectoryEntry *operator*() const;
-
-            /// @brief Increments the internal index.
-            fslib::DirectoryIterator &operator++();
-
-            /// @brief Returns if the iterator passed is not equal to this one.
-            bool operator!=(const fslib::DirectoryIterator &iter) const;
+            fslib::DirectoryIterator::iterator end() const noexcept;
 
         private:
             /// @brief Pointer to the directory that constructed this.
             fslib::Directory *m_directory{};
-
-            /// @brief Internal index of the iterator.
-            int m_index{};
     };
 }

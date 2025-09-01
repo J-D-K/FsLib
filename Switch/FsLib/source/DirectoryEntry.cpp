@@ -1,23 +1,37 @@
 #include "DirectoryEntry.hpp"
 
+#include <cstring>
 #include <string>
 
 fslib::DirectoryEntry::DirectoryEntry(const FsDirectoryEntry &entry)
-    : m_isDirectory(entry.type == FsDirEntryType_Dir)
+    : m_directory(entry.type == FsDirEntryType_Dir)
     , m_filename(entry.name)
     , m_size(entry.file_size) {};
 
-bool fslib::DirectoryEntry::is_directory() const { return m_isDirectory; }
+fslib::DirectoryEntry::DirectoryEntry(DirectoryEntry &&entry) noexcept { *this = std::move(entry); }
 
-const char *fslib::DirectoryEntry::get_filename() const { return m_filename.c_str(); }
-
-const char *fslib::DirectoryEntry::get_extension() const
+fslib::DirectoryEntry &fslib::DirectoryEntry::operator=(DirectoryEntry &&entry) noexcept
 {
-    size_t extensionBegin = m_filename.find_last_of('.');
-    if (extensionBegin == m_filename.npos) { return nullptr; }
+    m_directory = entry.m_directory;
+    m_filename  = std::move(entry.m_filename);
+    m_size      = entry.m_size;
 
-    // Note: This can still be dangerous. Need to figure this out better.
-    return &m_filename.c_str()[extensionBegin + 1];
+    m_directory = false;
+    m_size      = 0;
+
+    return *this;
 }
 
-int64_t fslib::DirectoryEntry::get_size() const { return m_size; }
+bool fslib::DirectoryEntry::is_directory() const noexcept { return m_directory; }
+
+const char *fslib::DirectoryEntry::get_filename() const noexcept { return m_filename.c_str(); }
+
+const char *fslib::DirectoryEntry::get_extension() const noexcept
+{
+    const size_t lastDot = m_filename.find_last_of('.');
+    if (lastDot == m_filename.npos) { return nullptr; }
+
+    return &m_filename.data()[lastDot];
+}
+
+int64_t fslib::DirectoryEntry::get_size() const noexcept { return m_size; }

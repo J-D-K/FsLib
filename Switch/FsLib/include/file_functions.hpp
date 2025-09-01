@@ -2,6 +2,7 @@
 #include "Path.hpp"
 
 #include <cstdint>
+#include <switch.h>
 
 namespace fslib
 {
@@ -31,4 +32,10 @@ namespace fslib
     /// @param newPath New path of target file.
     /// @return True on success. False on failure.
     bool rename_file(const fslib::Path &oldPath, const fslib::Path &newPath);
+
+    /// @brief Attempts to retrieve a timestamp for the path passed.
+    /// @param filePath Path of the file to get the timestamp for.
+    /// @param stampOut FsTimeStampRaw to write the POSIX timestamp to.
+    /// @return True on success. False on failure.
+    bool get_file_timestamp(const fslib::Path &filePath, FsTimeStampRaw &stampOut);
 } // namespace fslib

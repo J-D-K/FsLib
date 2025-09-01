@@ -37,6 +37,22 @@ void print(const char *format, ...)
     }
 }
 
+class timer
+{
+    public:
+        timer()
+            : m_start(std::chrono::high_resolution_clock::now()) {};
+
+        ~timer()
+        {
+            auto end = std::chrono::high_resolution_clock::now();
+            print("Timer: %ums\n", std::chrono::duration_cast<std::chrono::microseconds>(end - m_start));
+        }
+
+    private:
+        std::chrono::system_clock::time_point m_start{};
+};
+
 int main()
 {
     static const char *SNAP_DIR = "sdmc:/snapTest";
@@ -60,15 +76,14 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    const fslib::Path pathA{"sdmc:/pathA"};
-    const fslib::Path pathB{"sdmc:/pathB"};
-    const fslib::Path pathC{"sdmc:/pathA"};
+    fslib::Directory switchDir{"sdmc:/switch"};
+    for (const auto &entry : switchDir.list()) { print("%s\n", entry.get_filename()); }
 
-    if (pathA == pathB) { print("pathA matches pathB?\n"); }
-    else { print("pathA doesn't match pathB!\n"); }
-
-    if (pathA == pathC) { print("pathA matches pathC!\n"); }
-    else { print("pathA doesn't match pathC!"); }
+    fslib::SaveInfoReader infoReader{FsSaveDataSpaceId_System, 256};
+    while (infoReader.read())
+    {
+        for (const FsSaveDataInfo &saveInfo : infoReader.list()) { print("0x%016llX\n", saveInfo.system_save_data_id); }
+    }
 
     print("\nPress + to Exit");
     while (appletMainLoop())
