@@ -76,13 +76,9 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    fslib::Directory switchDir{"sdmc:/switch"};
-    for (const auto &entry : switchDir.list()) { print("%s\n", entry.get_filename()); }
-
-    fslib::SaveInfoReader infoReader{FsSaveDataSpaceId_System, 256};
-    while (infoReader.read())
     {
-        for (const FsSaveDataInfo &saveInfo : infoReader.list()) { print("0x%016llX\n", saveInfo.system_save_data_id); }
+        timer dirTimer{};
+        fslib::Directory switchDir{"sdmc:/switch"};
     }
 
     print("\nPress + to Exit");

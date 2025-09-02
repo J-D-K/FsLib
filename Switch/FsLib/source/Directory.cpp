@@ -55,6 +55,7 @@ void fslib::Directory::open(const fslib::Path &directoryPath, bool sortedListing
     const bool countError = !dirError && error::occurred(fsDirGetEntryCount(&m_handle, &m_entryCount));
     if (dirError || countError) { return; }
 
+    m_directoryList.reserve(m_entryCount);
     auto entryBuffer = std::make_unique<FsDirectoryEntry[]>(m_entryCount);
 
     // This is how many entries the function says are read.

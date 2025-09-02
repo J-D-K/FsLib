@@ -16,8 +16,8 @@ fslib::DirectoryEntry &fslib::DirectoryEntry::operator=(DirectoryEntry &&entry) 
     m_filename  = std::move(entry.m_filename);
     m_size      = entry.m_size;
 
-    m_directory = false;
-    m_size      = 0;
+    entry.m_directory = false;
+    entry.m_size      = 0;
 
     return *this;
 }
