@@ -57,8 +57,7 @@ int main()
 {
     static const char *SNAP_DIR = "sdmc:/snapTest";
 
-    // Initialize fslib
-    if (!fslib::initialize()) { return -1; }
+    if (!fslib::is_initialized()) { return -1; }
 
     // This goes here if you're using romfs cause I don't feel like writing something for that.
     // if(R_FAILED(romfsInit()))
@@ -76,9 +75,28 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
+    fslib::Directory switchDir{};
     {
-        timer dirTimer{};
-        fslib::Directory switchDir{"sdmc:/switch"};
+        timer time{};
+        switchDir.open("sdmc:/switch");
+    }
+
+    for (const fslib::DirectoryEntry &entry : switchDir)
+    {
+        const bool isDir = entry.is_directory();
+        print("[%c] %s\n", isDir ? 'D' : 'F', entry.get_filename());
+    }
+
+    fslib::Directory jksvDir{};
+    {
+        timer time{};
+        jksvDir.open("sdmc:/switch/JKSV");
+    }
+
+    for (const fslib::DirectoryEntry &entry : jksvDir)
+    {
+        const bool isDir = entry.is_directory();
+        print("[%c] %s\n", isDir ? 'D' : 'F', entry.get_filename());
     }
 
     print("\nPress + to Exit");
@@ -91,8 +109,6 @@ int main()
 
     // Just exit stuff.
     accountExit();
-    fslib::device::exit();
-    fslib::exit();
     consoleExit(NULL);
     return 0;
 }

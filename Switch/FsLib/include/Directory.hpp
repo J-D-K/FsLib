@@ -7,13 +7,13 @@
 
 namespace fslib
 {
-    /// @brief Forward declaration to avoid clashes.
-    class DirectoryIterator;
 
     /// @brief Class for opening and reading entries from directories.
     class Directory final
     {
         public:
+            using iterator = std::vector<fslib::DirectoryEntry>::const_iterator;
+
             /// @brief Default constructor for Directory.
             Directory() = default;
 
@@ -58,11 +58,11 @@ namespace fslib
             /// @return Entry's name. If out of bounds, nullptr.
             const fslib::DirectoryEntry &operator[](int index) const;
 
-            /// @brief Returns a Directory iterator for use with range based for loops.
-            fslib::DirectoryIterator list();
+            /// @brief Returns the begin iterator.
+            Directory::iterator begin() const noexcept;
 
-            /// @brief This is so the DirectoryIterator class can access the private members here.
-            friend class fslib::DirectoryIterator;
+            /// @brief Returns the end iterator.
+            Directory::iterator end() const noexcept;
 
         private:
             /// @brief Saves whether or not the directory was successfully opened and read.

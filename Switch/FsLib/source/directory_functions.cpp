@@ -58,7 +58,7 @@ bool fslib::delete_directory_recursively(const fslib::Path &directoryPath)
     fslib::Directory targetDirectory{directoryPath};
     if (!targetDirectory.is_open()) { return false; }
 
-    for (const fslib::DirectoryEntry &entry : targetDirectory.list())
+    for (const fslib::DirectoryEntry &entry : targetDirectory)
     {
         const fslib::Path targetPath{directoryPath / entry};
         const bool isDirectory = entry.is_directory();

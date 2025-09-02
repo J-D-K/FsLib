@@ -1,5 +1,4 @@
 #pragma once
-#include <SaveInfoIterator.hpp>
 #include <memory>
 #include <switch.h>
 
@@ -44,22 +43,19 @@ namespace fslib
             void open(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t bufferCount);
 
             /// @brief Closes the save data info reader. This is called in the destructor too.
-            void close();
+            void close() noexcept;
 
             /// @brief Returns if save data info reader was successfully opened.
             /// @return True on success. False on failure.
-            bool is_open() const;
+            bool is_open() const noexcept;
 
             /// @brief Reads the next save data info entry.
             /// @return True on success. False on failure.
-            bool read();
+            bool read() noexcept;
 
             /// @brief Returns the number of FsSaveDataInfo entries read from the system.
             /// @return Number of FsSaveDataInfo entries read from the system.
-            int64_t get_read_count() const;
-
-            /// @brief Operator that can be used in place of isOpen.
-            operator bool() const;
+            int64_t get_read_count() const noexcept;
 
             /// @brief Returns a reference to the FsSaveDataInfo at index. Bounds checking is performed.
             FsSaveDataInfo &at(int index);
@@ -69,10 +65,11 @@ namespace fslib
             /// @return Reference to the FsSaveDataInfo struct at index.
             FsSaveDataInfo &operator[](int index);
 
-            /// @brief Returns an iterator instance for range based for loops.
-            SaveInfoIterator list() const;
+            /// @brief Returns the beginning of the array.
+            const FsSaveDataInfo *begin() const noexcept;
 
-            friend class SaveInfoIterator;
+            /// @brief Returns the last valid element of the array.
+            const FsSaveDataInfo *end() const noexcept;
 
         private:
             /// @brief Underlying FsSaveDataInfoReader.

@@ -1,6 +1,5 @@
 #include "Directory.hpp"
 
-#include "DirectoryIterator.hpp"
 #include "error.hpp"
 #include "fslib.hpp"
 
@@ -79,7 +78,9 @@ const fslib::DirectoryEntry &fslib::Directory::get_entry(int index) const { retu
 
 const fslib::DirectoryEntry &fslib::Directory::operator[](int index) const { return m_directoryList[index]; }
 
-fslib::DirectoryIterator fslib::Directory::list() { return fslib::DirectoryIterator(this); }
+fslib::Directory::iterator fslib::Directory::begin() const noexcept { return m_directoryList.begin(); }
+
+fslib::Directory::iterator fslib::Directory::end() const noexcept { return m_directoryList.end(); }
 
 void fslib::Directory::close() { fsDirClose(&m_handle); }
 
