@@ -81,7 +81,7 @@ bool fslib::get_file_timestamp(const fslib::Path &filePath, FsTimeStampRaw &stam
     const bool found   = isValid && fslib::get_file_system_by_device_name(filePath.get_device_name(), &filesystem);
     if (!isValid || !found) { return false; }
 
-    const bool stampError = fsFsGetFileTimeStampRaw(filesystem, filePath.get_path(), &stampOut);
+    const bool stampError = error::occurred(fsFsGetFileTimeStampRaw(filesystem, filePath.get_path(), &stampOut));
     if (stampError) { return false; }
 
     return true;

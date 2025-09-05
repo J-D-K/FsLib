@@ -99,6 +99,11 @@ int main()
         print("[%c] %s\n", isDir ? 'D' : 'F', entry.get_filename());
     }
 
+    fslib::SaveInfoReader infoReader{FsSaveDataSpaceId_System, 256};
+
+    print("System saves found: %i", infoReader.get_read_count());
+    for (const FsSaveDataInfo &saveInfo : infoReader) { print("%016llX", saveInfo.save_data_space_id); }
+
     print("\nPress + to Exit");
     while (appletMainLoop())
     {
