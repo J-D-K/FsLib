@@ -55,7 +55,8 @@ class timer
 
 int main()
 {
-    static const char *SNAP_DIR = "sdmc:/snapTest";
+    static constexpr int BUFFER_SIZE = 0x80;
+    static const char *SNAP_DIR      = "sdmc:/snapTest";
 
     if (!fslib::is_initialized()) { return -1; }
 
@@ -75,34 +76,34 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    fslib::Directory switchDir{};
-    {
-        timer time{};
-        switchDir.open("sdmc:/switch");
-    }
+    FsTimeStampRaw fslibStamp{};
+    FsTimeStampRaw rawStamp;
 
-    for (const fslib::DirectoryEntry &entry : switchDir)
-    {
-        const bool isDir = entry.is_directory();
-        print("[%c] %s\n", isDir ? 'D' : 'F', entry.get_filename());
-    }
+    FsFileSystem *sdmc{};
+    fslib::get_file_system_by_device_name("sdmc", &sdmc);
 
-    fslib::Directory jksvDir{};
-    {
-        timer time{};
-        jksvDir.open("sdmc:/switch/JKSV");
-    }
+    const fslib::Path hbmenu{"sdmc:/hbmenu.nro"};
+    const bool fslibGet = fslib::get_file_timestamp(hbmenu, fslibStamp);
+    const bool rawGet   = R_SUCCEEDED(fsFsGetFileTimeStampRaw(sdmc, hbmenu.get_path(), &rawStamp));
+    if (!fslibGet || !rawGet) { return -2; }
 
-    for (const fslib::DirectoryEntry &entry : jksvDir)
-    {
-        const bool isDir = entry.is_directory();
-        print("[%c] %s\n", isDir ? 'D' : 'F', entry.get_filename());
-    }
+    const std::time_t fslibCreated = static_cast<std::time_t>(fslibStamp.created);
+    const std::time_t rawCreated   = static_cast<std::time_t>(rawStamp.created);
 
-    fslib::SaveInfoReader infoReader{FsSaveDataSpaceId_System, 256};
+    if (fslibCreated != rawCreated) { print("Stamp mismatch."); }
 
-    print("System saves found: %i", infoReader.get_read_count());
-    for (const FsSaveDataInfo &saveInfo : infoReader) { print("%016llX", saveInfo.save_data_space_id); }
+    print("%lli\n", fslibStamp.created);
+
+    char fslibBuffer[BUFFER_SIZE] = {0};
+    char rawBuffer[BUFFER_SIZE]   = {0};
+
+    const std::tm *fslibTm = std::localtime(&fslibCreated);
+    const std::tm *rawTm   = std::localtime(&rawCreated);
+
+    std::strftime(fslibBuffer, BUFFER_SIZE, "%c", fslibTm);
+    std::strftime(rawBuffer, BUFFER_SIZE, "%c", rawTm);
+
+    print("fslib: %s\nRaw: %s\n", fslibBuffer, rawBuffer);
 
     print("\nPress + to Exit");
     while (appletMainLoop())

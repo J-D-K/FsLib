@@ -11,12 +11,15 @@ namespace
     constexpr const char *FORBIDDEN_PATH_CHARACTERS = "<>:\"|?*";
 } // namespace
 
-fslib::Path::Path() { m_path = std::make_unique<char[]>(FS_MAX_PATH); }
+fslib::Path::Path()
+    : m_path(std::make_unique<char[]>(FS_MAX_PATH)) {};
 
 fslib::Path::Path(const fslib::Path &path)
-    : Path()
+    : m_device(path.m_device)
+    , m_path(std::make_unique<char[]>(FS_MAX_PATH))
+    , m_offset(path.m_offset)
 {
-    *this = path;
+    std::memcpy(m_path.get(), path.m_path.get(), FS_MAX_PATH);
 }
 
 fslib::Path::Path(Path &&path) { *this = std::move(path); }
