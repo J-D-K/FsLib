@@ -26,6 +26,12 @@ namespace fslib
             /// @param bufferCount Number of FsSaveDataInfo entries to buffer while reading.
             SaveInfoReader(FsSaveDataSpaceId saveSpaceID, FsSaveDataType saveType, size_t buffer);
 
+            SaveInfoReader(SaveInfoReader &&saveInfoReader) noexcept;
+            SaveInfoReader &operator=(SaveInfoReader &&SaveInfoReader) noexcept;
+
+            SaveInfoReader(const SaveInfoReader &)            = delete;
+            SaveInfoReader &operator=(const SaveInfoReader &) = delete;
+
             /// @brief Closes the info reader.
             ~SaveInfoReader();
 

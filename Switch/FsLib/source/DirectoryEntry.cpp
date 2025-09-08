@@ -8,7 +8,15 @@ fslib::DirectoryEntry::DirectoryEntry(const FsDirectoryEntry &entry)
     , m_filename(entry.name)
     , m_size(entry.file_size) {};
 
-fslib::DirectoryEntry::DirectoryEntry(DirectoryEntry &&entry) noexcept { *this = std::move(entry); }
+fslib::DirectoryEntry::DirectoryEntry(DirectoryEntry &&entry) noexcept
+    : m_directory(entry.m_directory)
+    , m_filename(std::move(entry.m_filename))
+    , m_size(entry.m_size)
+
+{
+    entry.m_directory = false;
+    entry.m_size      = 0;
+}
 
 fslib::DirectoryEntry &fslib::DirectoryEntry::operator=(DirectoryEntry &&entry) noexcept
 {

@@ -76,34 +76,23 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    FsTimeStampRaw fslibStamp{};
-    FsTimeStampRaw rawStamp;
+    fslib::SaveInfoReader reader{FsSaveDataSpaceId_System, 256};
+    fslib::SaveInfoReader moveReader{std::move(reader)};
+    reader.open(FsSaveDataSpaceId_User, 256);
 
-    FsFileSystem *sdmc{};
-    fslib::get_file_system_by_device_name("sdmc", &sdmc);
+    moveReader.read();
+    for (const auto &saveInfo : moveReader)
+    {
+        const uint64_t applicationID = saveInfo.system_save_data_id;
+        print("%016llX\n", applicationID);
+    }
 
-    const fslib::Path hbmenu{"sdmc:/hbmenu.nro"};
-    const bool fslibGet = fslib::get_file_timestamp(hbmenu, fslibStamp);
-    const bool rawGet   = R_SUCCEEDED(fsFsGetFileTimeStampRaw(sdmc, hbmenu.get_path(), &rawStamp));
-    if (!fslibGet || !rawGet) { return -2; }
-
-    const std::time_t fslibCreated = static_cast<std::time_t>(fslibStamp.created);
-    const std::time_t rawCreated   = static_cast<std::time_t>(rawStamp.created);
-
-    if (fslibCreated != rawCreated) { print("Stamp mismatch."); }
-
-    print("%lli\n", fslibStamp.created);
-
-    char fslibBuffer[BUFFER_SIZE] = {0};
-    char rawBuffer[BUFFER_SIZE]   = {0};
-
-    const std::tm *fslibTm = std::localtime(&fslibCreated);
-    const std::tm *rawTm   = std::localtime(&rawCreated);
-
-    std::strftime(fslibBuffer, BUFFER_SIZE, "%c", fslibTm);
-    std::strftime(rawBuffer, BUFFER_SIZE, "%c", rawTm);
-
-    print("fslib: %s\nRaw: %s\n", fslibBuffer, rawBuffer);
+    reader.read();
+    for (const auto &saveInfo : reader)
+    {
+        const uint64_t applicationID = saveInfo.application_id;
+        print("%016llX\n", applicationID);
+    }
 
     print("\nPress + to Exit");
     while (appletMainLoop())

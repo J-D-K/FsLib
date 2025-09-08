@@ -20,6 +20,12 @@ namespace fslib
             /// @brief Default Stream constructor.
             Stream() = default;
 
+            Stream(Stream &&stream) noexcept;
+            Stream &operator=(Stream &&string) noexcept;
+
+            Stream(const Stream &)            = delete;
+            Stream &operator=(const Stream &) = delete;
+
             /// @brief Checks if stream was successfully opened.
             /// @return True on success. False on failure.
             bool is_open() const;

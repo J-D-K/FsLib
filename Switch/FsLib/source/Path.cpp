@@ -22,7 +22,14 @@ fslib::Path::Path(const fslib::Path &path)
     std::memcpy(m_path.get(), path.m_path.get(), FS_MAX_PATH);
 }
 
-fslib::Path::Path(Path &&path) { *this = std::move(path); }
+fslib::Path::Path(Path &&path) noexcept
+    : m_device(std::move(path.m_device))
+    , m_path(std::move(path.m_path))
+    , m_offset(path.m_offset)
+{
+    path.m_path   = std::make_unique<char[]>(FS_MAX_PATH);
+    path.m_offset = 0;
+}
 
 fslib::Path::Path(const char *path)
     : Path()
@@ -188,7 +195,7 @@ const char *fslib::Path::get_extension() const noexcept
 
 size_t fslib::Path::get_length() const noexcept { return m_offset; }
 
-fslib::Path &fslib::Path::operator=(const fslib::Path &path) noexcept
+fslib::Path &fslib::Path::operator=(const fslib::Path &path)
 {
     m_device = path.m_device;
     m_offset = path.m_offset;
@@ -211,11 +218,11 @@ fslib::Path &fslib::Path::operator=(fslib::Path &&path) noexcept
     return *this;
 }
 
-fslib::Path &fslib::Path::operator=(const char *path) noexcept { return *this = std::string_view(path); }
+fslib::Path &fslib::Path::operator=(const char *path) { return *this = std::string_view(path); }
 
-fslib::Path &fslib::Path::operator=(const std::string &path) noexcept { return *this = std::string_view(path); }
+fslib::Path &fslib::Path::operator=(const std::string &path) { return *this = std::string_view(path); }
 
-fslib::Path &fslib::Path::operator=(std::string_view path) noexcept
+fslib::Path &fslib::Path::operator=(std::string_view path)
 {
     const size_t deviceEnd = path.find_first_of(':');
     if (deviceEnd == path.npos) { return *this; }
@@ -382,10 +389,7 @@ fslib::Path fslib::operator+(const fslib::Path &pathA, const fslib::DirectoryEnt
 bool fslib::operator==(const fslib::Path &pathA, const fslib::Path &pathB) noexcept
 {
     if (pathA.get_device_name() != pathB.get_device_name()) { return false; }
-
-    const size_t lengthA = std::char_traits<char>::length(pathA.get_path());
-    const size_t lengthB = std::char_traits<char>::length(pathB.get_path());
-    if (lengthA != lengthB) { return false; }
+    else if (pathA.get_length() != pathB.get_length()) { return false; }
 
     const char *fsPathA = pathA.get_path();
     const char *fsPathB = pathB.get_path();

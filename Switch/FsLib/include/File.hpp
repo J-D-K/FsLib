@@ -115,14 +115,14 @@ namespace fslib
             bool resize_if_needed(int64_t bufferSize);
 
             /// @brief Private: Returns if file has flag set to read.
-            inline bool is_open_for_reading() const
+            inline bool is_open_for_reading() const noexcept
             {
                 const bool openForRead = (m_flags & FsOpenMode_Read);
                 return m_isOpen && openForRead;
             }
 
             /// @brief Private: Returns if file has flag set to write.
-            inline bool is_open_for_writing() const
+            inline bool is_open_for_writing() const noexcept
             {
                 const bool openForWrite = (m_flags & FsOpenMode_Write);
                 return m_isOpen && openForWrite;

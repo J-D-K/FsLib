@@ -120,27 +120,27 @@ namespace fslib
 
             /// @brief Assigns P to Path. Accepts most standard C/C++ string types.
             /// @param pathData Path to assign.
-            Path &operator=(const Path &path) noexcept;
+            Path &operator=(const Path &path);
 
             /// @brief Move = operator.
             /// @param path Path to eviscerate.
-            Path &operator=(Path &&path) noexcept;
+            Path &operator=(Path &&path);
 
             /// @brief Assigns path
             /// @param path String to assign from.
-            Path &operator=(const char *path) noexcept;
+            Path &operator=(const char *path);
 
             /// @brief Assigns path
             /// @param path String to assign from.
-            Path &operator=(const std::string &path) noexcept;
+            Path &operator=(const std::string &path);
 
             /// @brief Assigns path
             /// @param pathData String to assign from.
-            Path &operator=(std::string_view path) noexcept;
+            Path &operator=(std::string_view path);
 
             /// @brief Assigns path from path passed.
             /// @param path Path to assign from.
-            Path &operator=(const std::filesystem::path &path) noexcept;
+            Path &operator=(const std::filesystem::path &path);
 
             /// @brief Appends path to Path.
             /// @param path String to append.

@@ -18,6 +18,35 @@ fslib::SaveInfoReader::SaveInfoReader(FsSaveDataSpaceId saveSpaceID, FsSaveDataT
     SaveInfoReader::open(saveSpaceID, saveType, bufferCount);
 }
 
+fslib::SaveInfoReader::SaveInfoReader(SaveInfoReader &&saveInfoReader) noexcept
+    : m_infoReader(saveInfoReader.m_infoReader)
+    , m_isOpen(saveInfoReader.m_isOpen)
+    , m_bufferCount(saveInfoReader.m_bufferCount)
+    , m_readCount(saveInfoReader.m_readCount)
+    , m_saveInfoBuffer(std::move(saveInfoReader.m_saveInfoBuffer))
+{
+    saveInfoReader.m_infoReader  = {0};
+    saveInfoReader.m_isOpen      = false;
+    saveInfoReader.m_bufferCount = 0;
+    saveInfoReader.m_readCount   = 0;
+}
+
+fslib::SaveInfoReader &fslib::SaveInfoReader::operator=(SaveInfoReader &&saveInfoReader) noexcept
+{
+    m_infoReader     = saveInfoReader.m_infoReader;
+    m_isOpen         = saveInfoReader.m_isOpen;
+    m_bufferCount    = saveInfoReader.m_bufferCount;
+    m_readCount      = saveInfoReader.m_readCount;
+    m_saveInfoBuffer = std::move(saveInfoReader.m_saveInfoBuffer);
+
+    saveInfoReader.m_infoReader  = {0};
+    saveInfoReader.m_isOpen      = false;
+    saveInfoReader.m_bufferCount = 0;
+    saveInfoReader.m_readCount   = 0;
+
+    return *this;
+}
+
 fslib::SaveInfoReader::~SaveInfoReader() { SaveInfoReader::close(); }
 
 void fslib::SaveInfoReader::open(FsSaveDataSpaceId saveDataSpaceID, size_t bufferCount)

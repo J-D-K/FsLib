@@ -22,27 +22,28 @@ fslib::File::File(const fslib::Path &filePath, uint32_t openFlags, int64_t fileS
 }
 
 fslib::File::File(fslib::File &&file)
+    : Stream(std::move(file))
+    , m_handle(file.m_handle)
+    , m_flags(file.m_flags)
 {
-    // Just let the operator do the work.
-    *this = std::move(file);
+    file.m_handle = {0};
+    file.m_flags  = 0;
 }
 
 fslib::File &fslib::File::operator=(fslib::File &&file) noexcept
 {
-    static constexpr size_t FSFILE_SIZE = sizeof(FsFile);
-
     // Steal the parent stuff.
     m_offset     = file.m_offset;
     m_streamSize = file.m_streamSize;
     m_isOpen     = file.m_isOpen;
     m_flags      = file.m_flags;
-    std::memcpy(&m_handle, &file.m_handle, FSFILE_SIZE);
+    m_handle     = file.m_handle;
 
     file.m_offset     = 0;
     file.m_streamSize = 0;
     file.m_isOpen     = false;
     file.m_flags      = 0;
-    std::memset(&file.m_handle, 0x00, FSFILE_SIZE);
+    file.m_handle     = {0};
     return *this;
 }
 

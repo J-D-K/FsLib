@@ -4,6 +4,29 @@
 
 extern void print(const char *format, ...);
 
+fslib::Stream::Stream(Stream &&stream)
+    : m_offset(stream.m_offset)
+    , m_streamSize(stream.m_streamSize)
+    , m_isOpen(stream.m_isOpen)
+{
+    stream.m_offset     = 0;
+    stream.m_streamSize = 0;
+    stream.m_isOpen     = false;
+}
+
+fslib::Stream &fslib::Stream::operator=(Stream &&stream)
+{
+    m_offset     = stream.m_offset;
+    m_streamSize = stream.m_streamSize;
+    m_isOpen     = stream.m_isOpen;
+
+    stream.m_offset     = 0;
+    stream.m_streamSize = 0;
+    stream.m_isOpen     = false;
+
+    return *this;
+}
+
 bool fslib::Stream::is_open() const { return m_isOpen; }
 
 int64_t fslib::Stream::tell() const { return m_offset; }

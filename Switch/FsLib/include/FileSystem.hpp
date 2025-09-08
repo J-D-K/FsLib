@@ -8,6 +8,12 @@ class FileSystem final
         /// @param filesystem Reference to FsFileSystem to manage.
         FileSystem(FsFileSystem &filesystem) noexcept;
 
+        FileSystem(FileSystem &&filesystem) noexcept;
+        FileSystem &operator=(FileSystem &&filesystem) noexcept;
+
+        FileSystem(const FileSystem &)            = delete;
+        FileSystem &operator=(const FileSystem &) = delete;
+
         /// @brief Closes the managed FileSystem.
         ~FileSystem() noexcept;
 

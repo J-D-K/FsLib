@@ -12,6 +12,12 @@ class FsLibCore final
         /// @brief Constructor. Mounts the sdmc.
         FsLibCore();
 
+        // None of these shenanigans.
+        FsLibCore(const FsLibCore &)            = delete;
+        FsLibCore &operator=(const FsLibCore &) = delete;
+        FsLibCore(FsLibCore &&)                 = delete;
+        FsLibCore &operator=(FsLibCore &&)      = delete;
+
         /// @brief Basically returns whether or not the SD card was opened successfully.
         bool is_initialized() const noexcept;
 

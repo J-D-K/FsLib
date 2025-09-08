@@ -15,9 +15,18 @@ fslib::Directory::Directory(const fslib::Path &directoryPath, bool sortedListing
     Directory::open(directoryPath, sortedListing);
 }
 
-fslib::Directory::Directory(Directory &&directory) { *this = std::move(directory); }
+fslib::Directory::Directory(Directory &&directory) noexcept
+    : m_wasRead(directory.m_wasRead)
+    , m_handle(directory.m_handle)
+    , m_entryCount(directory.m_entryCount)
+    , m_directoryList(std::move(directory.m_directoryList))
+{
+    directory.m_handle     = {0};
+    directory.m_entryCount = 0;
+    directory.m_wasRead    = 0;
+}
 
-fslib::Directory &fslib::Directory::operator=(Directory &&directory)
+fslib::Directory &fslib::Directory::operator=(Directory &&directory) noexcept
 {
     // Start by copying this to make sure we have EVERYTHING~
     m_handle        = directory.m_handle;

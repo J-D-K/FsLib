@@ -25,11 +25,11 @@ namespace fslib
 
             /// @brief Move constructor for directory.
             /// @param directory Directory to move.
-            Directory(Directory &&directory);
+            Directory(Directory &&directory) noexcept;
 
             /// @brief Move operator for directory.
             /// @param directory Directory to move.
-            Directory &operator=(Directory &&directory);
+            Directory &operator=(Directory &&directory) noexcept;
 
             // None of this nonsense round dese parts!
             Directory(const Directory &)            = delete;
