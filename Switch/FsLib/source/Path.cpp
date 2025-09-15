@@ -80,7 +80,7 @@ fslib::Path fslib::Path::sub_path(size_t pathLength) const
     newPath.m_offset = pathLength;
 
     const char *path = m_path.get();
-    std::copy(path, path + pathLength, m_path.get());
+    std::copy(path, path + pathLength, newPath.m_path.get());
 
     return newPath;
 }
