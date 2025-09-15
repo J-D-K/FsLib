@@ -76,23 +76,13 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    fslib::SaveInfoReader reader{FsSaveDataSpaceId_System, 256};
-    fslib::SaveInfoReader moveReader{std::move(reader)};
-    reader.open(FsSaveDataSpaceId_User, 256);
+    std::FILE *cFile = fopen("sdmc:/Test.txt", "w");
+    if (!cFile) { return -1; }
 
-    moveReader.read();
-    for (const auto &saveInfo : moveReader)
-    {
-        const uint64_t applicationID = saveInfo.system_save_data_id;
-        print("%016llX\n", applicationID);
-    }
-
-    reader.read();
-    for (const auto &saveInfo : reader)
-    {
-        const uint64_t applicationID = saveInfo.application_id;
-        print("%016llX\n", applicationID);
-    }
+    fputs("Message here.", cFile);
+    fseek(cFile, -5, SEEK_CUR);
+    fputs("there.", cFile);
+    fclose(cFile);
 
     print("\nPress + to Exit");
     while (appletMainLoop())
