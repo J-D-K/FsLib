@@ -104,11 +104,11 @@ static bool compare_entries(const fslib::DirectoryEntry &entryA, const fslib::Di
     const size_t entryALength  = std::char_traits<char>::length(nameA);
     const size_t entryBLength  = std::char_traits<char>::length(nameB);
     const size_t shortestEntry = entryALength < entryBLength ? entryALength : entryBLength;
-    for (size_t i = 0; i < shortestEntry;)
+    for (size_t i = 0; i < shortestEntry; i++)
     {
         const int charA = std::tolower(nameA[i]);
         const int charB = std::tolower(nameB[i]);
         if (charA != charB) { return charA < charB; }
     }
-    return false;
+    return true;
 }

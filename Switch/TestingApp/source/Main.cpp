@@ -76,14 +76,8 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    fslib::Path testPath{"sdmc:/switch"};
-    testPath /= "JKSV";
-    testPath /= "SUPER MARIO ODYSSEY";
-    testPath /= "Backup";
-    testPath += ".zip";
-
-    const std::string pathString = testPath.string();
-    print("%s\n", pathString.c_str());
+    fslib::Directory testSort{"sdmc:/switch/saves"};
+    for (const fslib::DirectoryEntry &entry : testSort) { print("%s\n", entry.get_filename()); }
 
     print("\nPress + to Exit");
     while (appletMainLoop())
