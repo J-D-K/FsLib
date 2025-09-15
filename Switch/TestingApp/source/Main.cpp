@@ -76,13 +76,14 @@ int main()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&padState);
 
-    std::FILE *cFile = fopen("sdmc:/Test.txt", "w");
-    if (!cFile) { return -1; }
+    fslib::Path testPath{"sdmc:/switch"};
+    testPath /= "JKSV";
+    testPath /= "SUPER MARIO ODYSSEY";
+    testPath /= "Backup";
+    testPath += ".zip";
 
-    fputs("Message here.", cFile);
-    fseek(cFile, -5, SEEK_CUR);
-    fputs("there.", cFile);
-    fclose(cFile);
+    const std::string pathString = testPath.string();
+    print("%s\n", pathString.c_str());
 
     print("\nPress + to Exit");
     while (appletMainLoop())

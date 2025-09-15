@@ -19,7 +19,8 @@ fslib::Path::Path(const fslib::Path &path)
     , m_path(std::make_unique<char[]>(FS_MAX_PATH))
     , m_offset(path.m_offset)
 {
-    std::memcpy(m_path.get(), path.m_path.get(), FS_MAX_PATH);
+    const char *pathData = path.m_path.get();
+    std::copy(pathData, pathData + FS_MAX_PATH, m_path.get());
 }
 
 fslib::Path::Path(Path &&path) noexcept
@@ -78,7 +79,8 @@ fslib::Path fslib::Path::sub_path(size_t pathLength) const
     newPath.m_device = m_device;
     newPath.m_offset = pathLength;
 
-    std::memcpy(newPath.m_path.get(), m_path.get(), pathLength);
+    const char *path = m_path.get();
+    std::copy(path, path + pathLength, m_path.get());
 
     return newPath;
 }
@@ -199,7 +201,9 @@ fslib::Path &fslib::Path::operator=(const fslib::Path &path)
 {
     m_device = path.m_device;
     m_offset = path.m_offset;
-    std::memcpy(m_path.get(), path.m_path.get(), FS_MAX_PATH);
+
+    const char *pathData = path.m_path.get();
+    std::copy(pathData, pathData + FS_MAX_PATH, m_path.get());
 
     return *this;
 }
@@ -239,8 +243,9 @@ fslib::Path &fslib::Path::operator=(std::string_view path)
     const size_t fsPathLength = (pathEnd - pathBegin) + 1;
     if (fsPathLength + 1 >= FS_MAX_PATH) { return *this; }
 
-    fsPath = fsPath.substr(pathBegin);
-    std::memcpy(&m_path[m_offset], fsPath.data(), fsPathLength);
+    fsPath               = fsPath.substr(pathBegin);
+    const char *pathData = fsPath.data();
+    std::copy(pathData, pathData + fsPathLength, &m_path[m_offset]);
     m_offset += fsPathLength;
     Path::null_terminate();
 
@@ -271,7 +276,8 @@ fslib::Path &fslib::Path::operator/=(std::string_view path) noexcept
 
     // This looks really dangerous for some reason. I like it though.
     const std::string_view slice = path.substr(pathBegin);
-    std::memcpy(&m_path[m_offset], slice.data(), length);
+    const char *pathData         = slice.data();
+    std::copy(pathData, pathData + length, &m_path[m_offset]);
     m_offset += length;
     Path::null_terminate();
 
@@ -297,7 +303,8 @@ fslib::Path &fslib::Path::operator+=(std::string_view path) noexcept
     const size_t length = path.length();
     if (m_offset + length >= FS_MAX_PATH) { return *this; }
 
-    std::memcpy(&m_path[m_offset], path.data(), length);
+    const char *pathData = path.data();
+    std::copy(pathData, pathData + length, &m_path[m_offset]);
     m_offset += length;
     Path::null_terminate();
 
